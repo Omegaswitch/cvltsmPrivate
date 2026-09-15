@@ -9,7 +9,7 @@
  */
 import { makeRng, fbm2dTiling, ridgeline } from '../lib/rng.js';
 import {
-  surface, rect, hline, vline, px, disc, vgrad, shadeRegion, wrapX,
+  surface, rect, hline, vline, px, disc, vgrad, shadeRegion, wrapX, bayer,
   mix, shade, hexToRgb, clamp, lerp, glow, fillPoly,
 } from '../lib/paint.js';
 import { PAL } from '../palette.js';
@@ -71,18 +71,18 @@ export function buildSky(L, seed) {
 
   /* ------------------------------------------------------ mountain ranges */
   drawRange(c, rng, W, L, {
-    top: L.vy(0.30), amp: L.vh * 0.16, baseY: L.horizon + 4,
+    top: L.vy(0.31), amp: L.vh * 0.085, baseY: L.horizon + 4,
     color: mix(PAL.skyLow, PAL.frostShadow, 0.22),
     snowLine: L.vy(0.345), snowBright: mix(PAL.frostMid, PAL.skyLow, 0.55),
     snowShadow: mix(PAL.frostShadow, PAL.skyLow, 0.35),
-    roughness: 0.68, waves: 5,
+    roughness: 0.45, waves: 3,
   });
   drawRange(c, rng, W, L, {
-    top: L.vy(0.375), amp: L.vh * 0.175, baseY: L.horizon + 6,
+    top: L.vy(0.385), amp: L.vh * 0.095, baseY: L.horizon + 6,
     color: mix(PAL.skyBottom, PAL.frostShadow, 0.30),
     snowLine: L.vy(0.415), snowBright: mix(PAL.frost, PAL.frostShadow, 0.45),
     snowShadow: PAL.frostShadow,
-    roughness: 0.64, waves: 8,
+    roughness: 0.42, waves: 5,
   });
 
   /* ------------------------------------------- cliff, ruins & waterfall */
@@ -94,44 +94,84 @@ export function buildSky(L, seed) {
   shadeRegion(c, 0, hazeTop, W, Math.round(L.vh * 0.22), (x, y) => {
     const t = clamp((y - hazeTop) / (L.vh * 0.16), 0, 1);
     const n = detailNoise(x * 0.8, y * 3);
-    const a = t * t * (3 - 2 * t) * 130 * (0.65 + n * 0.55);
-    return [mistRgb[0], mistRgb[1], mistRgb[2], clamp(a, 0, 150)];
+    const a = t * t * (3 - 2 * t) * 170 * (0.65 + n * 0.55);
+    return [mistRgb[0], mistRgb[1], mistRgb[2], clamp(a, 0, 195)];
   });
 
   return { canvas: s.canvas };
 }
 
 /**
- * One snow-capped ridge. The profile starts and ends at the same height and
- * every modulation is an exact whole number of cycles across the tile, so the
- * range closes on itself.
+ * One snow-capped ridge.
+ *
+ * Midpoint displacement alone gives a furry, single-pixel-spiky profile that
+ * reads as noise rather than rock, and per-column random snow depth turns the
+ * snowline into a comb. So the profile is box-smoothed into facets first, and
+ * the snow is laid to a depth that follows height above the snowline with an
+ * ordered-dither lower edge.
+ *
+ * The profile starts and ends at the same height and every modulation is a
+ * whole number of cycles across the tile, so the range closes on itself.
  */
 function drawRange(c, rng, W, L, o) {
-  const r = ridgeline(rng, W, o.top, o.top, o.amp, o.roughness);
+  const raw = ridgeline(rng, W, o.top, o.top, o.amp, o.roughness);
+
+  // major peaks come from the periodic terms; the displacement only roughens
   for (let x = 0; x < W; x++) {
-    r[x] += Math.sin((x / W) * TAU * o.waves + r[x] * 0.2) * o.amp * 0.22;
+    const u = (x / W) * TAU;
+    raw[x] += Math.sin(u * o.waves) * o.amp * 0.55
+      + Math.sin(u * o.waves * 2.3 + 1.2) * o.amp * 0.24
+      + Math.sin(u * o.waves * 4.1 + 2.7) * o.amp * 0.09;
   }
 
-  for (let x = 0; x < W; x++) vline(c, x, Math.round(r[x]), o.baseY, o.color);
-
-  const shadowCol = shade(o.color, -0.35);
+  // box smooth, wrapping at the seam — knocks out the single-pixel fur
+  const r = new Float32Array(W);
+  const k = Math.max(1, Math.round(L.sw * 0.006));
   for (let x = 0; x < W; x++) {
-    const y = r[x];
+    let sum = 0;
+    for (let d = -k; d <= k; d++) sum += raw[(x + d + W) % W];
+    r[x] = sum / (k * 2 + 1);
+  }
+
+  const rockLit = mix(o.color, PAL.frostMid, 0.16);
+  const rockShadow = shade(o.color, -0.4);
+  const maxSnow = L.vh * 0.042;
+
+  for (let x = 0; x < W; x++) {
+    const y = Math.round(r[x]);
     const slope = r[(x + 1) % W] - r[(x - 1 + W) % W];
 
-    if (slope < -0.35) vline(c, x, y, y + clamp(-slope * 2.4, 1, 9), shadowCol);
+    // body, then a facet pass: faces falling away to the right sit in shadow
+    vline(c, x, y, o.baseY, o.color);
+    if (slope < -0.25) {
+      vline(c, x, y, y + clamp(-slope * 5, 1, L.vh * 0.05), rockShadow);
+    } else if (slope > 0.25) {
+      vline(c, x, y, y + clamp(slope * 3, 1, L.vh * 0.025), rockLit);
+    }
+
     if (y >= o.snowLine) continue;
 
-    const above = (o.snowLine - y) / (o.snowLine * 0.35 + 1);
-    const depth = clamp(above * 7 * rng.range(0.5, 1.4), 1, 9);
-    const lit = slope > 0.1;
+    // Snow depth follows height above the snowline, not a dice roll — but a
+    // constant depth over a flat crest lines the dither edge up into a long
+    // horizontal dotted rule, so the boundary undulates.
+    const u = (x / W) * TAU;
+    const wob = 0.72 + 0.5 * (Math.sin(u * o.waves * 7.3) * 0.5
+      + Math.sin(u * o.waves * 17.1 + 2.1) * 0.35
+      + Math.sin(u * o.waves * 31.7 + 0.8) * 0.15);
+    const above = clamp((o.snowLine - y) / (L.vh * 0.09), 0, 1);
+    const depth = Math.max(1, above * maxSnow * wob);
+    const lit = slope > -0.1;
     const col = lit ? o.snowBright : o.snowShadow;
+
     for (let i = 0; i < depth; i++) {
       const edge = i / depth;
-      if (edge > 0.55 && rng.chance((edge - 0.55) * 2.2)) continue;
-      px(c, x, y + i, edge > 0.72 ? mix(col, o.color, 0.5) : col);
+      // ordered dither dissolves the lower boundary. Kept to the last quarter
+      // of the depth — spread wider it reads as a screen door, not snow.
+      if (edge > 0.74 && bayer(x, y + i) + 0.5 < (edge - 0.74) / 0.26) continue;
+      px(c, x, y + i, edge > 0.82 ? mix(col, o.color, 0.45) : col);
     }
-    if (lit && rng.chance(0.3)) px(c, x, y, mix(col, '#ffffff', 0.3));
+    // crisp lit edge along the crest
+    if (lit) px(c, x, y, mix(col, '#ffffff', 0.25));
   }
 }
 

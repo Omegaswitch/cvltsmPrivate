@@ -9,9 +9,10 @@
  * The world travels: `worldX` advances continuously and every layer is a
  * horizontally tiling strip drawn at `-worldX * factor` wrapped into its own
  * tile width. The traveller stays put on screen and the forest streams past
- * him right to left, so he is always walking and never arrives.
+ * him right to left, so he is always walking and never arrives. Nothing the
+ * pointer does moves the camera — the wood simply passes behind him.
  *
- * Rain and crows are not overlays — they are drawn *between* layers at their
+ * Fog and crows are not overlays — they are drawn *between* layers at their
  * own depths, so the sentinels and the foreground occlude them like anything
  * else in the wood.
  */
@@ -58,10 +59,7 @@ export function createEngine(canvas, opts = {}) {
     pursuers: null,
     ready: false,
     reducedMotion: !!opts.reducedMotion,
-    rainIntensity: 1,
     // camera
-    pointer: 0, pointerY: 0,
-    tiltX: 0, tiltY: 0,
     worldX: 0,
     scrub: 0,            // manual travel added by wheel/drag/keys
     worldSpeed: 30,
@@ -143,8 +141,8 @@ export function createEngine(canvas, opts = {}) {
 
   /** Draw one tiling layer across the viewport, and its live pass per tile. */
   function drawLayer(layer, t, shared) {
-    const shift = state.worldX * layer.factor + state.tiltX * layer.factor;
-    const oy = Math.round(-state.my + state.tiltY * layer.factor);
+    const shift = state.worldX * layer.factor;
+    const oy = -state.my;
     let x = -(((shift % layer.W) + layer.W) % layer.W);
     const offsets = [];
     for (let i = 0; x < state.vw; x += layer.W, i++) {
@@ -175,14 +173,6 @@ export function createEngine(canvas, opts = {}) {
     state.worldX += state.scrub * dt * 6;
     state.scrub *= Math.exp(-dt * 3.2);
 
-    // camera tilt — frame-rate independent exponential smoothing
-    const damp = state.reducedMotion ? 0.35 : 1 - Math.exp(-dt * 5.5);
-    const tilt = state.reducedMotion ? 0.25 : 1;
-    const targetX = state.pointer * tilt * state.vw * 0.06;
-    const targetY = clamp(state.pointerY * 0.6 * tilt, -1, 1) * state.my;
-    state.tiltX += (targetX - state.tiltX) * damp;
-    state.tiltY += (targetY - state.tiltY) * damp;
-
     const shared = {
       reducedMotion: state.reducedMotion,
       runeColumns: state.runeColumns,
@@ -193,13 +183,12 @@ export function createEngine(canvas, opts = {}) {
 
     /* ---- back to front, with the weather and the birds woven in between -- */
     drawLayer(state.byKey.sky, t, shared);
-    state.weather.drawRain(ctx, 0, t, dt, state.vw, state.vh, rainOpts());
-
     drawLayer(state.byKey.jotunn, t, shared);
     drawLayer(state.byKey.deepForest, t, shared);
 
+    // haze banked up behind the treeline
+    state.weather.drawFog(ctx, 0, t, state.vh, state.worldX, state.reducedMotion);
     state.crows.draw(ctx, t, dt, state.vw, state.vh, state.reducedMotion, state.worldSpeed);
-    state.weather.drawRain(ctx, 1, t, dt, state.vw, state.vh, rainOpts());
 
     const sent = drawLayer(state.byKey.sentinels, t, shared);
     shared.sentinelOffsets = sent.offsets;
@@ -219,27 +208,15 @@ export function createEngine(canvas, opts = {}) {
       state.reducedMotion,
     );
 
-    state.weather.drawFog(ctx, t, state.vw, state.vh, state.worldX, state.reducedMotion);
+    // banks rolling over the road, then the foreground, then wisps in front
+    state.weather.drawFog(ctx, 1, t, state.vh, state.worldX, state.reducedMotion);
     drawLayer(state.byKey.foreground, t, shared);
-    state.weather.drawRain(ctx, 2, t, dt, state.vw, state.vh, rainOpts());
+    state.weather.drawFog(ctx, 2, t, state.vh, state.worldX, state.reducedMotion);
 
     requestAnimationFrame(frame);
   }
 
-  const rainOpts = () => ({
-    intensity: state.rainIntensity,
-    reducedMotion: state.reducedMotion,
-    worldSpeed: state.worldSpeed,
-  });
-
   /* -------------------------------------------------------------- input */
-
-  function onPointerMove(e) {
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
-    const y = e.touches ? e.touches[0].clientY : e.clientY;
-    state.pointer = (x / window.innerWidth) * 2 - 1;
-    state.pointerY = (y / window.innerHeight) * 2 - 1;
-  }
 
   let dragging = false;
   let dragX = 0;
@@ -250,7 +227,6 @@ export function createEngine(canvas, opts = {}) {
     canvas.style.cursor = 'grabbing';
   }
   function onMove(e) {
-    onPointerMove(e);
     if (!dragging) return;
     const x = e.touches ? e.touches[0].clientX : e.clientX;
     // dragging left pushes the journey forward
@@ -310,9 +286,6 @@ export function createEngine(canvas, opts = {}) {
       state.running = true;
       state.lastT = performance.now();
       requestAnimationFrame(frame);
-    },
-    setRain(v) {
-      state.rainIntensity = clamp(v, 0, 1);
     },
     setReducedMotion(v) {
       state.reducedMotion = !!v;

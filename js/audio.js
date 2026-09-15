@@ -4,6 +4,9 @@
  * There is deliberately NO music here and no audio file of any kind: the
  * signal is filtered white noise synthesised in the browser. Nothing starts
  * without an explicit user gesture, and the toggle defaults to off.
+ *
+ * Wind-led: with no rain falling in the scene, the bed is gusting low noise
+ * with only a thin hiss of moisture over the top.
  */
 export function createAmbience() {
   let ctx = null;
@@ -35,19 +38,19 @@ export function createAmbience() {
 
     const buf = noiseBuffer(ctx);
 
-    /* ------------------------------------------------------------- rain */
+    /* ------------------------------- a thin wash of damp air, not rain */
     const rain = ctx.createBufferSource();
     rain.buffer = buf;
     rain.loop = true;
     const rainFilter = ctx.createBiquadFilter();
     rainFilter.type = 'bandpass';
-    rainFilter.frequency.value = 3200;
-    rainFilter.Q.value = 0.45;
+    rainFilter.frequency.value = 2400;
+    rainFilter.Q.value = 0.3;
     const rainHi = ctx.createBiquadFilter();
     rainHi.type = 'highpass';
     rainHi.frequency.value = 900;
     const rainGain = ctx.createGain();
-    rainGain.gain.value = 0.16;
+    rainGain.gain.value = 0.05;
     rain.connect(rainFilter).connect(rainHi).connect(rainGain).connect(master);
     rain.start();
 
@@ -60,7 +63,7 @@ export function createAmbience() {
     windFilter.frequency.value = 420;
     windFilter.Q.value = 0.8;
     const windGain = ctx.createGain();
-    windGain.gain.value = 0.28;
+    windGain.gain.value = 0.42;
     wind.connect(windFilter).connect(windGain).connect(master);
     wind.start();
 
@@ -68,7 +71,7 @@ export function createAmbience() {
     const lfo = ctx.createOscillator();
     lfo.frequency.value = 0.055;
     const lfoGain = ctx.createGain();
-    lfoGain.gain.value = 0.18;
+    lfoGain.gain.value = 0.26;
     lfo.connect(lfoGain).connect(windGain.gain);
     const lfo2 = ctx.createOscillator();
     lfo2.frequency.value = 0.031;

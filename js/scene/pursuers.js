@@ -269,8 +269,9 @@ function drawHunched(c, x, y, h, gait) {
 /* ----------------------------------------------------------- shared bits */
 
 function leg(c, x, hipY, u, phase, col) {
+  // lift on the forward stroke (-sin), not the backward one — see villager.js
   const fx = x + Math.cos(phase) * u * 3.6;
-  const fy = hipY + u * 7.4 - Math.max(0, Math.sin(phase)) * u * 3.2;
+  const fy = hipY + u * 7.4 - Math.max(0, -Math.sin(phase)) * u * 3.2;
   const kx = x + (fx - x) * 0.45 + u * 1.1;
   const ky = hipY + (fy - hipY) * 0.5;
   const th = Math.max(1, Math.round(u * 1.5));

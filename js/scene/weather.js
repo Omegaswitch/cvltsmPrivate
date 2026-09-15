@@ -1,108 +1,67 @@
 /**
- * LAYER 6 — Weather, woven through the depth stack.
+ * LAYER 6 — Fog, woven through the depth stack.
  *
- * The rain is NOT an overlay. It is split into three depth bands which the
- * engine draws at three different points in the layer order: the far band
- * behind the treeline, the mid band in front of the road, the near band in
- * front of everything. So the sentinels and the foreground occlude rain the
- * same way they occlude anything else, and the near streaks fly past far
- * faster than the distant ones.
+ * Not an overlay. The fog is split into three depth bands which the engine
+ * draws at three different points in the layer order: a high haze behind the
+ * treeline, banks rolling over the road, and thin wisps crossing in front of
+ * the foreground. So the sentinels and the deadfall sit *inside* the weather
+ * rather than under a sheet laid over the finished frame.
  *
- * Every streak is stepped out pixel by pixel into the low-resolution
- * framebuffer, so it stays exactly one pixel wide after the integer upscale.
+ * Every bank is a horizontally tiling strip drifting at its own fraction of
+ * the walk, which keeps the near fog moving visibly faster than the far haze.
  */
 import { makeRng, fbm2dTiling } from '../lib/rng.js';
-import { surface, rgba, shadeRegion, hexToRgb, clamp } from '../lib/paint.js';
+import { surface, shadeRegion, hexToRgb, clamp } from '../lib/paint.js';
 import { PAL } from '../palette.js';
 
-/** Far to near. `depth` scales how much the walker's own travel drags them. */
-const BANDS = [
-  { alpha: 0.13, speed: 150, len: [3, 7], count: 0.40, slant: -0.24, depth: 0.30 },
-  { alpha: 0.22, speed: 240, len: [6, 12], count: 0.34, slant: -0.27, depth: 0.75 },
-  { alpha: 0.38, speed: 350, len: [9, 19], count: 0.26, slant: -0.30, depth: 1.35 },
+/**
+ * band: which pass draws it — 0 far (behind the trees), 1 mid (over the road),
+ * 2 near (in front of everything).
+ * y/height are fractions of the viewport; drift is a fraction of world travel.
+ */
+const BANKS = [
+  { band: 0, y: 0.545, h: 0.30, alpha: 0.34, drift: 0.09, period: 150, sway: 0.004 },
+  { band: 0, y: 0.60, h: 0.22, alpha: 0.26, drift: 0.14, period: 110, sway: 0.006 },
+
+  { band: 1, y: 0.735, h: 0.26, alpha: 0.46, drift: 0.30, period: 120, sway: 0.007 },
+  { band: 1, y: 0.815, h: 0.22, alpha: 0.40, drift: 0.46, period: 95, sway: 0.009 },
+  { band: 1, y: 0.90, h: 0.20, alpha: 0.32, drift: 0.62, period: 80, sway: 0.010 },
+
+  { band: 2, y: 0.88, h: 0.26, alpha: 0.36, drift: 1.05, period: 140, sway: 0.012 },
+  { band: 2, y: 0.40, h: 0.34, alpha: 0.13, drift: 0.85, period: 190, sway: 0.010 },
 ];
 
 export function buildWeather(vw, vh, seed) {
-  const rng = makeRng(seed);
-  const density = clamp((vw * vh) / 4200, 110, 520);
-
-  const bands = BANDS.map((band) => {
-    const drops = [];
-    const n = Math.round(density * band.count);
-    for (let i = 0; i < n; i++) {
-      drops.push({
-        x: rng.range(-vw * 0.2, vw * 1.2),
-        y: rng.range(-vh, vh),
-        len: rng.range(band.len[0], band.len[1]),
-        speed: band.speed * rng.range(0.85, 1.15),
-        alpha: band.alpha * rng.range(0.75, 1.2),
-      });
-    }
-    drops.sort((a, b) => a.alpha - b.alpha);
-    return { ...band, drops };
-  });
-
-  const fogBanks = [
-    { strip: makeFog(vw, Math.round(vh * 0.20), seed + 3, 0.30), y: 0.80, speed: 0.22 },
-    { strip: makeFog(vw, Math.round(vh * 0.16), seed + 7, 0.24), y: 0.88, speed: 0.34 },
-    { strip: makeFog(vw, Math.round(vh * 0.13), seed + 13, 0.18), y: 0.70, speed: 0.15 },
-  ];
+  const banks = BANKS.map((b, i) => ({
+    ...b,
+    strip: makeFog(vw, Math.max(8, Math.round(vh * b.h)), seed + i * 17, b.alpha, b.period),
+  }));
 
   return {
-    /** Draw one depth band of rain. Called from inside the layer stack. */
-    drawRain(c, index, t, dt, w, h, opts = {}) {
-      const intensity = opts.intensity === undefined ? 1 : opts.intensity;
-      if (intensity <= 0.001) return;
-      const band = bands[index];
-      const still = opts.reducedMotion;
-      const drag = (opts.worldSpeed || 0) * band.depth;
-
-      let lastAlpha = -1;
-      for (const d of band.drops) {
-        if (!still) {
-          d.y += d.speed * dt;
-          // slant from the wind, plus the apparent drift of walking into it
-          d.x += (d.speed * band.slant - drag) * dt;
-          if (d.y > h + d.len) {
-            d.y = -d.len - Math.random() * h * 0.2;
-            d.x = Math.random() * (w * 1.4) - w * 0.2;
-          }
-          if (d.x < -w * 0.3) d.x += w * 1.5;
-        }
-        const a = d.alpha * intensity;
-        if (a !== lastAlpha) {
-          c.fillStyle = rgba(PAL.frost, a);
-          lastAlpha = a;
-        }
-        const steps = Math.round(d.len);
-        for (let i = 0; i < steps; i++) {
-          c.fillRect(Math.round(d.x + i * band.slant), Math.round(d.y - i), 1, 1);
-        }
-      }
-    },
-
-    /** Low fog banks, drifting with the walk. */
-    drawFog(c, t, w, h, worldX, still) {
-      for (const bank of fogBanks) {
-        const off = still ? 0 : ((worldX * bank.speed) % w + w) % w;
-        const y = Math.round(h * bank.y - bank.strip.height * 0.5
-          + (still ? 0 : Math.sin(t * 0.12 + bank.speed) * h * 0.006));
-        c.drawImage(bank.strip, Math.round(-off), y);
-        c.drawImage(bank.strip, Math.round(-off + bank.strip.width), y);
+    /** Draw one depth band of fog. Called from inside the layer stack. */
+    drawFog(c, band, t, vh2, worldX, still) {
+      for (const b of banks) {
+        if (b.band !== band) continue;
+        const off = still ? 0 : ((worldX * b.drift) % b.strip.width + b.strip.width) % b.strip.width;
+        const y = Math.round(vh2 * b.y - b.strip.height * 0.5
+          + (still ? 0 : Math.sin(t * 0.11 + b.period) * vh2 * b.sway));
+        c.drawImage(b.strip, Math.round(-off), y);
+        c.drawImage(b.strip, Math.round(-off + b.strip.width), y);
       }
     },
   };
 }
 
-/** A horizontally tiling fog bank. */
-function makeFog(W, H, seed, alpha) {
+/** A horizontally tiling bank of fog. */
+function makeFog(W, H, seed, alpha, period) {
   const rng = makeRng(seed);
   const s = surface(W, H);
-  const n = fbm2dTiling(rng, W, 90, 3);
+  const n = fbm2dTiling(rng, W, period, 3);
   const rgb = hexToRgb(PAL.mistPale);
   shadeRegion(s.ctx, 0, 0, W, H, (x, y) => {
-    const vert = Math.pow(Math.sin((y / H) * Math.PI), 0.8);
-    const a = clamp((n(x, y * 4.5) - 0.40) * 2.1, 0, 1) * vert * alpha * 255;
+    // soft top and bottom so a bank never shows an edge
+    const vert = Math.pow(Math.sin((y / H) * Math.PI), 0.75);
+    const a = clamp((n(x, y * 3.6) - 0.36) * 2.0, 0, 1) * vert * alpha * 255;
     return a < 3 ? null : [rgb[0], rgb[1], rgb[2], a];
   });
   return s.canvas;

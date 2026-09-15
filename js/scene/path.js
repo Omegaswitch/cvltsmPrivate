@@ -166,7 +166,7 @@ export function buildPath(L, seed) {
   const mistTop = Math.round(L.waterY - L.vh * 0.03);
   shadeRegion(c, 0, mistTop, W, Math.round(L.vh * 0.08), (x, y) => {
     const t = 1 - clamp(Math.abs(y - L.waterY) / (L.vh * 0.04), 0, 1);
-    const a = t * n(x * 0.7, y * 4) * 150;
+    const a = t * n(x * 0.7, y * 4) * 195;
     return a < 4 ? null : [mistRgb[0], mistRgb[1], mistRgb[2], a];
   });
 

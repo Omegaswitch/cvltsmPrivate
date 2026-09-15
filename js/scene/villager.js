@@ -119,9 +119,12 @@ function drawFrame(c, ox, oy, u, phase) {
 }
 
 function drawLeg(c, ox, hipY, u, phase, col) {
-  // foot traces an ellipse; the knee is the bend between hip and foot
+  // Foot traces an ellipse; the knee is the bend between hip and foot.
+  // fx travels forward while sin(phase) < 0, so the foot must lift on -sin —
+  // keying the lift off +sin plants it on the forward stroke and the walk
+  // reads as moonwalking.
   const fx = ox + Math.cos(phase) * u * 3.6;
-  const lift = Math.max(0, Math.sin(phase)) * u * 3.2;
+  const lift = Math.max(0, -Math.sin(phase)) * u * 3.2;
   const fy = hipY + u * 7.4 - lift;
   const kx = lerp(ox, fx, 0.45) + u * 1.1;
   const ky = lerp(hipY, fy, 0.5);

@@ -22,16 +22,6 @@ engine.start();
 
 motionQuery.addEventListener('change', (e) => engine.setReducedMotion(e.matches));
 
-/* ----------------------------------------------------------- rain toggle */
-
-const rainBtn = document.getElementById('rain');
-let rainOn = true;
-rainBtn.addEventListener('click', () => {
-  rainOn = !rainOn;
-  rainBtn.setAttribute('aria-pressed', String(rainOn));
-  engine.setRain(rainOn ? 1 : 0);
-});
-
 /* ------------------------------------------------- ambient fx (no music) */
 
 const ambience = createAmbience();

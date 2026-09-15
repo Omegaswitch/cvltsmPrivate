@@ -28,7 +28,7 @@ export function buildDeepForest(L, seed) {
     snowColor: mix(PAL.frostDeep, PAL.mist, 0.4), snowAmount: 0.10,
     rng, step: L.vh * 0.030,
   });
-  veil(c, W, L.horizon - L.vh * 0.10, L.vh * 0.34, PAL.mist, 0.24);
+  veil(c, W, L.horizon - L.vh * 0.10, L.vh * 0.34, PAL.mist, 0.36);
 
   drawForestBand(c, {
     W, baseY: L.treeBase + L.vh * 0.012,
@@ -37,7 +37,7 @@ export function buildDeepForest(L, seed) {
     snowColor: mix(PAL.frostDeep, PAL.mist, 0.25), snowAmount: 0.14,
     rng, step: L.vh * 0.042,
   });
-  veil(c, W, L.horizon - L.vh * 0.04, L.vh * 0.30, PAL.mist, 0.15);
+  veil(c, W, L.horizon - L.vh * 0.04, L.vh * 0.30, PAL.mist, 0.26);
 
   drawForestBand(c, {
     W, baseY: L.treeBase + L.vh * 0.045,
@@ -62,13 +62,13 @@ export function buildDeepForest(L, seed) {
   const hazeTop = Math.round(L.treeBase - L.vh * 0.10);
   shadeRegion(c, 0, hazeTop, W, Math.round(L.vh * 0.22), (x, y) => {
     const t = clamp((y - hazeTop) / (L.vh * 0.14), 0, 1);
-    return [mistRgb[0], mistRgb[1], mistRgb[2], clamp(t * 135 * (0.5 + n(x, y * 2.5) * 0.9), 0, 150)];
+    return [mistRgb[0], mistRgb[1], mistRgb[2], clamp(t * 180 * (0.5 + n(x, y * 2.5) * 0.9), 0, 200)];
   });
 
   /* ------------------------------------------------- drifting mist ribbons */
   const ribbons = [
-    makeMistStrip(W, Math.round(L.vh * 0.16), seed + 11, PAL.mist, 0.55),
-    makeMistStrip(W, Math.round(L.vh * 0.11), seed + 29, PAL.mistPale, 0.34),
+    makeMistStrip(W, Math.round(L.vh * 0.18), seed + 11, PAL.mist, 0.72),
+    makeMistStrip(W, Math.round(L.vh * 0.13), seed + 29, PAL.mistPale, 0.46),
   ];
   const ribbonY = [
     Math.round(L.treeBase - L.vh * 0.10),

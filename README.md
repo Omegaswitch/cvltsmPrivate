@@ -34,11 +34,15 @@ pace his stride implies — he is permanently mid-step and never arrives.
 Crows cross between layers 2 and 3. A pack of cultists and deformed things
 runs the road behind the traveller, between the road and the traveller himself
 — they carry torches and light their own stretch of ground, surging closer and
-falling back but never quite catching him. Rain is **not** an overlay: it is split
-into three depth bands drawn at three different points in the layer order, so
-the sentinels and the foreground occlude it like anything else in the wood and
-the near streaks fly past far faster than the distant ones. Low fog sits
-behind the foreground deadfall.
+falling back but never quite catching him.
+
+Fog is **not** an overlay: it is split into three depth bands drawn at three
+different points in the layer order — a high haze banked behind the treeline,
+banks rolling over the road, and thin wisps crossing in front of the
+foreground. The sentinels and the deadfall sit *inside* the weather rather
+than under a sheet laid over the finished frame, and each bank drifts at its
+own fraction of the walk, so the near fog moves visibly faster than the far
+haze.
 
 Layers bake once into offscreen buffers; only what must live (eyes, runes,
 torches, ripples, reflections, crows, the traveller) is repainted each frame.
@@ -68,19 +72,18 @@ Then open <http://localhost:8000>.
 
 ## Controls
 
-The wood walks by itself. Input only changes the pace:
+The wood walks by itself and the pointer never moves the camera — the forest
+simply passes behind him. Input only changes the pace:
 
 - **Scroll / drag / swipe / ← →** — push the journey forward or hold it back
-- **Mouse move** — subtle camera tilt
-- **Rain** — toggle the precipitation
-- **Ambient fx** — optional wind and rain bed
+- **Ambient fx** — optional wind bed
 
 ## Audio
 
 There is **no background music**, and no audio file of any kind. The optional
-ambient toggle synthesises filtered white noise (rain band-pass, wind low-pass
-with slow gust LFOs) with the Web Audio API. It is off by default and never
-starts without a user gesture.
+ambient toggle synthesises filtered white noise with the Web Audio API —
+wind-led, gusting on slow LFOs, with only a thin wash of damp air over the
+top. It is off by default and never starts without a user gesture.
 
 ## Performance & accessibility
 
@@ -88,8 +91,8 @@ starts without a user gesture.
 - The framebuffer is sized to ~360 virtual pixels tall regardless of viewport,
   so cost is near-constant from a phone to a 4K display.
 - Rendering pauses on `visibilitychange`; layers rebuild on a debounced resize.
-- `prefers-reduced-motion: reduce` stops the world entirely — no travel, rain,
-  crows, walk cycle or eye flare — and damps the input parallax.
+- `prefers-reduced-motion: reduce` stops the world entirely — no travel, fog
+  drift, crows, walk cycle or eye flare.
 - The canvas carries a descriptive `aria-label`; the interface is keyboard
   navigable with visible focus rings, and there is a `<noscript>` fallback.
 
@@ -101,7 +104,7 @@ css/style.css       interface, vignette, responsive rules
 fonts/              Valhalica, the display face
 js/main.js          boot: wires engine to the UI
 js/engine.js        framebuffer sizing, world travel, tiled composition
-js/audio.js         ambient rain/wind synthesis (no music)
+js/audio.js         ambient wind synthesis (no music)
 js/palette.js       the scene palette and depth factors
 js/runes.js         rune glyph bitmaps
 js/lib/rng.js       seeded PRNG, value noise, tiling fBm, ridgelines
