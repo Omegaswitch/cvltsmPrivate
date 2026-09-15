@@ -32,6 +32,11 @@ import { clamp } from './lib/paint.js';
 
 const SEED = 0x5c0d;
 
+/** Simulation tick. World travel is quantised to this so integer-snapped
+ *  layer offsets step on a regular beat instead of a jittering one. */
+const STEP = 1 / 120;
+const MAX_STEPS = 12;
+
 /** Tile width per layer, as a multiple of the viewport width. Deliberately
  *  mismatched so the layers never repeat in lockstep. */
 const TILE = {
@@ -44,7 +49,7 @@ const TILE = {
 };
 
 export function createEngine(canvas, opts = {}) {
-  const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+  const ctx = canvas.getContext('2d', { alpha: false });
   ctx.imageSmoothingEnabled = false;
 
   const state = {
@@ -66,6 +71,7 @@ export function createEngine(canvas, opts = {}) {
     running: false,
     lastT: 0,
     clock: 0,
+    accumulator: 0,
     onReady: opts.onReady || (() => {}),
   };
 
@@ -163,15 +169,34 @@ export function createEngine(canvas, opts = {}) {
 
   function frame(now) {
     if (!state.running) return;
-    const dt = Math.min(0.05, (now - state.lastT) / 1000 || 0);
+    const dt = Math.min(0.1, (now - state.lastT) / 1000 || 0);
     state.lastT = now;
-    if (!state.reducedMotion) state.clock += dt;
+
+    /**
+     * Fixed timestep.
+     *
+     * Layer offsets are integer-snapped to keep the pixel grid exact, so a
+     * layer at 0.05 parallax only moves one pixel every 0.6s. Advancing the
+     * world by a raw, jittering dt made those snaps land at uneven moments,
+     * which reads as the background stuttering even at a solid 60fps. Draining
+     * a fixed-size accumulator makes every snap fall on a regular beat.
+     */
+    state.accumulator += dt;
+    let steps = 0;
+    while (state.accumulator >= STEP && steps < MAX_STEPS) {
+      state.accumulator -= STEP;
+      steps++;
+    }
+    if (steps === MAX_STEPS) state.accumulator = 0;   // after a stall, do not sprint
+    const sdt = steps * STEP;
     const t = state.clock;
 
-    // the world only travels when motion is welcome
-    if (!state.reducedMotion) state.worldX += state.worldSpeed * dt;
-    state.worldX += state.scrub * dt * 6;
-    state.scrub *= Math.exp(-dt * 3.2);
+    if (!state.reducedMotion) {
+      state.clock += sdt;
+      state.worldX += state.worldSpeed * sdt;
+    }
+    state.worldX += state.scrub * sdt * 6;
+    state.scrub *= Math.exp(-sdt * 3.2);
 
     const shared = {
       reducedMotion: state.reducedMotion,
@@ -188,7 +213,7 @@ export function createEngine(canvas, opts = {}) {
 
     // haze banked up behind the treeline
     state.weather.drawFog(ctx, 0, t, state.vh, state.worldX, state.reducedMotion);
-    state.crows.draw(ctx, t, dt, state.vw, state.vh, state.reducedMotion, state.worldSpeed);
+    state.crows.draw(ctx, t, sdt, state.vw, state.vh, state.reducedMotion, state.worldSpeed);
 
     const sent = drawLayer(state.byKey.sentinels, t, shared);
     shared.sentinelOffsets = sent.offsets;

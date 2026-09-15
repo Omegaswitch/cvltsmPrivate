@@ -225,37 +225,81 @@ export function vgrad(c, x, y, w, h, stops, levels = 26) {
 /* ----------------------------------------------------------------- light */
 
 /**
+ * Glow sprite cache.
+ *
+ * Every lantern, torch, ember and rune used to build a fresh radial gradient
+ * on every frame — several thousand allocations a second, which shows up as
+ * periodic GC hitches rather than a lower average framerate. Each
+ * colour/radius pair is now baked once into a small canvas and blitted.
+ *
+ * Radii are bucketed so a glow that breathes between 11.2 and 11.8 pixels
+ * reuses one sprite instead of minting a new one every frame.
+ */
+const GLOW_CACHE = new Map();
+const GLOW_CACHE_MAX = 240;
+
+function bucketRadius(r) {
+  if (r <= 16) return Math.max(2, Math.round(r));
+  if (r <= 64) return Math.round(r / 2) * 2;
+  return Math.round(r / 6) * 6;
+}
+
+function glowSprite(col, r) {
+  const R = bucketRadius(r);
+  const key = `${col}:${R}`;
+  let sprite = GLOW_CACHE.get(key);
+  if (sprite) return sprite;
+
+  const cv = document.createElement('canvas');
+  cv.width = R * 2;
+  cv.height = R * 2;
+  const g2 = cv.getContext('2d');
+  const grad = g2.createRadialGradient(R, R, 0, R, R, R);
+  grad.addColorStop(0, rgba(col, 0.62));
+  grad.addColorStop(0.3, rgba(col, 0.17));
+  grad.addColorStop(0.62, rgba(col, 0.04));
+  grad.addColorStop(1, rgba(col, 0));
+  g2.fillStyle = grad;
+  g2.fillRect(0, 0, R * 2, R * 2);
+
+  if (GLOW_CACHE.size >= GLOW_CACHE_MAX) {
+    GLOW_CACHE.delete(GLOW_CACHE.keys().next().value);
+  }
+  sprite = { canvas: cv, r: R };
+  GLOW_CACHE.set(key, sprite);
+  return sprite;
+}
+
+/**
  * Additive radial bloom. Drawn into the low-res buffer, so the falloff is
  * itself pixelated once the frame is scaled up — exactly the chunky glow
  * a CRT-era renderer would give you.
  */
-export function glow(c, cx, cy, r, col, alpha = 1, mode = 'lighter') {
+export function glow(c, cx, cy, r, col, alpha = 1) {
   if (r <= 0 || alpha <= 0) return;
-  const prev = c.globalCompositeOperation;
-  c.globalCompositeOperation = mode;
-  const g = c.createRadialGradient(cx, cy, 0, cx, cy, r);
-  g.addColorStop(0, rgba(col, 0.62 * alpha));
-  g.addColorStop(0.3, rgba(col, 0.17 * alpha));
-  g.addColorStop(0.62, rgba(col, 0.04 * alpha));
-  g.addColorStop(1, rgba(col, 0));
-  c.fillStyle = g;
-  c.fillRect(cx - r, cy - r, r * 2, r * 2);
-  c.globalCompositeOperation = prev;
+  const sprite = glowSprite(col, r);
+  const prevOp = c.globalCompositeOperation;
+  const prevAlpha = c.globalAlpha;
+  c.globalCompositeOperation = 'lighter';
+  c.globalAlpha = prevAlpha * Math.min(1, alpha);
+  c.drawImage(sprite.canvas, Math.round(cx - sprite.r), Math.round(cy - sprite.r));
+  c.globalAlpha = prevAlpha;
+  c.globalCompositeOperation = prevOp;
 }
 
 /** Soft elliptical pool of light on the ground. */
 export function glowEllipse(c, cx, cy, rx, ry, col, alpha = 1) {
-  const prev = c.globalCompositeOperation;
+  if (rx <= 0 || ry <= 0 || alpha <= 0) return;
+  const sprite = glowSprite(col, rx);
+  const prevOp = c.globalCompositeOperation;
+  const prevAlpha = c.globalAlpha;
   c.globalCompositeOperation = 'lighter';
-  c.save();
-  c.translate(cx, cy);
-  c.scale(1, ry / rx);
-  const g = c.createRadialGradient(0, 0, 0, 0, 0, rx);
-  g.addColorStop(0, rgba(col, 0.42 * alpha));
-  g.addColorStop(0.45, rgba(col, 0.14 * alpha));
-  g.addColorStop(1, rgba(col, 0));
-  c.fillStyle = g;
-  c.fillRect(-rx, -rx, rx * 2, rx * 2);
-  c.restore();
-  c.globalCompositeOperation = prev;
+  c.globalAlpha = prevAlpha * Math.min(1, alpha * 0.7);
+  c.drawImage(
+    sprite.canvas,
+    Math.round(cx - rx), Math.round(cy - ry),
+    Math.round(rx * 2), Math.round(ry * 2),
+  );
+  c.globalAlpha = prevAlpha;
+  c.globalCompositeOperation = prevOp;
 }

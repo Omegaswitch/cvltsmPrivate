@@ -30,14 +30,6 @@
 
 <div class="ui">
 
-  <header class="topbar">
-    <nav class="nav" aria-label="Primary">
-      <a href="#lore">Lore</a>
-      <a href="#expedition">Expedition</a>
-      <a href="#archive">Archive</a>
-    </nav>
-  </header>
-
   <main class="hero">
     <!-- MANUFACTURER LOGO SLOT.
          Drop the artwork straight in here, e.g.
@@ -51,11 +43,56 @@
            <img src="img/cvltsm.svg" alt="CVLTSM"> -->
     <h1 class="hero__title">CVLTSM</h1>
 
+    <!-- Menu sits under the wordmark. Each link opens the slide-up section
+         panel below; the scene behind it never moves. -->
+    <nav class="nav" aria-label="Primary">
+      <a href="#lore" data-section="lore">Lore</a>
+      <a href="#expedition" data-section="expedition">Expedition</a>
+      <a href="#archive" data-section="archive">Archive</a>
+    </nav>
+
     <div class="hero__actions">
-      <a class="ghost" href="#expedition"><span>Enter the wood</span></a>
+      <a class="ghost" href="#expedition" data-section="expedition"><span>Enter the wood</span></a>
     </div>
   </main>
 </div>
+
+<!-- Slide-up section panel. Rises over a static background; content is
+     fetched on open, with loading / empty / error states below. -->
+<div class="scrim" id="scrim" hidden></div>
+<section class="panel" id="panel" role="dialog" aria-modal="true"
+         aria-labelledby="panelTitle" tabindex="-1" aria-hidden="true">
+  <header class="panel__bar">
+    <h2 class="panel__title" id="panelTitle"></h2>
+    <button type="button" class="panel__close" id="panelClose" aria-label="Close section">
+      <span aria-hidden="true">&#10005;</span>
+    </button>
+  </header>
+
+  <div class="panel__body" id="panelBody" data-state="loading" aria-live="polite" aria-busy="true">
+
+    <div class="state" data-for="loading">
+      <div class="spinner" aria-hidden="true"><i></i><i></i><i></i></div>
+      <p class="state__label">Opening</p>
+    </div>
+
+    <div class="state" data-for="empty">
+      <p class="state__title">Nothing filed here yet</p>
+      <p class="state__note">This section has no entries.</p>
+    </div>
+
+    <div class="state" data-for="error">
+      <p class="state__title">Could not load this section</p>
+      <p class="state__note" id="panelErrorNote"></p>
+      <button type="button" class="ghost ghost--sm" id="panelRetry">Try again</button>
+    </div>
+
+    <div class="state" data-for="ready">
+      <ul class="entries" id="panelEntries"></ul>
+    </div>
+
+  </div>
+</section>
 
 <!-- boot veil: lifts once every layer has been generated -->
 <div class="boot" id="boot">

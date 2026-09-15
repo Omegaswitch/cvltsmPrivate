@@ -1,0 +1,12 @@
+{
+  "name": "cvltsm",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "CVLTSM — procedurally generated pixel-art parallax landing page",
+  "scripts": {
+    "start": "npx --yes http-server -p 8000 -s .",
+    "lint": "npx --yes eslint js/",
+    "test:load": "node tests/load.mjs 12"
+  }
+}

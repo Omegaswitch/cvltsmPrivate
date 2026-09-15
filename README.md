@@ -65,6 +65,72 @@ comments:
   (`fonts/Valhalica-Regular.otf`). Replace its contents with the official logo
   `<img>` when it arrives; the styling already handles an image.
 
+## Interface
+
+The menu sits under the wordmark. Each item raises a **slide-up section
+panel** over the scene — the canvas is never scrolled or transformed, so the
+background stays exactly where it is while the panel travels. The hero is
+marked `inert` while the panel is modal, focus is trapped and restored, and
+Escape closes.
+
+The panel carries three request states, all reachable today:
+
+| State | When | What it shows |
+|-------|------|---------------|
+| Loading | while the section is fetched | pulsing indicator, `aria-busy` |
+| Empty | the section has no entries | "Nothing filed here yet" |
+| Error | the fetch failed or timed out | the reason, plus a retry that clears the cache |
+
+Section content is fetched from `content/<section>.json`, shaped
+`{ "items": [{ "title": "…", "body": "…" }] }`. The files ship empty, which is
+why every section currently shows the empty state.
+
+## Request layer
+
+`js/net/client.js` wraps `fetch` with the things a page needs to survive a bad
+network:
+
+- **Timeouts** — every attempt gets its own `AbortController` deadline.
+- **Retries** — exponential backoff with full jitter, on network failures,
+  408, 429 and 5xx only. `Retry-After` is honoured when present. Writes are
+  never retried blind.
+- **De-duplication** — concurrent callers asking for the same key share one
+  in-flight promise.
+- **Idempotent writes** — `submitOnce(url, body, { idempotencyKey })` will not
+  post twice: a key already in flight returns that promise, a key already
+  settled returns its result. The key is also sent as `Idempotency-Key`.
+- **Read cache** — TTL cache in memory and `sessionStorage`, so reopening a
+  section costs nothing.
+- **Client quota** — a token bucket that refuses to flood an endpoint.
+
+Two honest caveats. A client-side quota is a politeness guard, **not** rate
+limiting: it lives in the page and anyone can bypass it by not using the page.
+Likewise `Idempotency-Key` only prevents duplicate work if the server honours
+it. Both have to be enforced server-side to mean anything.
+
+## Logging
+
+`js/lib/log.js` emits flat JSON records with a stable shape
+(`ts`, `level`, `event`, `session`, …) and keeps the last 200 in a ring
+buffer. `window.onerror` and `unhandledrejection` are captured. Nothing is
+shipped anywhere by default — `log.setSink(fn)` is where a collector plugs in.
+`window.CVLTSM.logs()` dumps the buffer for a bug report.
+
+## Testing
+
+```sh
+npm run lint
+npm run test:load       # 12 concurrent sessions, self-serving
+```
+
+The load test is shaped around what this site actually is. There is no
+application server to saturate; every visitor generates the whole scene in
+their own browser, so the load is on the client. It measures a **baseline**
+session alone on the machine (tight budget: boot and framerate) and then N
+**concurrent** sessions, where it asserts correctness strictly — all boot, zero
+errors — but only loosely gates framerate, because N headless browsers share
+one CPU on the runner and real visitors do not share a CPU with each other.
+
 ## Running it
 
 A static site — serve the directory over HTTP (ES modules will not load from
@@ -82,6 +148,8 @@ The wood walks by itself and the pointer never moves the camera — the forest
 simply passes behind him. Input only changes the pace:
 
 - **Scroll / drag / swipe / ← →** — push the journey forward or hold it back
+- **Lore / Expedition / Archive** — raise the section panel
+- **Escape** — close it
 
 ## Audio
 
@@ -91,6 +159,17 @@ that can make a sound.
 ## Performance & accessibility
 
 - Single `requestAnimationFrame` loop, 60fps at 1600×900.
+- **Fixed timestep.** Layer offsets are integer-snapped to keep the pixel grid
+  exact, so a layer at 0.05 parallax moves one pixel every 0.6s. Advancing the
+  world by a raw, jittering `dt` made those snaps land at uneven moments, which
+  reads as background stutter even at a solid 60fps. Draining a fixed-size
+  accumulator puts every snap on a regular beat.
+- **Glow sprites are cached.** Each lantern, torch, ember and rune used to
+  build a fresh radial gradient every frame — thousands of allocations a
+  second, which showed up as a periodic GC hitch (worst frame 66ms) rather than
+  a lower average. Bucketed by colour and radius, worst frame is now 16.8ms.
+- The canvas is promoted to its own compositor layer so its per-frame repaint
+  never drags the interface into a repaint with it.
 - The framebuffer is sized to ~360 virtual pixels tall regardless of viewport,
   so cost is near-constant from a phone to a 4K display.
 - Rendering pauses on `visibilitychange`; layers rebuild on a debounced resize.
@@ -105,7 +184,12 @@ that can make a sound.
 index.html          markup + interface overlay
 css/style.css       interface, vignette, responsive rules
 fonts/              Valhalica, the display face
-js/main.js          boot: wires engine to the UI
+js/main.js          boot: wires engine, panel and logging together
+js/net/client.js    timeouts, retries, dedupe, quota, read cache
+js/ui/panel.js      slide-up section panel + loading/empty/error states
+js/lib/log.js       structured logging and global error capture
+content/*.json      section content (ships empty)
+tests/load.mjs      concurrent session load test
 js/engine.js        framebuffer sizing, world travel, tiled composition
 js/palette.js       the scene palette and depth factors
 js/runes.js         rune glyph bitmaps
