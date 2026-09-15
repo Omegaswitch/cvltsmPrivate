@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CVLTSM — BLÓT</title>
+<meta name="description" content="A dark Nordic folk-horror expedition into the Frostmark. Pixel art, six layers deep.">
+<meta name="theme-color" content="#08080a">
+<meta name="color-scheme" content="dark">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="CVLTSM — BLÓT">
+<meta property="og:description" content="A dark Nordic folk-horror expedition into the Frostmark.">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- the scene: one low-resolution framebuffer, upscaled by an integer factor -->
+<div class="stage">
+  <canvas id="scene" role="img"
+    aria-label="Pixel art scene: a cloaked villager runs with a lantern through a dark snow-dusted Nordic forest. Rune-carved sentinel pines glow crimson, a colossal antlered figure watches from behind the treeline, and cultists carry torches through the fog."></canvas>
+</div>
+
+<!-- atmospheric post: vignette, scanlines, grain -->
+<div class="post" aria-hidden="true">
+  <div class="post__vignette"></div>
+  <div class="post__scan"></div>
+  <div class="post__grain"></div>
+</div>
+
+<div class="ui">
+
+  <header class="topbar">
+    <a class="brand" href="#" data-pan="0">
+      <span class="brand__mark">CVLTSM</span>
+      <span class="brand__sub">fvrther north</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#lore" data-pan="-1">Lore</a>
+      <a href="#expedition" data-pan="0">Expedition</a>
+      <a href="#archive" data-pan="1">Archive</a>
+    </nav>
+  </header>
+
+  <main class="hero">
+    <p class="hero__eyebrow"><span class="tick"></span>Rite IX &middot; the long dark</p>
+    <h1 class="hero__title">BLÓT</h1>
+    <p class="hero__sub">SKOGVANDRER</p>
+    <p class="hero__lede">
+      Nine nights the wood has not slept. The runes are lit again on the old
+      sentinels, and something tall stands behind the treeline, counting the
+      ones who still carry fire.
+    </p>
+    <div class="hero__actions">
+      <a class="ghost" href="#expedition" data-pan="0.35">
+        <span>Enter the wood</span>
+      </a>
+      <span class="hero__hint" id="hint">drag &middot; scroll &middot; ← →</span>
+    </div>
+  </main>
+
+  <footer class="footbar">
+    <dl class="meta">
+      <div><dt>Coord</dt><dd>64&deg;08&prime;N 12&deg;37&prime;E</dd></div>
+      <div><dt>Region</dt><dd>Frostmark</dd></div>
+      <div><dt>Temp</dt><dd>&minus;19&deg;C</dd></div>
+      <div class="meta--wide"><dt>Status</dt><dd class="alive">watched</dd></div>
+    </dl>
+
+    <div class="controls">
+      <button type="button" class="toggle" id="rain" aria-pressed="true">
+        <span class="toggle__dot"></span>Rain
+      </button>
+      <button type="button" class="toggle" id="ambient" aria-pressed="false">
+        <span class="toggle__dot"></span>Ambient fx
+      </button>
+    </div>
+  </footer>
+
+  <div class="rail" aria-hidden="true"><span class="rail__fill" id="railfill"></span></div>
+</div>
+
+<!-- boot veil: lifts once every layer has been generated -->
+<div class="boot" id="boot">
+  <div class="boot__inner">
+    <div class="boot__rune">&#5892;</div>
+    <p class="boot__label">carving the wood</p>
+  </div>
+</div>
+
+<noscript>
+  <div class="noscript">
+    <h1>BLÓT</h1>
+    <p>This scene is generated pixel by pixel in the browser. Enable JavaScript to enter the wood.</p>
+  </div>
+</noscript>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
