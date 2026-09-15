@@ -25,6 +25,7 @@ import { buildForeground } from './scene/foreground.js';
 import { buildWeather } from './scene/weather.js';
 import { buildCrows } from './scene/crows.js';
 import { buildTraveller } from './scene/runner.js';
+import { buildPursuers } from './scene/pursuers.js';
 import { DEPTH } from './palette.js';
 import { clamp } from './lib/paint.js';
 
@@ -54,6 +55,7 @@ export function createEngine(canvas, opts = {}) {
     weather: null,
     crows: null,
     traveller: null,
+    pursuers: null,
     ready: false,
     reducedMotion: !!opts.reducedMotion,
     rainIntensity: 1,
@@ -123,6 +125,7 @@ export function createEngine(canvas, opts = {}) {
     state.weather = buildWeather(state.vw, state.vh, SEED + 700);
     state.crows = buildCrows(state.vw, state.vh, pathL, SEED + 800);
     state.traveller = buildTraveller(state.vh, SEED + 900);
+    state.pursuers = buildPursuers(state.vh, SEED + 950);
     state.runeColumns = sentinels.columns;
     state.pathLayout = pathL;
 
@@ -153,6 +156,8 @@ export function createEngine(canvas, opts = {}) {
         shared.tileIndex = i;
         layer.over(ctx, t, ox, oy, shared);
       }
+      // anything that must occlude the live pass (foliage over rune glow)
+      if (layer.after) ctx.drawImage(layer.after, ox, oy);
       offsets.push(ox);
     }
     return { offsets, oy };
@@ -202,11 +207,15 @@ export function createEngine(canvas, opts = {}) {
 
     const path = drawLayer(state.byKey.path, t, shared);
 
+    // the pack on the road behind him, then the traveller in front of them
+    const groundY = path.oy + state.pathLayout.pathY + state.vh * 0.012;
+    state.pursuers.draw(ctx, t, state.vw, groundY, state.reducedMotion);
+
     // the traveller walks on the spot at a fixed point in frame
     state.traveller.draw(
       ctx, t,
       Math.round(state.vw * 0.56),
-      path.oy + state.pathLayout.pathY + state.vh * 0.012,
+      groundY,
       state.reducedMotion,
     );
 

@@ -8,6 +8,10 @@
  *
  * Trunks are distributed along a tiling strip and every one is drawn through
  * wrapX, so the colonnade continues for as long as you keep walking.
+ *
+ * The crowns are baked into a SEPARATE surface which the engine draws after
+ * the live rune pass. Otherwise the glow — painted after the layer canvas —
+ * would spill straight over the foliage hanging in front of it.
  */
 import { makeRng } from '../lib/rng.js';
 import { surface, line, wrapX, mix, shade, clamp, glow } from '../lib/paint.js';
@@ -20,6 +24,9 @@ export function buildSentinels(L, seed) {
   const rng = makeRng(seed);
   const s = surface(W, H);
   const c = s.ctx;
+  // crowns live here, drawn on top of the rune glow
+  const crowns = surface(W, H);
+  const cc = crowns.ctx;
 
   const baseY = L.groundY + L.vh * 0.04;
   const scale = Math.max(1, Math.round(L.vh / 300));
@@ -72,8 +79,8 @@ export function buildSentinels(L, seed) {
           sx + dir * spec.hw * r.range(1.6, 2.6), y - r.range(2, 9),
           shade(PAL.bark, -0.4), 2);
       }
-      // canopy shadow from this trunk's crown
-      drawPine(c, {
+      // canopy shadow from this trunk's crown — onto the overlay surface
+      drawPine(cc, {
         x: sx, baseY: L.vy(0.14), height: L.vh * 0.42, halfWidth: spec.hw * 3.6,
         color: mix(PAL.voidBlack, PAL.bark, 0.35),
         snowColor: mix(PAL.frostDeep, PAL.bark, 0.4), snowAmount: 0.12,
@@ -91,6 +98,8 @@ export function buildSentinels(L, seed) {
 
   return {
     canvas: s.canvas,
+    /** Drawn by the engine after `over`, so foliage occludes the rune glow. */
+    after: crowns.canvas,
     columns,
     over(ctx, t, ox, oy, opts) {
       const still = opts && opts.reducedMotion;
@@ -125,7 +134,8 @@ function carve(c, rng, x, spec, L, scale, wheel) {
   const glyphs = [];
   const groove = mix(PAL.barkDark, PAL.crimsonDeep, 0.45);
   const lip = mix(PAL.barkLit, PAL.crimsonDeep, 0.25);
-  const top = wheel ? L.vy(0.24) : L.vy(rng.range(0.03, 0.11));
+  // start below the crown so the column reads on bare bark
+  const top = wheel ? L.vy(0.26) : L.vy(rng.range(0.19, 0.30));
   let y = top;
 
   const cut = (glyph, lag) => {

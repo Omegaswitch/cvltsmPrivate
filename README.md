@@ -27,11 +27,14 @@ pace his stride implies — he is permanently mid-step and never arrives.
 | 0 | Celestial & distant peaks | 0.05 | Mauve→charcoal gradient, storm cloud noise, blood-tinged moon ring, snow-capped ridges, monolith ruins, cliffside waterfall |
 | 1 | The colossal antlered entity | 0.12 | A Jötunn above the canopy; crimson eyes flare, narrow and settle on a ~17s cycle. It drifts out of frame and, later, is standing there again |
 | 2 | Deep fog & cultists | 0.25 | Receding tree walls, drifting mist ribbons, a torch-lit procession with a blood banner |
-| 3 | Ancient sentinel pines & runes | 0.45 | Colossal bark columns carved with stacked runes; the glow breathes and spills red onto the bark |
+| 3 | Ancient sentinel pines & runes | 0.45 | Colossal bark columns carved with stacked runes; the glow breathes and spills red onto the bark. Crowns are a separate pass drawn *after* the glow, so foliage occludes it |
 | 4 | Road, water & bridges | 0.70 | Frozen moss and mud, snow-caked scrub, rickety log bridges, scanline water carrying rune and lantern reflections |
 | 5 | Foreground framing & totems | 1.00 | Twisted roots, frost-tipped boughs, near-black trunks sweeping past, the antler skull totem |
 
-Crows cross between layers 2 and 3. Rain is **not** an overlay: it is split
+Crows cross between layers 2 and 3. A pack of cultists and deformed things
+runs the road behind the traveller, between the road and the traveller himself
+— they carry torches and light their own stretch of ground, surging closer and
+falling back but never quite catching him. Rain is **not** an overlay: it is split
 into three depth bands drawn at three different points in the layer order, so
 the sentinels and the foreground occlude it like anything else in the wood and
 the near streaks fly past far faster than the distant ones. Low fog sits
@@ -103,7 +106,8 @@ js/palette.js       the scene palette and depth factors
 js/runes.js         rune glyph bitmaps
 js/lib/rng.js       seeded PRNG, value noise, tiling fBm, ridgelines
 js/lib/paint.js     integer-snapped pixel primitives, seam wrapping
-js/scene/*.js       one module per layer, plus trees, crows and the traveller
+js/scene/*.js       one module per layer, plus trees, crows, the
+                    traveller and the pack chasing him
 ```
 
 ## Seed
