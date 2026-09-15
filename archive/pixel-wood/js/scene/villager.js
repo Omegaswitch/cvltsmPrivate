@@ -12,6 +12,10 @@ import { hipBob, footReach, footLift, armSwing, joint } from './gait.js';
 
 export const FRAME_COUNT = 8;
 
+/** Extra one-off poses baked after the walk loop, for the hidden game. */
+export const POSE = { JUMP: FRAME_COUNT, SLIDE: FRAME_COUNT + 1 };
+const SHEET_FRAMES = FRAME_COUNT + 2;
+
 const CLOAK = '#171320';
 const CLOAK_DARK = '#0c0a11';
 const HOOD = '#100d16';
@@ -21,12 +25,15 @@ export function buildRunner(bodyHeight) {
   const u = Math.max(1, bodyHeight / 20);      // one "pixel unit" of the body
   const fw = Math.ceil(u * 20);
   const fh = Math.ceil(u * 24);
-  const s = surface(fw * FRAME_COUNT, fh);
+  const s = surface(fw * SHEET_FRAMES, fh);
   const c = s.ctx;
+  const footY = fh - Math.round(u * 1.5);
 
   for (let i = 0; i < FRAME_COUNT; i++) {
-    drawFrame(c, i * fw + fw * 0.42, fh - Math.round(u * 1.5), u, (i / FRAME_COUNT) * Math.PI * 2);
+    drawFrame(c, i * fw + fw * 0.42, footY, u, (i / FRAME_COUNT) * Math.PI * 2);
   }
+  drawJump(c, POSE.JUMP * fw + fw * 0.42, footY, u);
+  drawSlide(c, POSE.SLIDE * fw + fw * 0.42, footY, u);
 
   return {
     sheet: s.canvas,
@@ -35,13 +42,16 @@ export function buildRunner(bodyHeight) {
     count: FRAME_COUNT,
     /** Lantern position within a frame, for the travelling light. */
     lantern: { x: fw * 0.42 + u * 5.6, y: fh - Math.round(u * 1.5) - u * 10.5 },
-    /** Blit one frame with its feet at (x, y). */
+    /** Blit one walk frame with its feet at (x, y). */
     draw(ctx, x, y, frame) {
-      const f = ((frame % FRAME_COUNT) + FRAME_COUNT) % FRAME_COUNT;
+      this.blit(ctx, x, y, ((frame % FRAME_COUNT) + FRAME_COUNT) % FRAME_COUNT);
+    },
+    /** Blit any sheet index, walk frame or pose. */
+    blit(ctx, x, y, index) {
       ctx.drawImage(
         s.canvas,
-        f * fw, 0, fw, fh,
-        Math.round(x - fw * 0.42), Math.round(y - (fh - Math.round(u * 1.5))),
+        index * fw, 0, fw, fh,
+        Math.round(x - fw * 0.42), Math.round(y - footY),
         fw, fh,
       );
     },
@@ -154,4 +164,91 @@ function drawLantern(c, x, y, u) {
   rect(c, x - u * 0.7, y - u * 0.7, u * 1.6, u * 2.1, PAL.amber);
   rect(c, x - u * 0.3, y - u * 0.4, u * 0.8, u * 1.4, PAL.amberPale);
   px(c, x, y + u * 0.2, '#fff6e2');
+}
+
+/* ------------------------------------------------------------ game poses */
+
+/** Airborne: knees tucked under, body pitched forward, cloak streaming. */
+function drawJump(c, ox, oy, u) {
+  const hipY = oy - u * 9;
+  const shoulderY = oy - u * 16;
+  const lean = u * 1.6;
+
+  // cloak thrown out behind
+  fillPoly(c, [
+    [ox - u * 1.2, shoulderY + u],
+    [ox - u * 7.5, shoulderY + u * 1.2],
+    [ox - u * 6.8, hipY + u * 3.2],
+    [ox - u * 1.5, hipY + u * 2.6],
+  ], CLOAK_DARK);
+
+  // trailing leg, kicked back
+  line(c, ox, hipY, ox - u * 2.6, hipY + u * 2.6, CLOAK_DARK, Math.max(1, Math.round(u * 1.5)));
+  line(c, ox - u * 2.6, hipY + u * 2.6, ox - u * 4.6, hipY + u * 1.4, CLOAK_DARK, Math.max(1, Math.round(u * 1.3)));
+  rect(c, ox - u * 5.4, hipY + u * 0.9, u * 1.8, u, BOOT);
+
+  // lead leg, knee up
+  line(c, ox, hipY, ox + u * 2.8, hipY - u * 0.6, CLOAK, Math.max(1, Math.round(u * 1.6)));
+  line(c, ox + u * 2.8, hipY - u * 0.6, ox + u * 2.2, hipY + u * 2.6, CLOAK, Math.max(1, Math.round(u * 1.3)));
+  rect(c, ox + u * 1.5, hipY + u * 2.4, u * 2.2, u * 1.1, BOOT);
+
+  // torso and hood
+  fillPoly(c, [
+    [ox - u * 2 + lean, shoulderY],
+    [ox + u * 2.4 + lean, shoulderY + u * 0.4],
+    [ox + u * 2.6, hipY + u * 1.8],
+    [ox - u * 2.6, hipY + u * 2],
+  ], CLOAK);
+  const headY = shoulderY - u * 2.2;
+  disc(c, ox + u * 0.8 + lean, headY, u * 2.1, HOOD);
+  fillPoly(c, [
+    [ox + u * 0.8 + lean, headY - u * 2.1],
+    [ox - u * 4.2, headY + u * 0.6],
+    [ox - u * 0.6, headY + u * 2],
+  ], HOOD);
+  rect(c, ox + u * 1.6 + lean, headY - u * 0.2, u * 1.4, u * 1.4, PAL.voidBlack);
+
+  drawLantern(c, ox + u * 5.2, shoulderY + u * 3.4, u);
+}
+
+/** Sliding: body low and pitched back, lead leg thrown forward. */
+function drawSlide(c, ox, oy, u) {
+  const hipY = oy - u * 3.4;
+  const shoulderY = oy - u * 7.2;
+
+  // cloak dragging flat behind
+  fillPoly(c, [
+    [ox - u * 1, shoulderY + u * 0.5],
+    [ox - u * 8.5, shoulderY + u * 2.4],
+    [ox - u * 8, oy - u * 0.4],
+    [ox - u * 1.5, oy - u * 0.6],
+  ], CLOAK_DARK);
+
+  // lead leg out along the ground
+  line(c, ox, hipY, ox + u * 4, oy - u * 1.4, CLOAK, Math.max(1, Math.round(u * 1.6)));
+  line(c, ox + u * 4, oy - u * 1.4, ox + u * 6.6, oy - u * 0.8, CLOAK, Math.max(1, Math.round(u * 1.3)));
+  rect(c, ox + u * 6, oy - u * 1.4, u * 2.2, u * 1.2, BOOT);
+  // trailing leg tucked
+  line(c, ox, hipY, ox - u * 1.6, oy - u * 0.8, CLOAK_DARK, Math.max(1, Math.round(u * 1.4)));
+  rect(c, ox - u * 2.6, oy - u * 1.2, u * 2, u, BOOT);
+
+  // torso raked back
+  fillPoly(c, [
+    [ox - u * 2.4, shoulderY + u * 0.4],
+    [ox + u * 0.6, shoulderY - u * 0.4],
+    [ox + u * 2, hipY + u * 1.2],
+    [ox - u * 1.6, hipY + u * 1.6],
+  ], CLOAK);
+
+  const headY = shoulderY - u * 1.4;
+  disc(c, ox + u * 0.4, headY, u * 2, HOOD);
+  fillPoly(c, [
+    [ox + u * 0.4, headY - u * 2],
+    [ox - u * 4, headY + u * 0.8],
+    [ox - u * 1, headY + u * 1.8],
+  ], HOOD);
+  rect(c, ox + u * 1.2, headY - u * 0.2, u * 1.3, u * 1.2, PAL.voidBlack);
+
+  // lantern held low, almost scraping
+  drawLantern(c, ox + u * 4.4, shoulderY + u * 2.6, u);
 }

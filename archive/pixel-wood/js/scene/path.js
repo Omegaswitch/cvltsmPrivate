@@ -8,6 +8,11 @@
  *
  * The water carries horizontal scanline ripples that reflect the lantern and
  * the rune columns standing behind it.
+ *
+ * Anything rooted NEARER than the walk line goes onto a second surface which
+ * the engine composites after the walkers. Baked into one canvas the whole
+ * layer sits behind them, and they tramp over the top of bushes that are
+ * plainly in front of them.
  */
 import { makeRng, ridgeline, fbm2dTiling } from '../lib/rng.js';
 import {
@@ -24,6 +29,11 @@ export function buildPath(L, seed) {
   const rng = makeRng(seed);
   const s = surface(W, H);
   const c = s.ctx;
+  // undergrowth rooted closer to the camera than the walkers
+  const nearSurface = surface(W, H);
+  const fc = nearSurface.ctx;
+  const walkY = L.pathY + L.vh * 0.012;
+  const layerFor = (y) => (y > walkY + L.vh * 0.004 ? fc : c);
 
   /* -------- bank profile: periodic, so the ground can repeat forever ----- */
   const bankTop = ridgeline(rng, W, L.groundY, L.groundY, L.vh * 0.030, 0.52);
@@ -107,13 +117,14 @@ export function buildPath(L, seed) {
     const h = w * rng.range(0.4, 0.75);
     const stone = mix(PAL.soil, PAL.frostShadow, rng.range(0.2, 0.5));
     const sd = Math.floor(rng() * 0xffffff);
+    const g = layerFor(y);
     wrapX(W, x, w + 3, (sx) => {
       const r = makeRng(sd);
       for (let k = -w; k <= w; k++) {
         const t = k / w;
-        vline(c, sx + k, y - Math.sqrt(Math.max(0, 1 - t * t)) * h, y + h * 0.2, stone);
+        vline(g, sx + k, y - Math.sqrt(Math.max(0, 1 - t * t)) * h, y + h * 0.2, stone);
         if (t < 0.35 && r.chance(0.55)) {
-          px(c, sx + k, y - Math.sqrt(Math.max(0, 1 - t * t)) * h, mix(PAL.frost, stone, 0.45));
+          px(g, sx + k, y - Math.sqrt(Math.max(0, 1 - t * t)) * h, mix(PAL.frost, stone, 0.45));
         }
       }
     });
@@ -124,12 +135,13 @@ export function buildPath(L, seed) {
     const h = rng.range(L.vh * 0.008, L.vh * 0.026);
     const col = mix(PAL.soil, PAL.voidBlack, 0.35);
     const sd = Math.floor(rng() * 0xffffff);
+    const g = layerFor(y);
     wrapX(W, x, h + 3, (sx) => {
       const r = makeRng(sd);
       for (let k = 0; k < r.int(3, 6); k++) {
         const lean = r.signed(h * 0.55);
-        line(c, sx + r.signed(1.5), y, sx + lean, y - h * r.range(0.6, 1.1), col, 1);
-        if (r.chance(0.3)) px(c, sx + lean, y - h, mix(PAL.frostDeep, col, 0.45));
+        line(g, sx + r.signed(1.5), y, sx + lean, y - h * r.range(0.6, 1.1), col, 1);
+        if (r.chance(0.3)) px(g, sx + lean, y - h, mix(PAL.frostDeep, col, 0.45));
       }
     });
   }
@@ -145,7 +157,8 @@ export function buildPath(L, seed) {
     const x = rng.range(0, W);
     const y = rng.range(L.pathY + L.vh * 0.02, L.waterY - L.vh * 0.012);
     const sd = Math.floor(rng() * 0xffffff);
-    wrapX(W, x, L.vh * 0.2, (sx) => drawFallenLog(c, makeRng(sd), sx, y, L.vh));
+    const g = layerFor(y);
+    wrapX(W, x, L.vh * 0.2, (sx) => drawFallenLog(g, makeRng(sd), sx, y, L.vh));
   }
 
   /* --------------------------------------------------------- the bridges */
@@ -159,7 +172,7 @@ export function buildPath(L, seed) {
   }
 
   bakeReflections(c, rng, W, H, L);
-  drawShrubs(c, rng, W, L, bankTop);
+  drawShrubs(c, fc, layerFor, rng, W, L, bankTop);
 
   /* ------------------------------------------------- mist over the stream */
   const mistRgb = hexToRgb(PAL.mistPale);
@@ -172,6 +185,8 @@ export function buildPath(L, seed) {
 
   return {
     canvas: s.canvas,
+    /** Composited by the engine after the walkers, so they pass behind it. */
+    front: nearSurface.canvas,
     over(ctx, t, ox, oy, shared) {
       const time = shared && shared.reducedMotion ? 6 : t;
       drawRipples(ctx, time, ox, oy, W, H, L);
@@ -267,7 +282,7 @@ function drawLiveReflections(c, t, oy, W, H, L, shared) {
  * Snow-laden scrub along the bank: clusters of squat conifers rather than
  * smooth mounds, so the silhouette stays broken and spiky.
  */
-function drawShrubs(c, rng, W, L, bankTop) {
+function drawShrubs(c, fc, layerFor, rng, W, L, bankTop) {
   const count = Math.round(W / 19);
   for (let i = 0; i < count; i++) {
     const x = rng.range(0, W);
@@ -278,12 +293,13 @@ function drawShrubs(c, rng, W, L, bankTop) {
     const dark = mix(PAL.moss, PAL.voidBlack, 0.72 - near * 0.12);
     const snow = mix(PAL.frost, dark, 0.35 + near * 0.15);
     const sd = Math.floor(rng() * 0xffffff);
+    const g = layerFor(y);
 
     wrapX(W, x, size * 3, (sx) => {
       const r = makeRng(sd);
       const tufts = r.int(2, 4);
       for (let k = 0; k < tufts; k++) {
-        drawPine(c, {
+        drawPine(g, {
           x: sx + r.signed(size * 0.85),
           baseY: y + r.signed(size * 0.16),
           height: size * r.range(0.7, 1.35),

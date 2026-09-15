@@ -64,6 +64,7 @@ export function createEngine(canvas, opts = {}) {
     crows: null,
     traveller: null,
     pursuers: null,
+    actor: null,        // takes the traveller's slot when the hidden run is on
     ready: false,
     reducedMotion: !!opts.reducedMotion,
     // camera
@@ -192,9 +193,11 @@ export function createEngine(canvas, opts = {}) {
     const sdt = steps * STEP;
     const t = state.clock;
 
+    // an actor may wind the world on faster than a walk
+    const scale = state.actor && state.actor.speedScale ? state.actor.speedScale : 1;
     if (!state.reducedMotion) {
       state.clock += sdt;
-      state.worldX += state.worldSpeed * sdt;
+      state.worldX += state.worldSpeed * scale * sdt;
     }
 
     const shared = {
@@ -224,13 +227,21 @@ export function createEngine(canvas, opts = {}) {
     const groundY = path.oy + state.pathLayout.pathY + state.vh * 0.012;
     state.pursuers.draw(ctx, t, state.vw, groundY, state.reducedMotion);
 
-    // the traveller walks on the spot at a fixed point in frame
-    state.traveller.draw(
-      ctx, t,
-      Math.round(state.vw * 0.56),
-      groundY,
-      state.reducedMotion,
-    );
+    // The wandering traveller passes BEHIND undergrowth rooted nearer than
+    // the walk line, which is what gives the road depth. An actor in the
+    // hidden run goes in FRONT of it instead: there, losing the player
+    // behind a bush is not atmosphere, it is a bug you cannot play around.
+    if (!state.actor) {
+      state.traveller.draw(ctx, t, Math.round(state.vw * 0.56), groundY, state.reducedMotion);
+    }
+
+    const near = state.byKey.path.front;
+    if (near) for (const ox of path.offsets) ctx.drawImage(near, ox, path.oy);
+
+    if (state.actor) {
+      if (state.actor.update) state.actor.update(sdt, state.vw);
+      state.actor.draw(ctx, t, sdt, state.vw, groundY);
+    }
 
     // banks rolling over the road, then the foreground, then wisps in front
     state.weather.drawFog(ctx, 1, t, state.vh, state.worldX, state.reducedMotion);
@@ -281,6 +292,18 @@ export function createEngine(canvas, opts = {}) {
      */
     seek(px) {
       state.worldX += px;
+    },
+    /**
+     * Hand the traveller's slot to something else. The engine keeps drawing
+     * every layer around it, so the hidden run inherits the whole wood
+     * rather than rebuilding it.
+     */
+    setActor(actor) {
+      state.actor = actor || null;
+    },
+    /** Ground speed a walker moves at, in virtual px per second. */
+    get groundSpeed() {
+      return state.traveller ? state.traveller.strideSpeed : 20;
     },
     get state() {
       return state;

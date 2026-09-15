@@ -3,6 +3,7 @@
  */
 import { createEngine } from './engine.js';
 import { createPanel } from './ui/panel.js';
+import { installHiddenGame } from './ui/game-hook.js';
 import { createClient } from './net/client.js';
 import { log } from './lib/log.js';
 
@@ -35,6 +36,8 @@ createPanel({
   onOpen: (section) => log.info('panel.open', { section }),
   onClose: () => log.info('panel.close', {}),
 });
+
+installHiddenGame({ engine });
 
 // expose the log buffer for support: a visitor can paste it into a bug report
 window.CVLTSM = {

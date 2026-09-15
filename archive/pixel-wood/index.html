@@ -57,6 +57,31 @@
   </main>
 </div>
 
+<!-- SKOGLØP: the hidden run. Reached only by clicking the wordmark ten
+     times; the hero lifts out of the way and the scene becomes the game. -->
+<div class="game" id="game" hidden>
+  <div class="game__hud">
+    <p class="game__score"><span id="gameScore">0</span><small>m</small></p>
+    <p class="game__best">best <span id="gameBest">0</span></p>
+  </div>
+
+  <div class="game__keys">
+    <button type="button" class="game__key" id="btnJump">Jump</button>
+    <button type="button" class="game__key" id="btnSlide">Slide</button>
+  </div>
+
+  <p class="game__hint">Space / &uarr; jump &middot; S / &darr; slide &middot; Esc leave</p>
+
+  <div class="game__over" id="gameOver" hidden>
+    <p class="game__overTitle">The wood took you</p>
+    <p class="game__overScore"><span id="gameFinal">0</span> m</p>
+    <div class="game__actions">
+      <button type="button" class="ghost ghost--sm" id="gameAgain">Run again</button>
+      <button type="button" class="ghost ghost--sm" id="gameLeave">Leave</button>
+    </div>
+  </div>
+</div>
+
 <!-- Slide-up section panel. Rises over a static background; content is
      fetched on open, with loading / empty / error states below. -->
 <div class="scrim" id="scrim" hidden></div>

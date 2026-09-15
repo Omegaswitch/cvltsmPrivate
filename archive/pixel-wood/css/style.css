@@ -36,6 +36,10 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* `hidden` has to beat any display rule we set later, or an element that is
+   display:grid stays on screen while claiming to be hidden */
+[hidden] { display: none !important; }
+
 html, body {
   height: 100%;
   margin: 0;
@@ -240,6 +244,140 @@ a { color: inherit; text-decoration: none; }
 }
 .ghost:hover::before, .ghost:focus-visible::before { opacity: 1; }
 .ghost:active { transform: translateY(1px); }
+
+/* ---------------------------------------------------------- the hidden run */
+
+/* the wordmark starts to notice after a few clicks */
+/* the interface is pointer-transparent by default; the wordmark is not,
+   or clicks fall straight through to the canvas behind it */
+.hero__title { cursor: pointer; user-select: none; pointer-events: auto; }
+.hero__title.is-stirring { animation: stir 320ms var(--ease); }
+@keyframes stir {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-3px) rotate(-0.4deg); }
+  75%      { transform: translateX(3px) rotate(0.4deg); }
+}
+
+/* The wood is deliberately near-black, which is atmosphere when you are
+   watching it and unplayable when you are dodging things in it. The scene
+   lifts a stop while the run is on. */
+.is-playing #scene {
+  filter: brightness(1.45) contrast(1.06) saturate(1.05);
+  transition: filter 0.5s var(--ease);
+}
+#scene { transition: filter 0.5s var(--ease); }
+
+/* The hero lifts out of the way and the scene becomes the game.
+   The entry animation is cancelled first: it is `fill: both`, so its end
+   state keeps re-applying transform:none and wins against this rule. */
+.is-playing .hero {
+  animation: none;
+  transform: translateY(-160%);
+  opacity: 0;
+  transition: transform 0.7s var(--ease), opacity 0.5s var(--ease);
+  pointer-events: none;
+}
+
+.game {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  padding: var(--edge-top) var(--gutter) var(--edge-bottom);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  animation: rise 0.6s var(--ease) both;
+}
+.game button { pointer-events: auto; }
+
+.game__hud {
+  display: flex;
+  align-items: baseline;
+  gap: 1.2rem;
+}
+.game__score {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 5vw, 2.8rem);
+  line-height: 1;
+  color: #efe9f2;
+  text-shadow: 0 0 24px rgba(230, 28, 56, 0.35);
+}
+.game__score small {
+  font-family: var(--mono);
+  font-size: 0.4em;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  margin-left: 0.35em;
+}
+.game__best {
+  margin: 0;
+  font-size: 0.58rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted-dim);
+}
+
+.game__hint {
+  margin: 0;
+  justify-self: center;
+  font-size: 0.55rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--muted-dim);
+}
+
+/* touch controls: only where there is no pointer to speak of */
+.game__keys { display: none; }
+.game__key {
+  flex: 1;
+  padding: 1.1rem;
+  border: 1px solid rgba(140, 134, 148, 0.22);
+  background: rgba(8, 8, 10, 0.4);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.6rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+.game__key:active { border-color: var(--crimson); color: #fff; }
+
+@media (hover: none) and (pointer: coarse) {
+  .game__keys {
+    display: flex;
+    gap: 0.75rem;
+    align-self: end;
+    grid-row: 3;
+  }
+  .game__hint { display: none; }
+}
+
+.game__over {
+  grid-row: 2;
+  align-self: center;
+  justify-self: center;
+  text-align: center;
+  padding: clamp(1.4rem, 4vw, 2.4rem) clamp(2rem, 6vw, 4rem);
+  background: rgba(6, 6, 8, 0.86);
+  border: 1px solid rgba(155, 183, 212, 0.14);
+  backdrop-filter: blur(3px);
+  animation: rise 0.4s var(--ease) both;
+}
+.game__overTitle {
+  margin: 0 0 0.8rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--crimson);
+}
+.game__overScore {
+  margin: 0 0 1.5rem;
+  font-family: var(--display);
+  font-size: clamp(2rem, 7vw, 3.4rem);
+  line-height: 1;
+  color: #efe9f2;
+}
+.game__actions { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
 
 /* ------------------------------------------------------------- section panel */
 
