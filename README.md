@@ -76,14 +76,11 @@ The wood walks by itself and the pointer never moves the camera — the forest
 simply passes behind him. Input only changes the pace:
 
 - **Scroll / drag / swipe / ← →** — push the journey forward or hold it back
-- **Ambient fx** — optional wind bed
 
 ## Audio
 
-There is **no background music**, and no audio file of any kind. The optional
-ambient toggle synthesises filtered white noise with the Web Audio API —
-wind-led, gusting on slow LFOs, with only a thin wash of damp air over the
-top. It is off by default and never starts without a user gesture.
+None. The page is silent: no music, no audio files, no Web Audio — nothing
+that can make a sound.
 
 ## Performance & accessibility
 
@@ -104,7 +101,6 @@ css/style.css       interface, vignette, responsive rules
 fonts/              Valhalica, the display face
 js/main.js          boot: wires engine to the UI
 js/engine.js        framebuffer sizing, world travel, tiled composition
-js/audio.js         ambient wind synthesis (no music)
 js/palette.js       the scene palette and depth factors
 js/runes.js         rune glyph bitmaps
 js/lib/rng.js       seeded PRNG, value noise, tiling fBm, ridgelines
