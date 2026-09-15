@@ -73,14 +73,14 @@ export function buildSky(L, seed) {
   drawRange(c, rng, W, L, {
     top: L.vy(0.31), amp: L.vh * 0.085, baseY: L.horizon + 4,
     color: mix(PAL.skyLow, PAL.frostShadow, 0.22),
-    snowLine: L.vy(0.345), snowBright: mix(PAL.frostMid, PAL.skyLow, 0.55),
+    snowLine: L.vy(0.345), snowBright: mix(PAL.frostMid, PAL.skyLow, 0.68),
     snowShadow: mix(PAL.frostShadow, PAL.skyLow, 0.35),
     roughness: 0.45, waves: 3,
   });
   drawRange(c, rng, W, L, {
     top: L.vy(0.385), amp: L.vh * 0.095, baseY: L.horizon + 6,
     color: mix(PAL.skyBottom, PAL.frostShadow, 0.30),
-    snowLine: L.vy(0.415), snowBright: mix(PAL.frost, PAL.frostShadow, 0.45),
+    snowLine: L.vy(0.415), snowBright: mix(PAL.frost, PAL.frostShadow, 0.62),
     snowShadow: PAL.frostShadow,
     roughness: 0.42, waves: 5,
   });
@@ -171,7 +171,7 @@ function drawRange(c, rng, W, L, o) {
       px(c, x, y + i, edge > 0.82 ? mix(col, o.color, 0.45) : col);
     }
     // crisp lit edge along the crest
-    if (lit) px(c, x, y, mix(col, '#ffffff', 0.25));
+    if (lit) px(c, x, y, mix(col, '#ffffff', 0.14));
   }
 }
 

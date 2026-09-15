@@ -1,49 +1,75 @@
 /**
  * The pursuit.
  *
- * Whatever the wood has sent after him, strung out along the road behind. The
- * traveller holds the middle of the frame, so "behind" is screen-left: the
- * pack occupies the road from the left edge up to his heels, surging closer
- * and falling back but never quite catching him.
+ * Whatever the wood has sent after him, strung out down the road behind. The
+ * traveller holds the middle of the frame, so "behind" is screen-left.
  *
- * They are drawn after the road and before the traveller, so he stays clearly
- * in front, and before the fog, which drifts across them and keeps the
- * furthest ones ambiguous.
+ * Three things do the work here:
+ *
+ *  - They FADE. Each one runs its own visibility cycle and is simply gone for
+ *    part of it. While it is gone its position is re-rolled from a hash of the
+ *    cycle number, so it never returns to quite where you last saw it.
+ *  - They LURCH. The stride phase is deliberately non-uniform, and the
+ *    deformed ones quantise it into stop-motion steps, which reads far worse
+ *    than a smooth walk.
+ *  - Their EYES never go out. Every one of them carries a pair of red embers,
+ *    and those stay lit a little longer than the body they belong to.
+ *
+ * Drawn after the road and before the traveller, so he stays clearly ahead,
+ * and before the fog, which swallows the far end of the pack.
  */
 import { makeRng } from '../lib/rng.js';
-import { rect, px, line, fillPoly, disc, mix, glow, glowEllipse } from '../lib/paint.js';
+import { rect, px, line, fillPoly, disc, mix, clamp, glow, glowEllipse } from '../lib/paint.js';
 import { PAL } from '../palette.js';
 
 const TAU = Math.PI * 2;
 
-/** One step lighter than the void, so they read as shapes and not holes. */
-const FLESH = mix(PAL.voidBlack, PAL.mist, 0.10);
-const ROBE = mix(PAL.voidBlack, PAL.mist, 0.05);
+/**
+ * Cold, and a shade off the void. The road they walk is almost pure black, so
+ * a silhouette mixed toward the warm mist disappeared into it entirely; these
+ * lean blue instead, which separates them from the soil without lifting them
+ * out of the dark.
+ */
+const FLESH = mix(PAL.voidBlack, PAL.frostShadow, 0.78);
+const ROBE = mix(PAL.voidBlack, PAL.frostShadow, 0.56);
+
+const smooth = (t) => t * t * (3 - 2 * t);
+
+/** Deterministic 0..1 from two numbers — no state, same result every frame. */
+const hash = (a, b) => {
+  const v = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
+  return v - Math.floor(v);
+};
 
 export function buildPursuers(vh, seed) {
   const rng = makeRng(seed);
   const bodyH = Math.max(14, Math.round(vh * 0.056));
 
-  // strung out down the road: fraction of the viewport width, behind him
+  // Strung out down the road as a fraction of viewport width. The traveller
+  // walks at 0.56, so the nearest of them is a good stretch behind him.
   const specs = [
-    { type: 'cultist', f: 0.44, torch: true },
-    { type: 'loper', f: 0.375 },
-    { type: 'hunched', f: 0.315 },
-    { type: 'cultist', f: 0.25, torch: true },
-    { type: 'tall', f: 0.185 },
-    { type: 'loper', f: 0.115 },
-    { type: 'cultist', f: 0.04, torch: true },
+    { type: 'cultist', f: 0.300, torch: true },
+    { type: 'loper', f: 0.225, stutter: 4 },
+    { type: 'hunched', f: 0.150 },
+    { type: 'cultist', f: 0.075, torch: true },
+    { type: 'tall', f: 0.010, stutter: 3 },
+    { type: 'loper', f: -0.060, stutter: 4 },
+    { type: 'cultist', f: -0.120, torch: true },
   ];
 
-  const pack = specs.map((sp) => ({
+  const pack = specs.map((sp, i) => ({
     ...sp,
+    id: i,
     scale: rng.range(0.82, 1.05),
     lift: rng.range(0, vh * 0.016),
     phase: rng.range(0, TAU),
-    gaitRate: rng.range(7.5, 11.5),
-    surgeAmp: rng.range(0.010, 0.032),
-    surgeRate: rng.range(0.22, 0.55),
+    gaitRate: rng.range(6.5, 10),
+    surgeAmp: rng.range(0.008, 0.026),
+    surgeRate: rng.range(0.2, 0.5),
     flick: rng.range(0.6, 1.4),
+    visPeriod: rng.range(7, 15),
+    visPhase: rng.range(0, 1),
+    jumpRange: rng.range(0.05, 0.13),
   }));
 
   // furthest back first, so the nearer ones overlap them correctly
@@ -53,44 +79,125 @@ export function buildPursuers(vh, seed) {
     draw(ctx, t, vw, groundY, still) {
       const time = still ? 1.1 : t;
 
-      // Where each of them is this frame.
-      const poses = pack.map((p) => {
-        const surge = Math.sin(time * p.surgeRate + p.phase) * p.surgeAmp;
-        return {
-          p,
-          x: Math.round(vw * (p.f + surge)),
-          y: Math.round(groundY - p.lift),
-          h: bodyH * p.scale,
-          gait: time * p.gaitRate + p.phase,
-          flick: time * 9 * p.flick + p.phase,
-        };
-      });
+      const poses = [];
+      for (const p of pack) {
+        const cyc = ((time / p.visPeriod) + p.visPhase) % 1;
+        const vis = still ? 1 : visibility(cyc);
+        // the eyes outlast the body on the way out and arrive before it
+        const eyeVis = still ? 1 : clamp(vis * 1.5 + 0.12, 0, 1) * (cyc > 0.82 ? 0 : 1);
+        if (vis <= 0.01 && eyeVis <= 0.01) continue;
 
-      // 1. the pack lights its own stretch of road. Without this they are
-      //    black shapes on black ground and read as nothing at all.
-      for (const o of poses) {
-        if (!o.p.torch) continue;
-        const f = Math.sin(o.flick) * 0.3 + 0.8;
-        glowEllipse(ctx, o.x + o.h * 0.2, o.y, o.h * 2.9 * f, o.h * 0.85, PAL.amberDeep, 0.5);
-        glowEllipse(ctx, o.x + o.h * 0.2, o.y, o.h * 1.3, o.h * 0.4, PAL.amber, 0.3);
+        // while it was gone, it moved
+        const cycleIndex = Math.floor((time / p.visPeriod) + p.visPhase);
+        const jump = (hash(p.id * 31.7 + 3.1, cycleIndex) - 0.5) * p.jumpRange;
+        const f = p.f + jump + Math.sin(time * p.surgeRate + p.phase) * p.surgeAmp;
+
+        // an occasional whole-body twitch, a few frames long
+        const tick = Math.floor(time * 6);
+        const spasm = hash(p.id * 7.3, tick) < 0.05
+          ? (hash(p.id, tick + 0.5) - 0.5) * bodyH * 0.22
+          : 0;
+
+        poses.push({
+          p,
+          vis,
+          eyeVis,
+          x: Math.round(vw * f + spasm),
+          y: Math.round(groundY - p.lift + spasm * 0.4),
+          h: bodyH * p.scale,
+          gait: lurch(p, time),
+          flick: time * 9 * p.flick + p.phase,
+        });
       }
 
-      // 2. the figures, silhouetted against it
+      // 1. what light there is, pooled on the road. The torchless ones are
+      //    lit only by whatever leaks out of their own eyes, which is just
+      //    enough to catch their legs against the soil.
       for (const o of poses) {
+        if (o.vis <= 0.01) continue;
+        ctx.globalAlpha = o.vis;
+        if (o.p.torch) {
+          const f = Math.sin(o.flick) * 0.3 + 0.8;
+          glowEllipse(ctx, o.x + o.h * 0.2, o.y, o.h * 2.6 * f, o.h * 0.78, PAL.amberDeep, 0.44);
+          glowEllipse(ctx, o.x + o.h * 0.2, o.y, o.h * 1.2, o.h * 0.38, PAL.amber, 0.26);
+        } else {
+          glowEllipse(ctx, o.x + o.h * 0.25, o.y, o.h * 1.6, o.h * 0.5, PAL.crimsonDeep, 0.5);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      // 2. the figures, fading in and out of the dark
+      for (const o of poses) {
+        if (o.vis <= 0.01) continue;
+        ctx.globalAlpha = o.vis;
         if (o.p.type === 'cultist') drawCultistRunner(ctx, o.x, o.y, o.h, o.gait);
         else if (o.p.type === 'loper') drawLoper(ctx, o.x, o.y, o.h, o.gait);
         else if (o.p.type === 'tall') drawTall(ctx, o.x, o.y, o.h, o.gait);
         else drawHunched(ctx, o.x, o.y, o.h, o.gait);
+        ctx.globalAlpha = 1;
       }
 
-      // 3. the flames themselves, over everything they light
+      // 3. the eyes, which outlive the bodies
       for (const o of poses) {
-        if (!o.p.torch) continue;
+        if (o.eyeVis <= 0.01) continue;
+        ctx.globalAlpha = o.eyeVis;
+        eyesOf(ctx, o);
+        ctx.globalAlpha = 1;
+      }
+
+      // 4. the flames, over everything they light
+      for (const o of poses) {
+        if (!o.p.torch || o.vis <= 0.01) continue;
+        ctx.globalAlpha = o.vis;
         const u = o.h / 20;
         torch(ctx, o.x + u * 5.4, o.y - u * 16.6, o.h, o.flick);
+        ctx.globalAlpha = 1;
       }
     },
   };
+}
+
+/** Visible for most of the cycle, gone for the rest, soft at both edges. */
+function visibility(cyc) {
+  if (cyc < 0.07) return smooth(cyc / 0.07);
+  if (cyc < 0.58) return 1;
+  if (cyc < 0.72) return 1 - smooth((cyc - 0.58) / 0.14);
+  return 0;
+}
+
+/**
+ * Stride phase. Never linear: the beat stretches and snaps so the walk is
+ * always slightly wrong, and the deformed ones quantise it into stop-motion.
+ */
+function lurch(p, time) {
+  const g = time * p.gaitRate + p.phase;
+  const uneven = g + Math.sin(g * 0.5) * 0.9 + Math.sin(g * 0.23 + 1.3) * 0.45;
+  return p.stutter ? (Math.floor(uneven * p.stutter) / p.stutter) : uneven;
+}
+
+/** Where each type carries its embers. */
+function eyesOf(c, o) {
+  const u = o.h / 20;
+  const { x, y, gait } = o;
+  if (o.p.type === 'cultist') {
+    const bob = Math.sin(gait * 2) * u * 0.7;
+    embers(c, x + u * 0.8, y - u * 16.4 + bob, u, 0.9);
+  } else if (o.p.type === 'loper') {
+    embers(c, x + u * 5.2, y - u * 5.4 + Math.sin(gait) * u * 1.3, u, 1.0);
+  } else if (o.p.type === 'tall') {
+    const tu = (o.h * 1.45) / 20;
+    embers(c, x + Math.sin(gait * 0.5) * tu * 0.6, y - tu * 18.6, tu, 0.85);
+  } else {
+    embers(c, x + u * 3.6, y - u * 8.3 + Math.abs(Math.sin(gait)) * u * 0.9, u, 0.8);
+  }
+}
+
+function embers(c, x, y, u, strength) {
+  const gap = Math.max(1, Math.round(u * 0.9));
+  glow(c, x, y, u * 8 * strength, PAL.crimson, 0.55 * strength);
+  glow(c, x, y, u * 2.8, PAL.crimsonHot, 0.65 * strength);
+  px(c, x - gap / 2, y, PAL.crimsonHot);
+  px(c, x + gap / 2, y, PAL.crimsonHot);
 }
 
 /* ------------------------------------------------------ robed, running */
@@ -105,7 +212,6 @@ function drawCultistRunner(c, x, y, h, gait) {
   leg(c, x, hipY, u, gait, ROBE);
   leg(c, x, hipY, u, gait + Math.PI, mix(ROBE, PAL.voidBlack, 0.5));
 
-  // robe, whipping behind
   const flap = Math.sin(gait * 2 + 0.6);
   fillPoly(c, [
     [x - u * 1.4, shoulderY + u],
@@ -115,7 +221,6 @@ function drawCultistRunner(c, x, y, h, gait) {
     [x + u * 2 + lean, shoulderY],
   ], ROBE);
 
-  // hood
   fillPoly(c, [
     [x - u * 1.2 + lean, shoulderY - u * 0.6],
     [x + u * 1.6 + lean, shoulderY - u * 1],
@@ -124,12 +229,11 @@ function drawCultistRunner(c, x, y, h, gait) {
   ], ROBE);
   disc(c, x + u * 0.3 + lean, shoulderY - u * 1.4, u * 1.7, ROBE);
 
-  // reaching arm
   const reach = Math.sin(gait) * u * 1.4;
   line(c, x + u * 1.2 + lean, shoulderY + u * 1.4,
     x + u * 4.4 + reach, shoulderY + u * 0.6, ROBE, Math.max(1, Math.round(u * 1.2)));
 
-  // torch haft, held high; the flame is painted in a later pass
+  // torch haft; the flame is painted in a later pass
   line(c, x + u * 4.4 + reach, shoulderY + u * 0.6, x + u * 5.4, shoulderY - u * 1.6,
     mix(PAL.voidBlack, PAL.bark, 0.45), 1);
 }
@@ -138,29 +242,26 @@ function drawCultistRunner(c, x, y, h, gait) {
 
 function drawLoper(c, x, y, h, gait) {
   const u = h / 20;
-  const bound = Math.sin(gait) * u * 1.3;
+  const bound = Math.sin(gait) * u * 1.6;
   const spineY = y - u * 7 + bound;
 
-  // long limbs reaching ahead, knuckling the ground
   for (const off of [0, Math.PI]) {
     const swing = Math.sin(gait + off);
-    const handX = x + u * 5.5 + swing * u * 3.4;
+    const handX = x + u * 5.5 + swing * u * 3.6;
     line(c, x + u * 2.4, spineY + u * 0.5, handX, y - u * 0.4, FLESH, Math.max(1, Math.round(u)));
     rect(c, handX - u * 0.6, y - u * 0.6, u * 1.6, u * 0.8, FLESH);
   }
-  // haunches
   for (const off of [0.6, Math.PI + 0.6]) {
     const swing = Math.sin(gait + off);
-    const footX = x - u * 3.6 + swing * u * 2.6;
+    const footX = x - u * 3.6 + swing * u * 2.8;
     line(c, x - u * 2, spineY + u, x - u * 3.4, spineY + u * 3.4, FLESH, Math.max(1, Math.round(u * 1.3)));
     line(c, x - u * 3.4, spineY + u * 3.4, footX, y, FLESH, Math.max(1, Math.round(u)));
   }
 
-  // arched, knotted spine
   fillPoly(c, [
     [x - u * 3.4, spineY + u * 1.6],
     [x - u * 1.4, spineY - u * 1.6],
-    [x + u * 2, spineY - u * 1],
+    [x + u * 2, spineY - u],
     [x + u * 3.4, spineY + u * 1.2],
     [x + u * 1.6, spineY + u * 2.4],
     [x - u * 2.6, spineY + u * 2.6],
@@ -170,17 +271,14 @@ function drawLoper(c, x, y, h, gait) {
       mix(FLESH, PAL.frostShadow, 0.3));
   }
 
-  // head slung low and forward
   const headX = x + u * 4.4;
   const headY = spineY + u * 1.6;
   fillPoly(c, [
     [headX - u * 1.4, headY - u * 1.2],
     [headX + u * 2.2, headY - u * 0.4],
-    [headX + u * 2, headY + u * 1],
+    [headX + u * 2, headY + u],
     [headX - u * 1.2, headY + u * 1.2],
   ], FLESH);
-  px(c, headX + u * 0.8, headY - u * 0.2, PAL.crimson);
-  glow(c, headX + u, headY, u * 3.5, PAL.crimson, 0.30);
 }
 
 /* ------------------------------------------ deformed: the tall thin one */
@@ -191,7 +289,6 @@ function drawTall(c, x, y, h, gait) {
   const hipY = y - u * 9;
   const shoulderY = y - u * 17;
 
-  // stilt legs, stiff and over-long
   for (const off of [0, Math.PI]) {
     const swing = Math.sin(gait * 0.85 + off);
     const kneeX = x + swing * u * 1.6;
@@ -199,7 +296,6 @@ function drawTall(c, x, y, h, gait) {
     line(c, kneeX, hipY + u * 4.6, x + swing * u * 3.2, y, FLESH, Math.max(1, Math.round(u * 0.8)));
   }
 
-  // narrow trunk of a body
   fillPoly(c, [
     [x - u * 1.3 + sway, shoulderY],
     [x + u * 1.3 + sway, shoulderY],
@@ -207,7 +303,6 @@ function drawTall(c, x, y, h, gait) {
     [x - u * 1.1, hipY + u],
   ], FLESH);
 
-  // arms hanging past the knee, trailing
   for (const off of [0, 0.9]) {
     const swing = Math.sin(gait * 0.85 + off + Math.PI);
     line(c, x + sway, shoulderY + u, x - u * 1.4 + swing * u, hipY + u * 2.4, FLESH,
@@ -216,7 +311,6 @@ function drawTall(c, x, y, h, gait) {
       FLESH, Math.max(1, Math.round(u * 0.6)));
   }
 
-  // small head, antler stubs
   const hx = x + sway;
   const hy = shoulderY - u * 1.6;
   disc(c, hx, hy, u * 1.3, FLESH);
@@ -224,42 +318,34 @@ function drawTall(c, x, y, h, gait) {
   line(c, hx - u * 2, hy - u * 2.8, hx - u * 1.2, hy - u * 3.6, FLESH, 1);
   line(c, hx + u * 0.7, hy - u, hx + u * 2, hy - u * 2.8, FLESH, 1);
   line(c, hx + u * 2, hy - u * 2.8, hx + u * 1.2, hy - u * 3.6, FLESH, 1);
-  px(c, hx - 1, hy, PAL.crimson);
-  px(c, hx + 1, hy, PAL.crimson);
-  glow(c, hx, hy, u * 4.5, PAL.crimson, 0.26);
 }
 
 /* --------------------------------------- deformed: bent double, dragging */
 
 function drawHunched(c, x, y, h, gait) {
   const u = h / 20;
-  // limping: one stride long, the next short
   const limp = Math.sin(gait) * 0.5 + Math.sin(gait * 2) * 0.5;
   const bob = Math.abs(Math.sin(gait)) * u * 0.9;
   const backY = y - u * 9 + bob;
 
-  // good leg drives, bad leg drags
   line(c, x, backY + u * 2, x + Math.sin(gait) * u * 2.6, y, ROBE, Math.max(1, Math.round(u * 1.4)));
   line(c, x, backY + u * 2, x - u * 3.4 - limp * u, y - u * 0.3, ROBE, Math.max(1, Math.round(u * 1.1)));
 
-  // spine folded almost horizontal
   fillPoly(c, [
     [x - u * 3, backY + u * 2.6],
     [x - u * 2, backY - u * 1.4],
     [x + u * 2.4, backY - u * 0.6],
     [x + u * 3, backY + u * 1.6],
-    [x + u * 1, backY + u * 3],
+    [x + u, backY + u * 3],
     [x - u * 2, backY + u * 3.2],
   ], ROBE);
 
-  // head hanging off the front, arm trailing on the ground
   fillPoly(c, [
     [x + u * 2.6, backY - u * 0.4],
     [x + u * 4.4, backY + u * 0.4],
     [x + u * 4, backY + u * 2],
     [x + u * 2.4, backY + u * 1.8],
   ], ROBE);
-  px(c, x + u * 3.6, backY + u * 0.7, PAL.crimsonDim);
 
   const drag = Math.sin(gait * 0.5) * u;
   line(c, x + u * 1.4, backY + u * 1.6, x - u * 2.6 + drag, y - u * 0.4, ROBE,
@@ -283,8 +369,8 @@ function leg(c, x, hipY, u, phase, col) {
 function torch(c, x, y, h, flick) {
   const f = Math.sin(flick) * 0.5 + Math.sin(flick * 2.3) * 0.3 + 0.6;
   const size = Math.max(1, h * 0.10 * (0.75 + f * 0.5));
-  glow(c, x, y, size * 10, PAL.crimsonDim, 0.34 + f * 0.22);
-  glow(c, x, y, size * 4, PAL.amber, 0.5 + f * 0.32);
+  glow(c, x, y, size * 9, PAL.crimsonDim, 0.3 + f * 0.2);
+  glow(c, x, y, size * 3.6, PAL.amber, 0.44 + f * 0.3);
   rect(c, x, y, Math.max(1, size * 0.8), Math.max(1, size * 1.3), PAL.amber);
   px(c, x, y - 1, PAL.amberPale);
   px(c, x + (f > 0.8 ? 1 : 0), y - 2, PAL.crimson);

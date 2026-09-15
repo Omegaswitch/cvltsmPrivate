@@ -30,9 +30,9 @@ export function buildTraveller(vh, seed) {
       const flicker = still ? 1 : 0.86 + Math.sin(time * 9.3) * 0.08 + Math.sin(time * 21.7) * 0.06;
 
       // pool of light on the ground, then the lantern's own halo
-      glowEllipse(ctx, lx, y + vh * 0.004, bodyH * 3.6 * flicker, bodyH * 1.05, PAL.amber, 0.55);
-      glowEllipse(ctx, lx, y + vh * 0.004, bodyH * 1.7, bodyH * 0.5, PAL.amberPale, 0.4);
-      glow(ctx, lx, ly, bodyH * 2.3 * flicker, PAL.amber, 0.55);
+      glowEllipse(ctx, lx, y + vh * 0.004, bodyH * 2.9 * flicker, bodyH * 0.85, PAL.amber, 0.38);
+      glowEllipse(ctx, lx, y + vh * 0.004, bodyH * 1.4, bodyH * 0.42, PAL.amberPale, 0.26);
+      glow(ctx, lx, ly, bodyH * 2.0 * flicker, PAL.amber, 0.44);
       glow(ctx, lx, ly, bodyH * 0.8, PAL.amberPale, 0.8);
 
       sprite.draw(ctx, x, y, frame);

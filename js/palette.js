@@ -9,26 +9,26 @@ export const PAL = {
   nearBlack: '#0b0a0e',
 
   /* sky & atmosphere */
-  skyTop: '#1c1420',
-  skyMid: '#150f1d',
-  skyLow: '#1a1220',
-  skyBottom: '#0a080d',
-  cloud: '#1e1725',
-  cloudLit: '#2d2136',
+  skyTop: '#160f1a',
+  skyMid: '#100b15',
+  skyLow: '#130d18',
+  skyBottom: '#07060a',
+  cloud: '#181222',
+  cloudLit: '#241a2c',
 
   /* bark & earth */
-  bark: '#1a1510',
-  barkMid: '#241c15',
-  barkLit: '#33281d',
-  barkDark: '#0e0b09',
-  soil: '#14110f',
-  moss: '#17201a',
+  bark: '#110d0a',
+  barkMid: '#181208',
+  barkLit: '#221a11',
+  barkDark: '#080706',
+  soil: '#0b0908',
+  moss: '#0d130d',
 
   /* cold frost highlights */
-  frost: '#9bb7d4',
-  frostMid: '#6d87a4',
-  frostDeep: '#33425a',
-  frostShadow: '#1d2533',
+  frost: '#8099b3',
+  frostMid: '#55697f',
+  frostDeep: '#27334a',
+  frostShadow: '#141a26',
 
   /* ritual crimson */
   crimson: '#e61c38',
@@ -42,10 +42,10 @@ export const PAL = {
   amberDeep: '#a8541a',
 
   /* mist */
-  mist: '#1c1727',
-  mistPale: '#2b2438',
-  water: '#0d0f16',
-  waterLit: '#1b2130',
+  mist: '#161222',
+  mistPale: '#1f1a2b',
+  water: '#070811',
+  waterLit: '#101522',
 };
 
 /** Parallax depth factors, back to front. */

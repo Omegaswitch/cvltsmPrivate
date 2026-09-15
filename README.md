@@ -32,9 +32,15 @@ pace his stride implies — he is permanently mid-step and never arrives.
 | 5 | Foreground framing & totems | 1.00 | Twisted roots, frost-tipped boughs, near-black trunks sweeping past, the antler skull totem |
 
 Crows cross between layers 2 and 3. A pack of cultists and deformed things
-runs the road behind the traveller, between the road and the traveller himself
-— they carry torches and light their own stretch of ground, surging closer and
-falling back but never quite catching him.
+works the road behind the traveller, a good stretch back. Three things make
+them: they **fade**, each running its own visibility cycle and simply gone for
+part of it — and while gone, its position is re-rolled from a hash of the
+cycle number, so it never returns to quite where you last saw it; they
+**lurch**, on a deliberately non-uniform stride that the deformed ones
+quantise into stop-motion steps; and their **eyes never go out**, a pair of
+red embers each that stay lit a little longer than the body they belong to.
+Torch-bearers pool light on the road; the rest are lit only by what leaks out
+of their own eyes.
 
 Fog is **not** an overlay: it is split into three depth bands drawn at three
 different points in the layer order — a high haze banked behind the treeline,
