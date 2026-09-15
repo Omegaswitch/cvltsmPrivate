@@ -32,15 +32,21 @@ pace his stride implies — he is permanently mid-step and never arrives.
 | 5 | Foreground framing & totems | 1.00 | Twisted roots, frost-tipped boughs, near-black trunks sweeping past, the antler skull totem |
 
 Crows cross between layers 2 and 3. A pack of cultists and deformed things
-works the road behind the traveller, a good stretch back. Three things make
-them: they **fade**, each running its own visibility cycle and simply gone for
-part of it — and while gone, its position is re-rolled from a hash of the
-cycle number, so it never returns to quite where you last saw it; they
-**lurch**, on a deliberately non-uniform stride that the deformed ones
-quantise into stop-motion steps; and their **eyes never go out**, a pair of
-red embers each that stay lit a little longer than the body they belong to.
+works the road behind the traveller, a good stretch back. All of them are
+solid and permanently present — nothing fades or blinks away. They **lurch**,
+on a deliberately non-uniform stride that the deformed ones quantise into
+stop-motion steps, with occasional whole-body spasms; they **surge**, each
+closing and falling back on its own slow cycle so the gap keeps breathing
+without ever shutting; and every one carries a pair of glowing red eyes.
 Torch-bearers pool light on the road; the rest are lit only by what leaks out
 of their own eyes.
+
+Deeper in, a **rite** is under way — a pyre, a standing stone cut with a red
+mark, hooded figures bowed around it and skull-topped stakes. Its firelight is
+baked into the layer *behind* the congregation so they read as silhouettes;
+only the flame itself is live. **Dead men lashed to poles** stand along the
+treeline. Both are baked into the tiling strip, so they come round every time
+the tile does rather than on a timer.
 
 Fog is **not** an overlay: it is split into three depth bands drawn at three
 different points in the layer order — a high haze banked behind the treeline,
@@ -144,12 +150,14 @@ Then open <http://localhost:8000>.
 
 ## Controls
 
-The wood walks by itself and the pointer never moves the camera — the forest
-simply passes behind him. Input only changes the pace:
+The wood walks entirely by itself. No pointer, wheel, drag or key input moves
+the background — scrolling belongs to the interface, not to the forest.
 
-- **Scroll / drag / swipe / ← →** — push the journey forward or hold it back
 - **Lore / Expedition / Archive** — raise the section panel
 - **Escape** — close it
+
+`window.CVLTSM.seek(px)` jumps the world along, for inspecting a different
+point in the tile without waiting out the walk.
 
 ## Audio
 
@@ -170,6 +178,19 @@ that can make a sound.
   a lower average. Bucketed by colour and radius, worst frame is now 16.8ms.
 - The canvas is promoted to its own compositor layer so its per-frame repaint
   never drags the interface into a repaint with it.
+
+## Texture
+
+Snow on the trees is placed as a few short contiguous **caps** along the upper
+edge of each branch tier, in two tones, rather than a dice roll per pixel. The
+per-pixel version produced exactly the failure the pixel art literature warns
+about — orphan pixels, single stray dots that read as static crawling over the
+bushes instead of as snow. The guidance is to build texture from a few simple
+clusters repeated with varied distribution, keep the colour count low, and
+avoid scattered single-pixel detail:
+[Pixel Art Tutorial](https://androidarts.com/pixtut/pixelart.htm),
+[Pixelblog 2 — Texture](https://www.slynyrd.com/blog/2018/2/15/pixelblog-2-texture),
+[Cluster sketching and painting](https://medium.com/pixel-grimoire/how-to-start-making-pixel-art-2-bcd705cb04d7).
 - The framebuffer is sized to ~360 virtual pixels tall regardless of viewport,
   so cost is near-constant from a phone to a 4K display.
 - Rendering pauses on `visibilitychange`; layers rebuild on a debounced resize.

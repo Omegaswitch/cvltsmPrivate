@@ -9,8 +9,10 @@
  * The world travels: `worldX` advances continuously and every layer is a
  * horizontally tiling strip drawn at `-worldX * factor` wrapped into its own
  * tile width. The traveller stays put on screen and the forest streams past
- * him right to left, so he is always walking and never arrives. Nothing the
- * pointer does moves the camera — the wood simply passes behind him.
+ * him right to left, so he is always walking and never arrives.
+ *
+ * The travel is entirely its own: no pointer, wheel, drag or key input moves
+ * the background. Scrolling belongs to the interface, not to the wood.
  *
  * Fog and crows are not overlays — they are drawn *between* layers at their
  * own depths, so the sentinels and the foreground occlude them like anything
@@ -66,7 +68,6 @@ export function createEngine(canvas, opts = {}) {
     reducedMotion: !!opts.reducedMotion,
     // camera
     worldX: 0,
-    scrub: 0,            // manual travel added by wheel/drag/keys
     worldSpeed: 30,
     running: false,
     lastT: 0,
@@ -195,8 +196,6 @@ export function createEngine(canvas, opts = {}) {
       state.clock += sdt;
       state.worldX += state.worldSpeed * sdt;
     }
-    state.worldX += state.scrub * sdt * 6;
-    state.scrub *= Math.exp(-sdt * 3.2);
 
     const shared = {
       reducedMotion: state.reducedMotion,
@@ -243,38 +242,6 @@ export function createEngine(canvas, opts = {}) {
 
   /* -------------------------------------------------------------- input */
 
-  let dragging = false;
-  let dragX = 0;
-
-  function onDown(e) {
-    dragging = true;
-    dragX = e.touches ? e.touches[0].clientX : e.clientX;
-    canvas.style.cursor = 'grabbing';
-  }
-  function onMove(e) {
-    if (!dragging) return;
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
-    // dragging left pushes the journey forward
-    state.scrub = clamp(state.scrub + (dragX - x) * 0.6, -400, 400);
-    dragX = x;
-    if (e.cancelable) e.preventDefault();
-  }
-  function onUp() {
-    dragging = false;
-    canvas.style.cursor = '';
-  }
-  function onWheel(e) {
-    const d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-    state.scrub = clamp(state.scrub + d * 0.5, -400, 400);
-    e.preventDefault();
-  }
-  function onKey(e) {
-    if (e.key === 'ArrowRight') state.scrub = clamp(state.scrub + 90, -400, 400);
-    else if (e.key === 'ArrowLeft') state.scrub = clamp(state.scrub - 90, -400, 400);
-    else return;
-    e.preventDefault();
-  }
-
   let resizeTimer = 0;
   function onResize() {
     clearTimeout(resizeTimer);
@@ -298,14 +265,6 @@ export function createEngine(canvas, opts = {}) {
       resize();
       window.addEventListener('resize', onResize, { passive: true });
       window.addEventListener('orientationchange', onResize, { passive: true });
-      window.addEventListener('mousemove', onMove, { passive: true });
-      window.addEventListener('mousedown', onDown);
-      window.addEventListener('mouseup', onUp);
-      window.addEventListener('touchstart', onDown, { passive: true });
-      window.addEventListener('touchmove', onMove, { passive: false });
-      window.addEventListener('touchend', onUp, { passive: true });
-      window.addEventListener('wheel', onWheel, { passive: false });
-      window.addEventListener('keydown', onKey);
       document.addEventListener('visibilitychange', onVisibility);
 
       state.running = true;
@@ -314,6 +273,14 @@ export function createEngine(canvas, opts = {}) {
     },
     setReducedMotion(v) {
       state.reducedMotion = !!v;
+    },
+    /**
+     * Jump the world along by `px` virtual pixels. Nothing in the page calls
+     * this — it exists so the scene can be inspected at an arbitrary point in
+     * the tile without waiting out the walk.
+     */
+    seek(px) {
+      state.worldX += px;
     },
     get state() {
       return state;

@@ -5,11 +5,16 @@
  * tiling strip. A procession of hooded cultists carries torches through the
  * fog; because the live pass runs once per visible tile, they come round again
  * further along the road.
+ *
+ * Further in there is a rite going on — a pyre with figures bowed around it,
+ * a standing stone, skull-topped stakes — and dead men lashed to poles stand
+ * along the treeline. Both are baked into the strip, so they come past every
+ * time the tile does rather than on a timer.
  */
 import { makeRng, fbm2dTiling } from '../lib/rng.js';
 import {
-  surface, rect, hline, vline, px, line, fillPoly, wrapX,
-  mix, clamp, glow, hexToRgb, shadeRegion,
+  surface, rect, hline, vline, px, line, fillPoly, disc, wrapX,
+  mix, shade, clamp, glow, hexToRgb, shadeRegion,
 } from '../lib/paint.js';
 import { PAL } from '../palette.js';
 import { drawForestBand, drawPine } from './trees.js';
@@ -73,6 +78,19 @@ export function buildDeepForest(L, seed) {
     });
   }
 
+  /* ------------------------------------------ the rite, and what it leaves */
+  const fires = [];
+  wrapX(W, L.tx(0.255), L.sw * 0.14, (x) => {
+    fires.push(drawRitualSite(c, makeRng(seed + 51), x, L.treeBase - L.vh * 0.045, L));
+  });
+
+  for (const t of [0.075, 0.33, 0.47, 0.66, 0.885]) {
+    const sd = Math.floor(rng() * 0xffffff);
+    wrapX(W, L.tx(t), L.vh * 0.14, (x) => {
+      drawSkeletonPole(c, makeRng(sd), x, L.treeBase - L.vh * 0.018, L);
+    });
+  }
+
   /* ---------------------------------------- ground haze pooled at the base */
   const mistRgb = hexToRgb(PAL.mist);
   const n = fbm2dTiling(rng, W, 40, 3);
@@ -101,7 +119,8 @@ export function buildDeepForest(L, seed) {
       const still = opts && opts.reducedMotion;
       const time = still ? 0 : t;
 
-      // cultists first — the mist should drift in front of them
+      // the pyre and the cultists first — the mist should drift in front
+      for (const f of fires) drawRitualFire(ctx, f, time, ox, oy);
       drawProcession(ctx, proc, time, ox, oy);
 
       for (let i = 0; i < ribbons.length; i++) {
@@ -137,6 +156,187 @@ function makeMistStrip(W, H, seed, col, alpha) {
     return a < 3 ? null : [rgb[0], rgb[1], rgb[2], a];
   });
   return s.canvas;
+}
+
+/* --------------------------------------------------------------- the rite */
+
+/**
+ * A pyre in a clearing with figures bowed around it, a standing stone at its
+ * back and skull-topped stakes to either side. Everything but the fire is
+ * baked; the flame is painted live so it flickers.
+ */
+function drawRitualSite(c, rng, x, baseY, L) {
+  const unit = Math.max(12, Math.round(L.vh * 0.052));
+  const body = mix(PAL.voidBlack, PAL.mist, 0.07);
+  const wood = mix(PAL.voidBlack, PAL.bark, 0.5);
+
+  /* The firelight is baked in first, before anything standing around it.
+   * Painted live it would composite OVER the congregation and wash them out;
+   * behind them it does the one job that matters here — turning them into
+   * readable silhouettes. Only the flame itself is live. */
+  glow(c, x, baseY - unit * 1.1, unit * 9.5, PAL.crimsonDim, 0.55);
+  glow(c, x, baseY - unit * 0.8, unit * 4.2, PAL.amberDeep, 0.5);
+
+  /* scorched ground */
+  const burnW = unit * 2.8;
+  for (let i = -burnW; i <= burnW; i++) {
+    const t = i / burnW;
+    const d = Math.sqrt(Math.max(0, 1 - t * t)) * unit * 0.42;
+    vline(c, x + i, baseY - d * 0.3, baseY + d * 0.3, mix(PAL.voidBlack, PAL.soil, 0.55));
+  }
+
+  /* the standing stone behind it */
+  const stoneH = unit * 3.1;
+  const stoneW = Math.max(3, Math.round(unit * 0.5));
+  fillPoly(c, [
+    [x - stoneW * 0.5, baseY - stoneH],
+    [x + stoneW * 0.5, baseY - stoneH * 0.94],
+    [x + stoneW * 0.62, baseY - unit * 0.2],
+    [x - stoneW * 0.6, baseY - unit * 0.2],
+  ], mix(PAL.voidBlack, PAL.mist, 0.16));
+  // a mark cut into it, catching the firelight
+  for (let i = 0; i < 4; i++) {
+    px(c, x - 1 + (i % 2), baseY - stoneH * 0.72 + i * 2, mix(PAL.crimsonDeep, PAL.mist, 0.35));
+  }
+
+  /* the pyre: crossed timbers stacked into a cone */
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI + rng.range(-0.2, 0.2);
+    const len = unit * rng.range(0.8, 1.15);
+    line(c, x - Math.cos(a) * len, baseY, x + Math.cos(a) * len * 0.45, baseY - len * 1.15, wood, 1);
+  }
+  rect(c, x - unit * 0.55, baseY - 1, unit * 1.1, 2, shade(wood, -0.3));
+
+  /* the congregation, bowed toward it */
+  for (const spot of [-2.75, -1.95, -1.2, 1.15, 1.9, 2.7]) {
+    const fx = x + spot * unit;
+    const h = unit * rng.range(2.0, 2.6);
+    drawWorshipper(c, fx, baseY + rng.signed(1.5), h, rng.chance(0.5), spot < 0 ? 1 : -1, body);
+  }
+
+  /* stakes with skulls on them, flanking the fire */
+  drawSkullStake(c, rng, x - unit * 3.6, baseY, unit, body);
+  drawSkullStake(c, rng, x + unit * 3.5, baseY, unit, body);
+
+  return { x, y: baseY - unit * 0.55, unit, phase: rng.range(0, Math.PI * 2) };
+}
+
+/** A hooded figure, standing or on its knees, turned toward the fire. */
+function drawWorshipper(c, x, y, h, kneeling, face, body) {
+  const hw = Math.max(1, h * 0.18);
+  if (kneeling) {
+    // folded forward, forehead near the ground
+    fillPoly(c, [
+      [x - hw * 1.5, y],
+      [x - hw * 1.1, y - h * 0.42],
+      [x + face * hw * 0.5, y - h * 0.58],
+      [x + face * hw * 1.7, y - h * 0.24],
+      [x + hw * 1.6, y],
+    ], body);
+    disc(c, x + face * hw * 1.2, y - h * 0.5, hw * 0.72, body);
+  } else {
+    fillPoly(c, [
+      [x - hw * 0.85, y - h * 0.8],
+      [x + hw * 0.85, y - h * 0.8],
+      [x + hw * 1.5, y],
+      [x - hw * 1.5, y],
+    ], body);
+    fillPoly(c, [
+      [x - hw * 0.62, y - h * 0.74],
+      [x, y - h * 1.04],
+      [x + hw * 0.62, y - h * 0.74],
+    ], body);
+    // arms lifted toward the flame, drawn thick enough to be a shape
+    line(c, x + face * hw * 0.7, y - h * 0.62,
+      x + face * hw * 1.9, y - h * 0.88, body, 2);
+  }
+}
+
+/** A stake with a skull set on top of it. */
+function drawSkullStake(c, rng, x, baseY, unit, body) {
+  const h = unit * rng.range(1.5, 2.0);
+  rect(c, x, baseY - h, 2, h, body);
+  const bone = mix(shade(mix(PAL.frostMid, '#b3ab97', 0.5), -0.38), PAL.mist, 0.18);
+  rect(c, x - 1, baseY - h - 4, 4, 4, bone);
+  px(c, x - 1, baseY - h - 3, PAL.voidBlack);
+  px(c, x + 2, baseY - h - 3, PAL.voidBlack);
+  hline(c, x - 1, x + 2, baseY - h - 1, shade(bone, -0.5));
+}
+
+/**
+ * A dead man lashed to a pole: skull, ribs, hanging arms and legs. Bone is
+ * kept dim and mixed toward the mist so it sits back in the trees instead of
+ * jumping forward as the brightest thing in the frame.
+ */
+function drawSkeletonPole(c, rng, x, baseY, L) {
+  const h = L.vh * rng.range(0.115, 0.155);
+  const bone = mix(shade(mix(PAL.frostMid, '#b3ab97', 0.5), -0.36), PAL.mist, 0.16);
+  const boneDim = shade(bone, -0.4);
+  const wood = mix(PAL.voidBlack, PAL.bark, 0.45);
+  const rope = mix(PAL.barkMid, PAL.voidBlack, 0.35);
+
+  /* the stake, and the crossbar the arms hang from */
+  vline(c, x, baseY - h, baseY, wood);
+  vline(c, x + 1, baseY - h, baseY, shade(wood, -0.45));
+  const armY = Math.round(baseY - h * 0.80);
+  const arm = Math.round(h * 0.24);
+  hline(c, x - arm, x + arm + 1, armY, wood);
+
+  /* skull, slumped forward */
+  const skullY = Math.round(baseY - h * 0.94);
+  rect(c, x - 1, skullY, 3, 3, bone);
+  px(c, x - 1, skullY + 1, PAL.voidBlack);
+  px(c, x + 1, skullY + 1, PAL.voidBlack);
+  px(c, x, skullY + 3, boneDim);
+
+  /* spine and ribs */
+  const hipY = Math.round(armY + h * 0.30);
+  vline(c, x, skullY + 4, hipY, bone);
+  for (let i = 0; i < 3; i++) {
+    const ry = skullY + 5 + i * 2;
+    if (ry >= hipY) break;
+    hline(c, x - 2, x - 1, ry, boneDim);
+    hline(c, x + 1, x + 2, ry, boneDim);
+  }
+  rect(c, x - 1, hipY, 3, 2, boneDim);
+
+  /* arms lashed out along the bar, then dropping */
+  line(c, x - arm + 1, armY, x - arm, armY + h * 0.22, bone, 1);
+  line(c, x + arm, armY, x + arm + 1, armY + h * 0.20, bone, 1);
+  px(c, x - arm + 1, armY, rope);
+  px(c, x + arm, armY, rope);
+
+  /* legs, hanging clear of the ground */
+  line(c, x - 1, hipY + 2, x - 2, hipY + h * 0.24, bone, 1);
+  line(c, x + 1, hipY + 2, x + 2, hipY + h * 0.22, bone, 1);
+  px(c, x, hipY - 1, rope);
+}
+
+/** The pyre flame, painted every frame. */
+function drawRitualFire(c, site, t, ox, oy) {
+  const u = site.unit;
+  const f = 0.72 + Math.sin(t * 6.3 + site.phase) * 0.18 + Math.sin(t * 14.1 + site.phase) * 0.1;
+  const x = ox + site.x;
+  const y = oy + site.y;
+
+  glow(c, x, y, u * 3.4 * f, PAL.amber, 0.55);
+  glow(c, x, y, u * 1.5, PAL.amberPale, 0.5);
+
+  // tongues of flame: a broad low cone, tallest in the middle
+  const half = Math.max(2, Math.round(u * 0.32));
+  for (let i = -half; i <= half; i++) {
+    const edge = Math.abs(i) / half;
+    const lick = 0.7 + 0.55 * Math.abs(Math.sin(t * 8 + i * 1.7 + site.phase));
+    const hgt = u * (0.95 - edge * 0.62) * lick;
+    const col = edge < 0.34 ? PAL.amberPale : edge < 0.72 ? PAL.amber : PAL.amberDeep;
+    vline(c, x + i, y - hgt, y, col);
+  }
+  // embers lifting off it
+  for (let i = 0; i < 3; i++) {
+    const rise = ((t * 0.45 + i * 0.37) % 1);
+    px(c, x + Math.round(Math.sin(t * 1.7 + i * 2.3) * u * 0.5),
+      Math.round(y - u * (1.1 + rise * 1.9)), rise > 0.6 ? PAL.crimsonDim : PAL.crimson);
+  }
 }
 
 /* ----------------------------------------------------------- cultists */

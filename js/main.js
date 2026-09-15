@@ -37,4 +37,8 @@ createPanel({
 });
 
 // expose the log buffer for support: a visitor can paste it into a bug report
-window.CVLTSM = { logs: () => log.recent(), net: () => client.stats };
+window.CVLTSM = {
+  logs: () => log.recent(),
+  net: () => client.stats,
+  seek: (px) => engine.seek(px),   // jump the world along, for inspection
+};

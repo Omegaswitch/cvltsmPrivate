@@ -4,22 +4,20 @@
  * Whatever the wood has sent after him, strung out down the road behind. The
  * traveller holds the middle of the frame, so "behind" is screen-left.
  *
- * Three things do the work here:
+ * Every one of them is solid and permanently on the road — nothing fades out
+ * or blinks away. Two things do the work:
  *
- *  - They FADE. Each one runs its own visibility cycle and is simply gone for
- *    part of it. While it is gone its position is re-rolled from a hash of the
- *    cycle number, so it never returns to quite where you last saw it.
  *  - They LURCH. The stride phase is deliberately non-uniform, and the
  *    deformed ones quantise it into stop-motion steps, which reads far worse
- *    than a smooth walk.
- *  - Their EYES never go out. Every one of them carries a pair of red embers,
- *    and those stay lit a little longer than the body they belong to.
+ *    than a smooth walk. Occasional whole-body spasms on top.
+ *  - They SURGE. Each closes and falls back on its own slow cycle, so the gap
+ *    behind the traveller keeps breathing without ever shutting.
  *
  * Drawn after the road and before the traveller, so he stays clearly ahead,
  * and before the fog, which swallows the far end of the pack.
  */
 import { makeRng } from '../lib/rng.js';
-import { rect, px, line, fillPoly, disc, mix, clamp, glow, glowEllipse } from '../lib/paint.js';
+import { rect, px, line, fillPoly, disc, mix, glow, glowEllipse } from '../lib/paint.js';
 import { PAL } from '../palette.js';
 
 const TAU = Math.PI * 2;
@@ -32,8 +30,6 @@ const TAU = Math.PI * 2;
  */
 const FLESH = mix(PAL.voidBlack, PAL.frostShadow, 0.78);
 const ROBE = mix(PAL.voidBlack, PAL.frostShadow, 0.56);
-
-const smooth = (t) => t * t * (3 - 2 * t);
 
 /** Deterministic 0..1 from two numbers — no state, same result every frame. */
 const hash = (a, b) => {
@@ -67,9 +63,7 @@ export function buildPursuers(vh, seed) {
     surgeAmp: rng.range(0.008, 0.026),
     surgeRate: rng.range(0.2, 0.5),
     flick: rng.range(0.6, 1.4),
-    visPeriod: rng.range(7, 15),
-    visPhase: rng.range(0, 1),
-    jumpRange: rng.range(0.05, 0.13),
+
   }));
 
   // furthest back first, so the nearer ones overlap them correctly
@@ -81,16 +75,7 @@ export function buildPursuers(vh, seed) {
 
       const poses = [];
       for (const p of pack) {
-        const cyc = ((time / p.visPeriod) + p.visPhase) % 1;
-        const vis = still ? 1 : visibility(cyc);
-        // the eyes outlast the body on the way out and arrive before it
-        const eyeVis = still ? 1 : clamp(vis * 1.5 + 0.12, 0, 1) * (cyc > 0.82 ? 0 : 1);
-        if (vis <= 0.01 && eyeVis <= 0.01) continue;
-
-        // while it was gone, it moved
-        const cycleIndex = Math.floor((time / p.visPeriod) + p.visPhase);
-        const jump = (hash(p.id * 31.7 + 3.1, cycleIndex) - 0.5) * p.jumpRange;
-        const f = p.f + jump + Math.sin(time * p.surgeRate + p.phase) * p.surgeAmp;
+        const f = p.f + Math.sin(time * p.surgeRate + p.phase) * p.surgeAmp;
 
         // an occasional whole-body twitch, a few frames long
         const tick = Math.floor(time * 6);
@@ -100,8 +85,6 @@ export function buildPursuers(vh, seed) {
 
         poses.push({
           p,
-          vis,
-          eyeVis,
           x: Math.round(vw * f + spasm),
           y: Math.round(groundY - p.lift + spasm * 0.4),
           h: bodyH * p.scale,
@@ -114,8 +97,6 @@ export function buildPursuers(vh, seed) {
       //    lit only by whatever leaks out of their own eyes, which is just
       //    enough to catch their legs against the soil.
       for (const o of poses) {
-        if (o.vis <= 0.01) continue;
-        ctx.globalAlpha = o.vis;
         if (o.p.torch) {
           const f = Math.sin(o.flick) * 0.3 + 0.8;
           glowEllipse(ctx, o.x + o.h * 0.2, o.y, o.h * 2.6 * f, o.h * 0.78, PAL.amberDeep, 0.44);
@@ -123,46 +104,27 @@ export function buildPursuers(vh, seed) {
         } else {
           glowEllipse(ctx, o.x + o.h * 0.25, o.y, o.h * 1.6, o.h * 0.5, PAL.crimsonDeep, 0.5);
         }
-        ctx.globalAlpha = 1;
       }
 
-      // 2. the figures, fading in and out of the dark
+      // 2. the figures, silhouetted against it
       for (const o of poses) {
-        if (o.vis <= 0.01) continue;
-        ctx.globalAlpha = o.vis;
         if (o.p.type === 'cultist') drawCultistRunner(ctx, o.x, o.y, o.h, o.gait);
         else if (o.p.type === 'loper') drawLoper(ctx, o.x, o.y, o.h, o.gait);
         else if (o.p.type === 'tall') drawTall(ctx, o.x, o.y, o.h, o.gait);
         else drawHunched(ctx, o.x, o.y, o.h, o.gait);
-        ctx.globalAlpha = 1;
       }
 
-      // 3. the eyes, which outlive the bodies
-      for (const o of poses) {
-        if (o.eyeVis <= 0.01) continue;
-        ctx.globalAlpha = o.eyeVis;
-        eyesOf(ctx, o);
-        ctx.globalAlpha = 1;
-      }
+      // 3. the eyes
+      for (const o of poses) eyesOf(ctx, o);
 
       // 4. the flames, over everything they light
       for (const o of poses) {
-        if (!o.p.torch || o.vis <= 0.01) continue;
-        ctx.globalAlpha = o.vis;
+        if (!o.p.torch) continue;
         const u = o.h / 20;
         torch(ctx, o.x + u * 5.4, o.y - u * 16.6, o.h, o.flick);
-        ctx.globalAlpha = 1;
       }
     },
   };
-}
-
-/** Visible for most of the cycle, gone for the rest, soft at both edges. */
-function visibility(cyc) {
-  if (cyc < 0.07) return smooth(cyc / 0.07);
-  if (cyc < 0.58) return 1;
-  if (cyc < 0.72) return 1 - smooth((cyc - 0.58) / 0.14);
-  return 0;
 }
 
 /**

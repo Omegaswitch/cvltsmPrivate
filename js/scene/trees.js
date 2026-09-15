@@ -42,33 +42,52 @@ export function drawPine(c, opts) {
     const wEnd = halfWidth * (0.22 + 0.78 * Math.pow(p1, 0.85));
     const wStart = wEnd * 0.42;
     const rows = Math.max(1, Math.round(y1 - y0));
+    const edges = [];
 
     for (let i = 0; i < rows; i++) {
       const y = Math.round(y0 + i);
       const f = i / rows;
-      let w = lerp(wStart, wEnd, Math.pow(f, 0.7));
+      const w = lerp(wStart, wEnd, Math.pow(f, 0.7));
       // ragged needle silhouette
       const jl = w + rng.signed(Math.max(0.7, w * 0.14));
       const jr = w + rng.signed(Math.max(0.7, w * 0.14));
       hline(c, x - jl, x + jr, y, color);
+      edges.push({ y, xl: x - jl, xr: x + jr });
+    }
 
-      // frost rim: strongest on the upper slope of each tier
-      if (snowColor && snowAmount > 0) {
-        const bias = (1 - f) * 0.85 + 0.15;
-        const p = snowAmount * bias;
-        if (rng.chance(p)) {
-          px(c, x - jl, y, snowColor);
-          if (rng.chance(0.3)) px(c, x - jl + 1, y, mix(snowColor, color, 0.55));
-        }
-        if (rng.chance(p * 0.7)) {
-          px(c, x + jr, y, mix(snowColor, color, 0.3));
-        }
-        // a dusting across the tier shoulder
-        if (f < 0.14 && rng.chance(p)) {
-          const sx = x + rng.signed(w * 0.8);
-          px(c, sx, y, mix(snowColor, color, 0.35));
-        }
-      }
+    if (snowColor && snowAmount > 0) capTier(c, edges, snowColor, color, snowAmount, rng);
+  }
+}
+
+/**
+ * Lay snow along the upper edge of one branch tier.
+ *
+ * Snow used to be scattered a pixel at a time with an independent dice roll
+ * per row, which is the classic recipe for orphan pixels: at this scale the
+ * result reads as static crawling over the bushes rather than as snow. It is
+ * placed as a few short contiguous caps instead, biased to the top of the
+ * tier where snow would actually settle, in two tones only.
+ */
+function capTier(c, edges, snowColor, color, amount, rng) {
+  if (edges.length < 2) return;
+  const bright = snowColor;
+  const dim = mix(snowColor, color, 0.5);
+
+  // one cap per tier at low amounts, two on the heavier trees
+  const caps = amount > 0.32 ? rng.int(1, 2) : (rng.chance(amount * 2.4) ? 1 : 0);
+
+  for (let n = 0; n < caps; n++) {
+    // start in the upper half of the tier — the shoulder of the branch
+    const start = rng.int(0, Math.max(0, Math.floor(edges.length * 0.45)));
+    const run = Math.min(edges.length - start, rng.int(2, 5));
+    if (run < 2) continue;
+
+    for (let k = 0; k < run; k++) {
+      const e = edges[start + k];
+      const endCap = k === 0 || k === run - 1;
+      px(c, e.xl, e.y, endCap ? dim : bright);
+      // thicken the middle of the cap so it is a cluster, not a hairline
+      if (!endCap && run > 2) px(c, e.xl + 1, e.y, dim);
     }
   }
 }
