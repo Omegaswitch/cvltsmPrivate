@@ -312,15 +312,35 @@ function drawPlank(c, rng, x, y, w, h) {
   }
 }
 
+/**
+ * A broken stump. The body used to sit at almost pure black with a lit 1px
+ * left edge, so all that actually rendered was that single line — a bare
+ * vertical stick standing in the undergrowth. The trunk now carries a tone of
+ * its own and the top is genuinely splintered rather than cut square.
+ */
 function drawStump(c, rng, x, y, vh) {
-  const h = rng.range(vh * 0.012, vh * 0.038);
-  const w = rng.range(vh * 0.008, vh * 0.022);
-  const col = mix(PAL.bark, PAL.voidBlack, 0.35);
-  rect(c, x - w / 2, y - h, w, h, col);
+  const h = rng.range(vh * 0.014, vh * 0.040);
+  const w = Math.max(2, Math.round(rng.range(vh * 0.010, vh * 0.024)));
+  const col = mix(PAL.bark, PAL.voidBlack, 0.12);
+  const left = x - Math.floor(w / 2);
+
+  // splintered crown: each column starts at its own height
+  const tops = [];
   for (let i = 0; i < w; i++) {
-    px(c, x - w / 2 + i, y - h + rng.range(0, h * 0.3), mix(PAL.frostDeep, col, 0.5));
+    const edge = Math.abs(i - (w - 1) / 2) / ((w - 1) / 2 || 1);
+    tops.push(y - h + rng.range(0, h * 0.26) + edge * h * 0.1);
   }
-  vline(c, x - w / 2, y - h, y, shade(col, 0.25));
+
+  for (let i = 0; i < w; i++) {
+    const top = tops[i];
+    vline(c, left + i, top, y, col);
+    // snow caught on the broken face
+    if (rng.chance(0.5)) px(c, left + i, top, mix(PAL.frostDeep, col, 0.35));
+    // grain
+    if (rng.chance(0.4)) vline(c, left + i, top + rng.range(1, h * 0.7), y, shade(col, -0.35));
+  }
+  vline(c, left, tops[0], y, shade(col, 0.18));
+  vline(c, left + w - 1, tops[w - 1], y, shade(col, -0.4));
 }
 
 function drawFallenLog(c, rng, x, y, vh) {

@@ -14,7 +14,7 @@
  * would spill straight over the foliage hanging in front of it.
  */
 import { makeRng } from '../lib/rng.js';
-import { surface, line, wrapX, mix, shade, clamp, glow } from '../lib/paint.js';
+import { surface, fillPoly, wrapX, mix, shade, clamp, glow } from '../lib/paint.js';
 import { PAL } from '../palette.js';
 import { drawGreatTrunk, drawPine } from './trees.js';
 import { RUNES, WHEEL, drawGlyph } from '../runes.js';
@@ -72,12 +72,22 @@ export function buildSentinels(L, seed) {
         x: sx, top: -L.vh * 0.08, baseY, halfWidth: spec.hw, rng: r,
         base: PAL.bark, lit: PAL.barkLit, dark: PAL.barkDark, frost: PAL.frostDeep,
       });
+      /* Broken limb stubs. Drawn as tapered wedges rather than flat lines:
+       * the old version reached out 2.6 trunk-widths while barely rising,
+       * which read as a stick floating beside the tree. */
       for (let i = 0; i < 3; i++) {
-        const y = r.range(L.vy(0.05), L.vy(0.5));
+        const y = r.range(L.vy(0.06), L.vy(0.5));
         const dir = r.chance(0.5) ? -1 : 1;
-        line(c, sx + dir * spec.hw * 0.8, y,
-          sx + dir * spec.hw * r.range(1.6, 2.6), y - r.range(2, 9),
-          shade(PAL.bark, -0.4), 2);
+        const len = spec.hw * r.range(0.8, 1.35);
+        const rise = len * r.range(0.35, 0.7);
+        const root = sx + dir * spec.hw * 0.7;
+        const th = Math.max(2, Math.round(spec.hw * 0.16));
+        fillPoly(c, [
+          [root, y - th],
+          [root + dir * len, y - rise],
+          [root + dir * len, y - rise + 1],
+          [root, y + th],
+        ], shade(PAL.bark, -0.45));
       }
       // canopy shadow from this trunk's crown — onto the overlay surface
       drawPine(cc, {

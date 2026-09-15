@@ -12,7 +12,7 @@ import {
   mix, clamp, glow, hexToRgb, shadeRegion,
 } from '../lib/paint.js';
 import { PAL } from '../palette.js';
-import { drawForestBand } from './trees.js';
+import { drawForestBand, drawPine } from './trees.js';
 
 export function buildDeepForest(L, seed) {
   const { W, H } = L;
@@ -47,13 +47,30 @@ export function buildDeepForest(L, seed) {
     rng, step: L.vh * 0.055,
   });
 
-  /* -------------------------------- scattered bare trunks between the pines */
-  for (let i = 0; i < Math.round(W / 40); i++) {
+  /* ------------------ taller spires breaking the line of the canopy -------
+   * These used to be bare rectangles: a flat-topped bar ending in open sky
+   * with nothing on it, which reads as a rendering fault rather than a tree.
+   * They are narrow conifers now — same job of breaking up the skyline, but
+   * they actually have a crown on them.
+   */
+  for (let i = 0; i < Math.round(W / 52); i++) {
     const x = rng.range(0, W);
-    const h = rng.range(L.vh * 0.25, L.vh * 0.5);
-    const w = Math.max(1, Math.round(rng.range(1, 3)));
-    const col = mix(PAL.voidBlack, PAL.mist, rng.range(0.08, 0.22));
-    wrapX(W, x, w + 2, (sx) => rect(c, sx, L.treeBase + L.vh * 0.05 - h, w, h, col));
+    const h = rng.range(L.vh * 0.34, L.vh * 0.54);
+    const halfWidth = h * rng.range(0.085, 0.135);
+    const treeSeed = Math.floor(rng() * 0xffffff);
+    wrapX(W, x, halfWidth + 4, (sx) => {
+      drawPine(c, {
+        x: sx,
+        baseY: L.treeBase + L.vh * 0.05,
+        height: h,
+        halfWidth,
+        color: mix(PAL.voidBlack, PAL.mist, 0.10),
+        snowColor: mix(PAL.frostDeep, PAL.voidSoft, 0.22),
+        snowAmount: 0.13,
+        rng: makeRng(treeSeed),
+        trunk: false,
+      });
+    });
   }
 
   /* ---------------------------------------- ground haze pooled at the base */
