@@ -1,74 +1,71 @@
 # CVLTSM
 
-An immersive dark-fantasy landing page: a six-layer pixel-art forest that
-scrolls past forever while a lantern-carrying traveller walks through it.
-Rendered entirely in the browser — no image assets, no sprite sheets on disk,
-no build step.
+An immersive dark-fantasy landing page: a wheat field at night, a bound effigy
+standing in the middle of it with runes burning down its body, and the menu
+arranged around it. Rendered entirely in the browser — no image assets, no
+sprite sheets on disk, no build step.
 
-![the wood](docs/preview.png)
+![the field](docs/preview.png)
 
 ## What it is
 
-Every pixel of the scene is generated procedurally at load from a fixed seed —
-the peaks, the rune carvings, the crows, the traveller's 8-frame walk cycle.
-The whole frame renders into one low-resolution canvas which is then upscaled
-by an **exact integer factor** with `image-rendering: pixelated`, so every
-source pixel maps to an N×N block and nothing is ever resampled.
+Every mark in the scene is generated procedurally at load from a fixed seed —
+the stars, the treeline on the horizon, some twelve thousand stalks of wheat,
+the effigy and the sixteen runes cut into it. One canvas, sized to the display's
+device pixels, with nothing upscaled and no pixel grid.
 
-**The world travels.** Each layer is a horizontally *tiling* strip drawn at a
-wrapping offset, so the forest streams right to left without end. The traveller
-holds a fixed point in frame and the ground moves beneath him at exactly the
-pace his stride implies — he is permanently mid-step and never arrives.
+**Nothing responds to the pointer or the wheel.** The field moves because the
+wind moves. Scrolling belongs to the interface.
 
-## Layers
+## The scene
 
-| # | Layer | Parallax | Contents |
-|---|-------|----------|----------|
-| 0 | Celestial & distant peaks | 0.05 | Mauve→charcoal gradient, storm cloud noise, blood-tinged moon ring, snow-capped ridges, monolith ruins, cliffside waterfall |
-| 1 | The colossal antlered entity | 0.12 | A Jötunn above the canopy; crimson eyes flare, narrow and settle on a ~17s cycle. It drifts out of frame and, later, is standing there again |
-| 2 | Deep fog & cultists | 0.25 | Receding tree walls, drifting mist ribbons, a torch-lit procession with a blood banner |
-| 3 | Ancient sentinel pines & runes | 0.45 | Colossal bark columns carved with stacked runes; the glow breathes and spills red onto the bark. Crowns are a separate pass drawn *after* the glow, so foliage occludes it |
-| 4 | Road, water & bridges | 0.70 | Frozen moss and mud, snow-caked scrub, rickety log bridges, scanline water carrying rune and lantern reflections |
-| 5 | Foreground framing & totems | 1.00 | Twisted roots, frost-tipped boughs, near-black trunks sweeping past, the antler skull totem |
+| Layer | What it is |
+|-------|------------|
+| Sky | A deep gradient, stars thinning toward the horizon, a bank of haze, and a ragged treeline biting into it. Baked once. |
+| Crop, far to near | Four depth bands, each lower, darker, coarser and swaying further than the one behind it. |
+| The effigy | A harvest figure bound out of timber and straw — splayed legs, a bundled torso, arms on a crossbeam, a sun wheel for a head. |
+| Fire | The bloom around the runes and the halo around the body, breathing. |
+| Chaff | Motes lifting off the crop. |
+| Near crop | The stalks close enough to bend individually, drawn over everything. |
 
-Crows cross between layers 2 and 3. A pack of cultists and deformed things
-works the road behind the traveller, a good stretch back. All of them are
-solid and permanently present — nothing fades or blinks away. They **lurch**,
-on a deliberately non-uniform stride that the deformed ones quantise into
-stop-motion steps, with occasional whole-body spasms; they **surge**, each
-closing and falling back on its own slow cycle so the gap keeps breathing
-without ever shutting; and every one carries a pair of glowing red eyes.
-Torch-bearers pool light on the road; the rest are lit only by what leaks out
-of their own eyes.
+### How the crop moves
 
-Deeper in, a small **rite** burns between the trunks — a pyre, a standing
-stone cut with a red mark, hooded figures bowed around it and skull-topped
-stakes. It is deliberately small and low, standing on the forest floor of its
-own layer, so it is glimpsed between trees rather than staged. Its firelight
-is baked into the layer *behind* the congregation so they read as silhouettes;
-only the flame is live. **Dead men lashed to poles** are scattered through the
-trees, each at its own depth — so they vary in height and size rather than
-lining up at one level like a fence. Both are baked into the tiling strip, so
-they come round every time the tile does rather than on a timer.
+Redrawing twelve thousand stalks a frame would look no better and cost a
+hundred times as much, so each band is drawn once into its own surface and then
+animated by **shearing it in horizontal slabs** — the top of a band shifts
+further than its base, which is how a head of wheat actually moves.
 
-Fog is **not** an overlay: it is split into three depth bands drawn at three
-different points in the layer order — a high haze banked behind the treeline,
-banks rolling over the road, and thin wisps crossing in front of the
-foreground. The sentinels and the deadfall sit *inside* the weather rather
-than under a sheet laid over the finished frame, and each bank drifts at its
-own fraction of the walk, so the near fog moves visibly faster than the far
-haze.
+Two details that took measuring to get right:
 
-Layers bake once into offscreen buffers; only what must live (eyes, runes,
-torches, ripples, reflections, crows, the traveller) is repainted each frame.
+- The wave travels *up* the stem, so a slab's height shifts the wind's phase —
+  but only slightly. Feeding a slab's `y` straight into the wind's *horizontal*
+  term swung the phase wildly between neighbouring slabs and tore each band
+  into horizontal steps.
+- Slabs abut exactly. An earlier version overlapped them by a row as insurance
+  against gaps, but shearing only moves a slab sideways — vertically they
+  already tile — and the shared row was composited twice at two different
+  offsets, printing a faint dark line across the crop every slab.
+
+A band whose feet all sat on one line ended in a razor edge, and wherever that
+edge fell the crop density dropped off a cliff. Feet sink over a range instead,
+and the nearest band sinks right off the bottom of the frame: standing in a
+crop, there is no ground line to see.
+
+### How the light works
+
+The effigy's fire is baked **into the stalks themselves**, tinting each one by
+how close it stands to the fire. An earlier version laid a single big `screen`
+gradient over the finished field instead; it left hard rectangular banding
+across the crop, and even without the artefact a flat wash over the top is not
+what light in a field looks like.
 
 ## Branding slots
 
 Two slots in `index.html` are waiting for real artwork, both marked with
 comments:
 
-- **Manufacturer logo** — `<div class="hero__mfr" id="mfrLogo">`, directly above
-  the wordmark. Drop an `<img>` straight in; the empty placeholder frame
+- **Manufacturer logo** — `<div class="crest__mfr" id="mfrLogo">`, directly
+  above the wordmark. Drop an `<img>` straight in; the empty placeholder frame
   disappears automatically once an image is present.
 - **CVLTSM wordmark** — the `<h1>`, currently set in Valhalica
   (`fonts/Valhalica-Regular.otf`). Replace its contents with the official logo
@@ -76,11 +73,15 @@ comments:
 
 ## Interface
 
-The menu sits under the wordmark. Each item raises a **slide-up section
-panel** over the scene — the canvas is never scrolled or transformed, so the
-background stays exactly where it is while the panel travels. The hero is
-marked `inert` while the panel is modal, focus is trapped and restored, and
-Escape closes.
+The four sections sit in a ring **around the effigy**, centred on the figure
+itself: the engine exposes its position and the ring is placed from that, so
+the menu stays arranged around it at any window size. Below 720px wide the ring
+collapses to a row.
+
+Each item raises a **slide-up section panel** over the scene — the canvas is
+never scrolled or transformed, so the background stays exactly where it is
+while the panel travels. The page behind is marked `inert` while the panel is
+modal, focus is trapped and restored, and Escape closes.
 
 The panel carries three request states, all reachable today:
 
@@ -125,6 +126,58 @@ buffer. `window.onerror` and `unhandledrejection` are captured. Nothing is
 shipped anywhere by default — `log.setSink(fn)` is where a collector plugs in.
 `window.CVLTSM.logs()` dumps the buffer for a bug report.
 
+## Performance
+
+Every baked layer is a **surface**: a canvas sized in device pixels, carrying
+the transform that lets it be painted in ordinary screen coordinates, so it
+blits one to one. Getting this wrong was the single largest cost in the scene —
+layers built at CSS-pixel size and blitted through the main context's device
+transform are *magnified* every frame, four times over on a retina display and
+nine on a phone, and everything baked into them comes out soft.
+
+A surface also carries an origin, so a layer that covers part of the frame can
+be cropped to what it actually paints rather than blitting a screenful of
+transparency. The effigy stands in about a tenth of the frame and its bloom in
+rather less.
+
+Three findings worth keeping, all measured at 1920×1080:
+
+- **Canvas shadows are not affordable live.** The rune bloom was drawn with
+  `shadowBlur` on every stroke: 5.9fps, against 60.5 with the fire pass off
+  entirely. It is baked once now and blitted with a breathing alpha, while the
+  sharp cores are stroked live without any shadow so each rune still flickers
+  on its own.
+- **Batching paths can make things slower.** The cost of an antialiased path
+  scales with its *bounding box*, and the near stalks are long and scattered
+  right across the frame. One path per colour group measured 51fps and one path
+  for all of them 46, against 55 for a stroke per stem. The baked bands, which
+  are dense and local, do batch — the tint there is quantised into ten levels
+  so stalks sharing a colour go into one path each.
+- **A head of grain is rigid.** It rides on the top of the stem and the bend
+  barely reshapes it, so each one is baked into a small sprite at build and
+  stamped at the stalk's top every frame. Only the stems are still paths.
+
+The sky layer has to cover the *whole* frame, not just the part of it that is
+sky. It is the only layer painted over the previous frame, so wherever it was
+transparent nothing was ever cleared, and the crop and chaff below the treeline
+accumulated there frame after frame.
+
+Also: a fixed-timestep accumulator rather than a raw `dt`; rendering pauses on
+`visibilitychange`; layers rebuild on a debounced resize; the device pixel
+ratio is capped at 2.
+
+## Accessibility
+
+- `prefers-reduced-motion: reduce` stops the field entirely — no wind, no
+  chaff, no breathing fire. The scene is held at a fixed instant.
+- The canvas carries a descriptive `aria-label`; the interface is keyboard
+  navigable with visible focus rings, and there is a `<noscript>` fallback.
+
+## Audio
+
+None. The page is silent: no music, no audio files, no Web Audio — nothing
+that can make a sound.
+
 ## Testing
 
 ```sh
@@ -146,111 +199,43 @@ A static site — serve the directory over HTTP (ES modules will not load from
 `file://`):
 
 ```sh
-python3 -m http.server 8000     # or: npx serve .
+npm start                       # or: python3 -m http.server 8000
 ```
 
 Then open <http://localhost:8000>.
 
-## Controls
-
-The wood walks entirely by itself. No pointer, wheel, drag or key input moves
-the background — scrolling belongs to the interface, not to the forest.
-
-- **Lore / Expedition / Archive** — raise the section panel
-- **Escape** — close it
-
-`window.CVLTSM.seek(px)` jumps the world along, for inspecting a different
-point in the tile without waiting out the walk.
-
-## Audio
-
-None. The page is silent: no music, no audio files, no Web Audio — nothing
-that can make a sound.
-
-## Performance & accessibility
-
-- Single `requestAnimationFrame` loop, 60fps at 1600×900.
-- **Fixed timestep.** Layer offsets are integer-snapped to keep the pixel grid
-  exact, so a layer at 0.05 parallax moves one pixel every 0.6s. Advancing the
-  world by a raw, jittering `dt` made those snaps land at uneven moments, which
-  reads as background stutter even at a solid 60fps. Draining a fixed-size
-  accumulator puts every snap on a regular beat.
-- **Glow sprites are cached.** Each lantern, torch, ember and rune used to
-  build a fresh radial gradient every frame — thousands of allocations a
-  second, which showed up as a periodic GC hitch (worst frame 66ms) rather than
-  a lower average. Bucketed by colour and radius, worst frame is now 16.8ms.
-- The canvas is promoted to its own compositor layer so its per-frame repaint
-  never drags the interface into a repaint with it.
-
-## The walk
-
-`js/scene/gait.js` holds the cycle, built on the four standard key poses
-rather than a foot swung around an ellipse:
-
-| Pose | What happens |
-|------|--------------|
-| Contact | the foot reaches the ground, legs at full split |
-| Down | the body drops accepting the weight — hips at their **lowest** |
-| Passing | the free leg passes under the body |
-| Up | the body rises onto the ball of the foot — hips at their **highest** |
-
-Three details that are easy to get wrong and obvious once wrong: the hips
-oscillate twice per stride, lowest a quarter-step *after* contact rather than
-at it; the arms swing opposite their own leg and reach full stretch at the
-down pose, not at contact; and the knee comes from two-bone IK with fixed
-bone lengths, so the leg straightens at contact and folds through the swing
-instead of stretching to reach — that last one is the single biggest reason a
-walk reads as a puppet. Stride length is tuned so ground travel per cycle
-matches the world's scroll speed and the feet do not skate.
-
-References:
-[Walk cycle](https://en.wikipedia.org/wiki/Walk_cycle),
-[The poses: contact, down, passing and high point](https://www.linkedin.com/learning/2d-animation-walk-cycles-basics/the-poses-contact-down-passing-and-high-point),
-[Walk cycle animation blueprint](https://rustyanimator.com/walk-cycle-animation/).
-
-## Texture
-
-Snow on the trees is placed as a few short contiguous **caps** along the upper
-edge of each branch tier, in two tones, rather than a dice roll per pixel. The
-per-pixel version produced exactly the failure the pixel art literature warns
-about — orphan pixels, single stray dots that read as static crawling over the
-bushes instead of as snow. The guidance is to build texture from a few simple
-clusters repeated with varied distribution, keep the colour count low, and
-avoid scattered single-pixel detail:
-[Pixel Art Tutorial](https://androidarts.com/pixtut/pixelart.htm),
-[Pixelblog 2 — Texture](https://www.slynyrd.com/blog/2018/2/15/pixelblog-2-texture),
-[Cluster sketching and painting](https://medium.com/pixel-grimoire/how-to-start-making-pixel-art-2-bcd705cb04d7).
-- The framebuffer is sized to ~360 virtual pixels tall regardless of viewport,
-  so cost is near-constant from a phone to a 4K display.
-- Rendering pauses on `visibilitychange`; layers rebuild on a debounced resize.
-- `prefers-reduced-motion: reduce` stops the world entirely — no travel, fog
-  drift, crows, walk cycle or eye flare.
-- The canvas carries a descriptive `aria-label`; the interface is keyboard
-  navigable with visible focus rings, and there is a `<noscript>` fallback.
-
 ## Layout
 
 ```
-index.html          markup + interface overlay
-css/style.css       interface, vignette, responsive rules
-fonts/              Valhalica, the display face
-js/main.js          boot: wires engine, panel and logging together
-js/net/client.js    timeouts, retries, dedupe, quota, read cache
-js/ui/panel.js      slide-up section panel + loading/empty/error states
-js/lib/log.js       structured logging and global error capture
-content/*.json      section content (ships empty)
-tests/load.mjs      concurrent session load test
-js/engine.js        framebuffer sizing, world travel, tiled composition
-js/palette.js       the scene palette and depth factors
-js/runes.js         rune glyph bitmaps
-js/lib/rng.js       seeded PRNG, value noise, tiling fBm, ridgelines
-js/lib/paint.js     integer-snapped pixel primitives, seam wrapping
-js/scene/*.js       one module per layer, plus trees, crows, gait, the
-                    traveller and the pack chasing him
+index.html           markup + interface overlay
+css/style.css        interface, ring, panel, grain, responsive rules
+fonts/               Valhalica, the display face
+js/main.js           boot: wires field, ring, panel and logging together
+js/field/engine.js   canvas sizing, fixed timestep, layer order
+js/field/surface.js  device-resolution offscreen layers
+js/field/sky.js      night, stars, haze, treeline, ground
+js/field/wheat.js    the crop: baked bands, shearing, the near stalks
+js/field/effigy.js   the bound figure, its runes, its fire
+js/field/runes.js    the rune stroke paths and the sun wheel
+js/field/palette.js  the scene palette
+js/field/color.js    colour mixing and the falloff of the firelight
+js/net/client.js     timeouts, retries, dedupe, quota, read cache
+js/ui/panel.js       slide-up section panel + loading/empty/error states
+js/lib/log.js        structured logging and global error capture
+content/*.json       section content (ships empty)
+tests/load.mjs       concurrent session load test
+archive/pixel-wood/  the previous design, kept whole — see its own README
 ```
 
 ## Seed
 
-The wood is deterministic. Change `SEED` in `js/engine.js` to grow a different
-one under the same rules; `TILE` in the same file sets how far each layer runs
-before it repeats.
+The field is deterministic. Change `SEED` in `js/field/engine.js` to grow a
+different one under the same rules.
+
+## The previous design
+
+The original pixel-art forest — six parallax layers, a traveller walking
+forever, a pack chasing him, a rite burning between the trees and a hidden
+side-scrolling game behind ten clicks on the wordmark — is kept whole and
+runnable in [`archive/pixel-wood/`](archive/pixel-wood/README.md). It is not
+the live site; it is there to be picked back up.

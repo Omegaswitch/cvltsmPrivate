@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CVLTSM</title>
+<meta name="description" content="CVLTSM">
+<meta name="theme-color" content="#03040a">
+<meta name="color-scheme" content="dark">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="CVLTSM">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preload" href="fonts/Valhalica-Regular.otf" as="font" type="font/otf" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="stage">
+  <canvas id="field" role="img"
+    aria-label="A dark wheat field at night. A tall effigy of bound timber and straw stands in the middle of the crop, runes burning red down its body and along its arms."></canvas>
+</div>
+
+<div class="post" aria-hidden="true">
+  <div class="post__grain"></div>
+  <div class="post__vignette"></div>
+</div>
+
+<div class="ui">
+
+  <header class="crest">
+    <!-- MANUFACTURER LOGO SLOT.
+         Drop the artwork straight in here, e.g.
+           <img src="img/manufacturer.svg" alt="Manufacturer">
+         The empty placeholder frame disappears as soon as an image is present. -->
+    <div class="crest__mfr" id="mfrLogo"></div>
+
+    <!-- CVLTSM WORDMARK.
+         Set in Valhalica for now. When the official logo artwork arrives,
+         replace the contents of this h1 with:
+           <img src="img/cvltsm.svg" alt="CVLTSM"> -->
+    <h1 class="crest__mark">CVLTSM</h1>
+  </header>
+
+  <!-- The menu stands around the effigy. Each item is placed on a ring by
+       the angle and radius in its style attribute; below the breakpoint the
+       ring collapses to a column. -->
+  <nav class="ring" aria-label="Primary">
+    <a class="ring__item" style="--angle:196deg; --radius:1"   href="#lore" data-section="lore">Lore</a>
+    <a class="ring__item" style="--angle:-16deg; --radius:1"   href="#expedition" data-section="expedition">Expedition</a>
+    <a class="ring__item" style="--angle:145deg; --radius:1.05" href="#archive" data-section="archive">Archive</a>
+    <a class="ring__item" style="--angle:35deg;  --radius:1.05" href="#rites" data-section="rites">Rites</a>
+  </nav>
+
+  <footer class="foot">
+    <a class="ghost" href="#expedition" data-section="expedition"><span>Enter the field</span></a>
+  </footer>
+</div>
+
+<!-- Slide-up section panel. Rises over a static background; content is
+     fetched on open, with loading / empty / error states below. -->
+<div class="scrim" id="scrim" hidden></div>
+<section class="panel" id="panel" role="dialog" aria-modal="true"
+         aria-labelledby="panelTitle" tabindex="-1" aria-hidden="true">
+  <header class="panel__bar">
+    <h2 class="panel__title" id="panelTitle"></h2>
+    <button type="button" class="panel__close" id="panelClose" aria-label="Close section">
+      <span aria-hidden="true">&#10005;</span>
+    </button>
+  </header>
+
+  <div class="panel__body" id="panelBody" data-state="loading" aria-live="polite" aria-busy="true">
+    <div class="state" data-for="loading">
+      <div class="spinner" aria-hidden="true"><i></i><i></i><i></i></div>
+      <p class="state__label">Opening</p>
+    </div>
+    <div class="state" data-for="empty">
+      <p class="state__title">Nothing filed here yet</p>
+      <p class="state__note">This section has no entries.</p>
+    </div>
+    <div class="state" data-for="error">
+      <p class="state__title">Could not load this section</p>
+      <p class="state__note" id="panelErrorNote"></p>
+      <button type="button" class="ghost ghost--sm" id="panelRetry">Try again</button>
+    </div>
+    <div class="state" data-for="ready">
+      <ul class="entries" id="panelEntries"></ul>
+    </div>
+  </div>
+</section>
+
+<div class="boot" id="boot">
+  <div class="boot__inner"><div class="boot__rune">&#5892;</div></div>
+</div>
+
+<noscript>
+  <div class="noscript">
+    <h1>CVLTSM</h1>
+    <p>This field is drawn in the browser. Enable JavaScript to see it.</p>
+  </div>
+</noscript>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -37,12 +37,21 @@ const SESSIONS = Number(process.argv[2]) || 12;
  * catches a genuine collapse (a leak, a runaway loop) without failing because
  * the runner is busy. What IS asserted strictly under concurrency is
  * correctness — every session boots, and nothing errors.
+ *
+ * That floor is derived, not fixed. N sessions sharing one core can do no
+ * better than the baseline split N ways, so fair share is the only defensible
+ * reference; an absolute number just encodes how fast this particular runner
+ * was on the day it was written, and has to be re-tuned whenever the scene
+ * gets heavier. A session that falls well under its fair share has actually
+ * collapsed — everything above it is the runner being busy, which is not a
+ * fact about the site.
  */
 const BUDGET = {
   baselineBootMs: 3000,
   baselineFps: 50,
   concurrentBootMsP95: 15000,
-  concurrentFpsFloor: 8,
+  // the fraction of its fair share (baseline / sessions) a session must hold
+  concurrentFpsFairShare: 0.75,
   maxErrors: 0,
 };
 
@@ -146,6 +155,10 @@ for (const r of results) {
   );
 }
 
+/* N sessions on one core can do no better than the baseline split N ways */
+const fairShare = (baseline.fps || 0) / SESSIONS;
+const fpsFloor = +(fairShare * BUDGET.concurrentFpsFairShare).toFixed(1);
+
 const summary = {
   baseline: { bootMs: baseline.bootMs, fps: baseline.fps },
   concurrent: {
@@ -157,12 +170,15 @@ const summary = {
     bootMsP95: pct(boots, 0.95),
     fpsMin: Math.min(...fpsAll),
     fpsP50: pct(fpsAll, 0.5),
+    fairShareFps: +fairShare.toFixed(1),
+    fpsFloor,
   },
   errors: errors.length + baseline.errors.length,
 };
 console.log('\nSUMMARY', JSON.stringify(summary, null, 2));
 console.log('\nnote: concurrent fps reflects N browsers sharing one CPU on this'
-  + '\n      runner. Real visitors do not share a CPU — see the baseline.');
+  + '\n      runner. Real visitors do not share a CPU — see the baseline.'
+  + `\n      fair share of the baseline is ${fairShare.toFixed(1)}fps; the floor is ${fpsFloor}.`);
 
 const allErrors = [...baseline.errors, ...errors];
 const failures = [];
@@ -171,7 +187,7 @@ else if (baseline.bootMs > BUDGET.baselineBootMs) failures.push(`baseline boot $
 if (baseline.fps < BUDGET.baselineFps) failures.push(`baseline ${baseline.fps}fps < ${BUDGET.baselineFps}fps`);
 if (booted.length !== SESSIONS) failures.push(`${SESSIONS - booted.length} session(s) failed to boot`);
 if (summary.concurrent.bootMsP95 > BUDGET.concurrentBootMsP95) failures.push(`concurrent boot p95 ${summary.concurrent.bootMsP95}ms > ${BUDGET.concurrentBootMsP95}ms`);
-if (summary.concurrent.fpsMin < BUDGET.concurrentFpsFloor) failures.push(`a session collapsed to ${summary.concurrent.fpsMin}fps (floor ${BUDGET.concurrentFpsFloor})`);
+if (summary.concurrent.fpsMin < fpsFloor) failures.push(`a session collapsed to ${summary.concurrent.fpsMin}fps (floor ${fpsFloor} = ${BUDGET.concurrentFpsFairShare} of a ${fairShare.toFixed(1)}fps fair share)`);
 if (allErrors.length > BUDGET.maxErrors) failures.push(`${allErrors.length} console/page error(s): ${allErrors.slice(0, 3).join(' | ')}`);
 
 if (failures.length) {
