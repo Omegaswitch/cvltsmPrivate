@@ -6,7 +6,8 @@
  * blob on top: in the reference, frost reads as a cold blue outline tracing
  * every needle cluster.
  */
-import { rect, hline, vline, px, lerp, clamp, mix, shade, fillPoly, line } from '../lib/paint.js';
+import { rect, hline, vline, px, lerp, clamp, mix, shade, fillPoly, line, wrapX } from '../lib/paint.js';
+import { makeRng } from '../lib/rng.js';
 import { PAL } from '../palette.js';
 
 /**
@@ -219,31 +220,36 @@ export function drawBough(c, opts) {
   return pts;
 }
 
-/** A silhouette-only conifer band used for distant tree walls. */
+/**
+ * A silhouette-only conifer band used for distant tree walls.
+ *
+ * Every tree is drawn through wrapX, so a trunk that overhangs the tile seam
+ * is also painted on the far side and the wall repeats forever cleanly.
+ */
 export function drawForestBand(c, opts) {
   const {
-    x0, x1, baseY, minH, maxH, color, rng,
-    snowColor = null, snowAmount = 0, step = 9, gaps = null,
+    W, baseY, minH, maxH, color, rng,
+    snowColor = null, snowAmount = 0, step = 9,
   } = opts;
-  for (let x = x0; x < x1; x += rng.range(step * 0.6, step * 1.4)) {
-    let h = rng.range(minH, maxH);
-    // clearings in the canopy — trees duck down toward each gap centre
-    if (gaps) {
-      for (const gap of gaps) {
-        const d = (x - gap.x) / gap.w;
-        h *= 1 - gap.amount * Math.exp(-d * d);
-      }
-    }
-    drawPine(c, {
-      x,
-      baseY: baseY + rng.signed(3),
-      height: h,
-      halfWidth: h * rng.range(0.14, 0.22),
-      color,
-      snowColor,
-      snowAmount,
-      rng,
-      trunk: false,
+
+  for (let x = 0; x < W; x += rng.range(step * 0.6, step * 1.4)) {
+    const h = rng.range(minH, maxH);
+    const halfWidth = h * rng.range(0.14, 0.22);
+    const baseJitter = baseY + rng.signed(3);
+    // one seeded stream per tree so both copies are pixel-identical
+    const treeSeed = Math.floor(rng() * 0xffffff);
+    wrapX(W, x, halfWidth + 4, (sx) => {
+      drawPine(c, {
+        x: sx,
+        baseY: baseJitter,
+        height: h,
+        halfWidth,
+        color,
+        snowColor,
+        snowAmount,
+        rng: makeRng(treeSeed),
+        trunk: false,
+      });
     });
   }
 }

@@ -142,6 +142,17 @@ export function disc(c, cx, cy, r, col) {
   }
 }
 
+/**
+ * Draw an element at x, and again across the tile seam when it sits near an
+ * edge — this is what makes a generated strip repeat forever without a join.
+ * `pad` should cover the widest the element can reach from its anchor.
+ */
+export function wrapX(W, x, pad, fn) {
+  fn(x);
+  if (x < pad) fn(x + W);
+  else if (x > W - pad) fn(x - W);
+}
+
 /* ------------------------------------------------------------ pixel buffer */
 
 /**

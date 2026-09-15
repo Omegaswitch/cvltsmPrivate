@@ -95,6 +95,24 @@ export function fbm2d(rng, period = 48, octaves = 4) {
 }
 
 /**
+ * Horizontally periodic fBm.
+ *
+ * Cross-blends the field with a copy of itself shifted by one tile width, so
+ * f(0, y) === f(W, y) exactly and the strip can be repeated forever with no
+ * visible seam. Contrast dips very slightly mid-tile, which clouds and mist
+ * hide completely.
+ */
+export function fbm2dTiling(rng, W, period = 48, octaves = 4) {
+  const f = fbm2d(rng, period, octaves);
+  return (x, y) => {
+    const xw = ((x % W) + W) % W;
+    const t = xw / W;
+    const s = t * t * (3 - 2 * t);
+    return f(xw, y) * (1 - s) + f(xw - W, y) * s;
+  };
+}
+
+/**
  * Midpoint displacement ridge line. Produces the jagged mountain profiles
  * and the uneven forest floor without looking like a sine wave.
  */

@@ -6,9 +6,14 @@
  * perfection: every source pixel maps to an N×N block, so nothing is ever
  * resampled or half-covered.
  *
- * Each layer is a pre-baked offscreen canvas plus an optional per-frame
- * `over()` pass for the parts that must live (eyes, runes, torches, the
- * runner, the water). Compositing is a handful of drawImage calls.
+ * The world travels: `worldX` advances continuously and every layer is a
+ * horizontally tiling strip drawn at `-worldX * factor` wrapped into its own
+ * tile width. The traveller stays put on screen and the forest streams past
+ * him right to left, so he is always walking and never arrives.
+ *
+ * Rain and crows are not overlays — they are drawn *between* layers at their
+ * own depths, so the sentinels and the foreground occlude them like anything
+ * else in the wood.
  */
 import { makeLayout } from './scene/layout.js';
 import { buildSky } from './scene/sky.js';
@@ -18,10 +23,23 @@ import { buildSentinels } from './scene/sentinels.js';
 import { buildPath } from './scene/path.js';
 import { buildForeground } from './scene/foreground.js';
 import { buildWeather } from './scene/weather.js';
+import { buildCrows } from './scene/crows.js';
+import { buildTraveller } from './scene/runner.js';
 import { DEPTH } from './palette.js';
 import { clamp } from './lib/paint.js';
 
 const SEED = 0x5c0d;
+
+/** Tile width per layer, as a multiple of the viewport width. Deliberately
+ *  mismatched so the layers never repeat in lockstep. */
+const TILE = {
+  sky: 2.3,
+  jotunn: 1.55,
+  deepForest: 2.1,
+  sentinels: 1.9,
+  path: 2.2,
+  foreground: 1.7,
+};
 
 export function createEngine(canvas, opts = {}) {
   const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
@@ -30,21 +48,25 @@ export function createEngine(canvas, opts = {}) {
   const state = {
     scale: 3,
     vw: 0, vh: 0,        // framebuffer size in virtual pixels
-    mx: 0, my: 0,        // parallax margins
+    my: 0,               // vertical parallax margin
     layers: [],
+    byKey: {},
     weather: null,
+    crows: null,
+    traveller: null,
     ready: false,
     reducedMotion: !!opts.reducedMotion,
     rainIntensity: 1,
     // camera
     pointer: 0, pointerY: 0,
-    nav: 0, navTarget: 0,
-    camX: 0, camY: 0,
+    tiltX: 0, tiltY: 0,
+    worldX: 0,
+    scrub: 0,            // manual travel added by wheel/drag/keys
+    worldSpeed: 30,
     running: false,
     lastT: 0,
     clock: 0,
     onReady: opts.onReady || (() => {}),
-    onCamera: opts.onCamera || (() => {}),
   };
 
   /* ------------------------------------------------------------- sizing */
@@ -61,7 +83,6 @@ export function createEngine(canvas, opts = {}) {
     state.scale = scale;
     state.vw = iw;
     state.vh = ih;
-    state.mx = clamp(Math.round(iw * 0.11), 50, 150);
     state.my = Math.max(6, Math.round(ih * 0.03));
 
     canvas.width = iw;
@@ -76,23 +97,38 @@ export function createEngine(canvas, opts = {}) {
   /* ------------------------------------------------------------ building */
 
   function build() {
-    const W = state.vw + state.mx * 2;
     const H = state.vh + state.my * 2;
-    const L = makeLayout(W, H, state.mx, state.my);
+    const sw = state.vw;
+    const layout = (key) => makeLayout(Math.round(sw * TILE[key]), H, sw, state.my);
 
-    const sentinels = buildSentinels(W, H, L, SEED + 400);
+    const skyL = layout('sky');
+    const jotunnL = layout('jotunn');
+    const deepL = layout('deepForest');
+    const sentL = layout('sentinels');
+    const pathL = layout('path');
+    const foreL = layout('foreground');
+
+    const sentinels = buildSentinels(sentL, SEED + 400);
 
     state.layers = [
-      { key: 'sky', factor: DEPTH.sky, ...buildSky(W, H, L, SEED + 100) },
-      { key: 'jotunn', factor: DEPTH.jotunn, ...buildJotunn(W, H, L, SEED + 200) },
-      { key: 'deepForest', factor: DEPTH.deepForest, ...buildDeepForest(W, H, L, SEED + 300) },
-      { key: 'sentinels', factor: DEPTH.sentinels, ...sentinels },
-      { key: 'path', factor: DEPTH.path, ...buildPath(W, H, L, SEED + 500) },
-      { key: 'foreground', factor: DEPTH.foreground, ...buildForeground(W, H, L, SEED + 600) },
+      { key: 'sky', factor: DEPTH.sky, W: skyL.W, ...buildSky(skyL, SEED + 100) },
+      { key: 'jotunn', factor: DEPTH.jotunn, W: jotunnL.W, ...buildJotunn(jotunnL, SEED + 200) },
+      { key: 'deepForest', factor: DEPTH.deepForest, W: deepL.W, ...buildDeepForest(deepL, SEED + 300) },
+      { key: 'sentinels', factor: DEPTH.sentinels, W: sentL.W, ...sentinels },
+      { key: 'path', factor: DEPTH.path, W: pathL.W, ...buildPath(pathL, SEED + 500) },
+      { key: 'foreground', factor: DEPTH.foreground, W: foreL.W, ...buildForeground(foreL, SEED + 600) },
     ];
+    state.byKey = Object.fromEntries(state.layers.map((l) => [l.key, l]));
 
     state.weather = buildWeather(state.vw, state.vh, SEED + 700);
+    state.crows = buildCrows(state.vw, state.vh, pathL, SEED + 800);
+    state.traveller = buildTraveller(state.vh, SEED + 900);
     state.runeColumns = sentinels.columns;
+    state.pathLayout = pathL;
+
+    // the ground must slide past at exactly the traveller's walking pace,
+    // otherwise his feet skate
+    state.worldSpeed = state.traveller.strideSpeed / DEPTH.path;
 
     if (!state.ready) {
       state.ready = true;
@@ -102,6 +138,26 @@ export function createEngine(canvas, opts = {}) {
 
   /* -------------------------------------------------------------- render */
 
+  /** Draw one tiling layer across the viewport, and its live pass per tile. */
+  function drawLayer(layer, t, shared) {
+    const shift = state.worldX * layer.factor + state.tiltX * layer.factor;
+    const oy = Math.round(-state.my + state.tiltY * layer.factor);
+    let x = -(((shift % layer.W) + layer.W) % layer.W);
+    const offsets = [];
+    for (let i = 0; x < state.vw; x += layer.W, i++) {
+      const ox = Math.round(x);
+      ctx.drawImage(layer.canvas, ox, oy);
+      if (layer.over) {
+        // live passes that work in screen space (reflections) need to know
+        // which repeat they are, so they paint once rather than per tile
+        shared.tileIndex = i;
+        layer.over(ctx, t, ox, oy, shared);
+      }
+      offsets.push(ox);
+    }
+    return { offsets, oy };
+  }
+
   function frame(now) {
     if (!state.running) return;
     const dt = Math.min(0.05, (now - state.lastT) / 1000 || 0);
@@ -109,43 +165,63 @@ export function createEngine(canvas, opts = {}) {
     if (!state.reducedMotion) state.clock += dt;
     const t = state.clock;
 
-    // camera easing — frame-rate independent exponential smoothing
-    const damp = state.reducedMotion ? 0.45 : 1 - Math.exp(-dt * 5.5);
-    state.nav += (state.navTarget - state.nav) * (1 - Math.exp(-dt * 4));
+    // the world only travels when motion is welcome
+    if (!state.reducedMotion) state.worldX += state.worldSpeed * dt;
+    state.worldX += state.scrub * dt * 6;
+    state.scrub *= Math.exp(-dt * 3.2);
+
+    // camera tilt — frame-rate independent exponential smoothing
+    const damp = state.reducedMotion ? 0.35 : 1 - Math.exp(-dt * 5.5);
     const tilt = state.reducedMotion ? 0.25 : 1;
-    const targetX = clamp(state.pointer * 0.45 * tilt + state.nav * 0.9, -1, 1) * state.mx;
+    const targetX = state.pointer * tilt * state.vw * 0.06;
     const targetY = clamp(state.pointerY * 0.6 * tilt, -1, 1) * state.my;
-    state.camX += (targetX - state.camX) * damp;
-    state.camY += (targetY - state.camY) * damp;
+    state.tiltX += (targetX - state.tiltX) * damp;
+    state.tiltY += (targetY - state.tiltY) * damp;
 
     const shared = {
       reducedMotion: state.reducedMotion,
       runeColumns: state.runeColumns,
-      sentinelOx: 0,
+      sentinelOffsets: [],
+      sentinelOy: 0,
+      tileIndex: 0,
     };
 
-    // pre-compute the sentinel offset so the water can mirror the runes
-    for (const layer of state.layers) {
-      if (layer.key === 'sentinels') {
-        shared.sentinelOx = Math.round(-state.mx + state.camX * layer.factor);
-      }
-    }
+    /* ---- back to front, with the weather and the birds woven in between -- */
+    drawLayer(state.byKey.sky, t, shared);
+    state.weather.drawRain(ctx, 0, t, dt, state.vw, state.vh, rainOpts());
 
-    for (const layer of state.layers) {
-      const ox = Math.round(-state.mx + state.camX * layer.factor);
-      const oy = Math.round(-state.my + state.camY * layer.factor);
-      ctx.drawImage(layer.canvas, ox, oy);
-      if (layer.over) layer.over(ctx, t, ox, oy, shared);
-    }
+    drawLayer(state.byKey.jotunn, t, shared);
+    drawLayer(state.byKey.deepForest, t, shared);
 
-    state.weather.draw(ctx, t, dt, state.vw, state.vh, {
-      intensity: state.rainIntensity,
-      reducedMotion: state.reducedMotion,
-    });
+    state.crows.draw(ctx, t, dt, state.vw, state.vh, state.reducedMotion, state.worldSpeed);
+    state.weather.drawRain(ctx, 1, t, dt, state.vw, state.vh, rainOpts());
 
-    state.onCamera(state.nav);
+    const sent = drawLayer(state.byKey.sentinels, t, shared);
+    shared.sentinelOffsets = sent.offsets;
+    shared.sentinelOy = sent.oy;
+
+    const path = drawLayer(state.byKey.path, t, shared);
+
+    // the traveller walks on the spot at a fixed point in frame
+    state.traveller.draw(
+      ctx, t,
+      Math.round(state.vw * 0.56),
+      path.oy + state.pathLayout.pathY + state.vh * 0.012,
+      state.reducedMotion,
+    );
+
+    state.weather.drawFog(ctx, t, state.vw, state.vh, state.worldX, state.reducedMotion);
+    drawLayer(state.byKey.foreground, t, shared);
+    state.weather.drawRain(ctx, 2, t, dt, state.vw, state.vh, rainOpts());
+
     requestAnimationFrame(frame);
   }
+
+  const rainOpts = () => ({
+    intensity: state.rainIntensity,
+    reducedMotion: state.reducedMotion,
+    worldSpeed: state.worldSpeed,
+  });
 
   /* -------------------------------------------------------------- input */
 
@@ -158,19 +234,19 @@ export function createEngine(canvas, opts = {}) {
 
   let dragging = false;
   let dragX = 0;
-  let dragStart = 0;
 
   function onDown(e) {
     dragging = true;
     dragX = e.touches ? e.touches[0].clientX : e.clientX;
-    dragStart = state.navTarget;
     canvas.style.cursor = 'grabbing';
   }
   function onMove(e) {
     onPointerMove(e);
     if (!dragging) return;
     const x = e.touches ? e.touches[0].clientX : e.clientX;
-    state.navTarget = clamp(dragStart - ((x - dragX) / window.innerWidth) * 2.2, -1, 1);
+    // dragging left pushes the journey forward
+    state.scrub = clamp(state.scrub + (dragX - x) * 0.6, -400, 400);
+    dragX = x;
     if (e.cancelable) e.preventDefault();
   }
   function onUp() {
@@ -178,17 +254,13 @@ export function createEngine(canvas, opts = {}) {
     canvas.style.cursor = '';
   }
   function onWheel(e) {
-    // vertical wheel drives horizontal travel through the wood
     const d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-    state.navTarget = clamp(state.navTarget + d * 0.0016, -1, 1);
+    state.scrub = clamp(state.scrub + d * 0.5, -400, 400);
     e.preventDefault();
   }
   function onKey(e) {
-    const step = 0.28;
-    if (e.key === 'ArrowRight') state.navTarget = clamp(state.navTarget + step, -1, 1);
-    else if (e.key === 'ArrowLeft') state.navTarget = clamp(state.navTarget - step, -1, 1);
-    else if (e.key === 'Home') state.navTarget = -1;
-    else if (e.key === 'End') state.navTarget = 1;
+    if (e.key === 'ArrowRight') state.scrub = clamp(state.scrub + 90, -400, 400);
+    else if (e.key === 'ArrowLeft') state.scrub = clamp(state.scrub - 90, -400, 400);
     else return;
     e.preventDefault();
   }
@@ -229,10 +301,6 @@ export function createEngine(canvas, opts = {}) {
       state.running = true;
       state.lastT = performance.now();
       requestAnimationFrame(frame);
-    },
-    /** Move the camera to a normalised position in [-1, 1]. */
-    panTo(n) {
-      state.navTarget = clamp(n, -1, 1);
     },
     setRain(v) {
       state.rainIntensity = clamp(v, 0, 1);

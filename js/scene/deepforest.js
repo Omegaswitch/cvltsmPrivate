@@ -1,82 +1,82 @@
 /**
  * LAYER 2 — Deep fog & cultists.  Parallax 0.25
  *
- * Background tree silhouettes smothered in low drifting mist. On the far
- * left a procession of hooded cultists carries torches through the fog,
- * moving slowly enough that you only notice them on second look.
+ * Background tree silhouettes smothered in low drifting mist, generated as a
+ * tiling strip. A procession of hooded cultists carries torches through the
+ * fog; because the live pass runs once per visible tile, they come round again
+ * further along the road.
  */
-import { makeRng, fbm2d } from '../lib/rng.js';
+import { makeRng, fbm2dTiling } from '../lib/rng.js';
 import {
-  surface, rect, hline, vline, px, line, fillPoly, mix, clamp, glow,
-  hexToRgb, shadeRegion,
+  surface, rect, hline, vline, px, line, fillPoly, wrapX,
+  mix, clamp, glow, hexToRgb, shadeRegion,
 } from '../lib/paint.js';
 import { PAL } from '../palette.js';
 import { drawForestBand } from './trees.js';
 
-export function buildDeepForest(W, H, L, seed) {
+export function buildDeepForest(L, seed) {
+  const { W, H } = L;
   const rng = makeRng(seed);
   const s = surface(W, H);
   const c = s.ctx;
 
   /* ------------------------------------------------- three receding bands */
   drawForestBand(c, {
-    x0: -10, x1: W + 10, baseY: L.treeBase - H * 0.015,
-    minH: H * 0.16, maxH: H * 0.30,
+    W, baseY: L.treeBase - L.vh * 0.015,
+    minH: L.vh * 0.14, maxH: L.vh * 0.26,
     color: mix(PAL.voidSoft, PAL.mist, 0.42),
     snowColor: mix(PAL.frostDeep, PAL.mist, 0.4), snowAmount: 0.10,
-    rng, step: H * 0.030,
+    rng, step: L.vh * 0.030,
   });
-  veil(c, W, H, L.horizon - H * 0.10, H * 0.34, PAL.mist, 0.24, rng);
+  veil(c, W, L.horizon - L.vh * 0.10, L.vh * 0.34, PAL.mist, 0.24);
 
   drawForestBand(c, {
-    x0: -10, x1: W + 10, baseY: L.treeBase + H * 0.012,
-    minH: H * 0.22, maxH: H * 0.42,
+    W, baseY: L.treeBase + L.vh * 0.012,
+    minH: L.vh * 0.18, maxH: L.vh * 0.34,
     color: mix(PAL.voidSoft, PAL.mist, 0.20),
     snowColor: mix(PAL.frostDeep, PAL.mist, 0.25), snowAmount: 0.14,
-    rng, step: H * 0.042, gaps: [{ x: L.vx(0.575), w: L.vw * 0.13, amount: 0.45 },
-      { x: L.vx(0.745), w: L.vw * 0.075, amount: 0.38 }],
+    rng, step: L.vh * 0.042,
   });
-  veil(c, W, H, L.horizon - H * 0.04, H * 0.30, PAL.mist, 0.15, rng);
+  veil(c, W, L.horizon - L.vh * 0.04, L.vh * 0.30, PAL.mist, 0.15);
 
   drawForestBand(c, {
-    x0: -10, x1: W + 10, baseY: L.treeBase + H * 0.045,
-    minH: H * 0.30, maxH: H * 0.54,
+    W, baseY: L.treeBase + L.vh * 0.045,
+    minH: L.vh * 0.24, maxH: L.vh * 0.40,
     color: mix(PAL.voidBlack, PAL.mist, 0.13),
     snowColor: mix(PAL.frostDeep, PAL.voidSoft, 0.2), snowAmount: 0.16,
-    rng, step: H * 0.055, gaps: [{ x: L.vx(0.575), w: L.vw * 0.11, amount: 0.40 },
-      { x: L.vx(0.745), w: L.vw * 0.06, amount: 0.30 }],
+    rng, step: L.vh * 0.055,
   });
 
   /* -------------------------------- scattered bare trunks between the pines */
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < Math.round(W / 40); i++) {
     const x = rng.range(0, W);
-    const h = rng.range(H * 0.25, H * 0.5);
+    const h = rng.range(L.vh * 0.25, L.vh * 0.5);
     const w = Math.max(1, Math.round(rng.range(1, 3)));
     const col = mix(PAL.voidBlack, PAL.mist, rng.range(0.08, 0.22));
-    rect(c, x, L.treeBase + H * 0.05 - h, w, h, col);
+    wrapX(W, x, w + 2, (sx) => rect(c, sx, L.treeBase + L.vh * 0.05 - h, w, h, col));
   }
 
   /* ---------------------------------------- ground haze pooled at the base */
   const mistRgb = hexToRgb(PAL.mist);
-  const n = fbm2d(rng, 40, 3);
-  shadeRegion(c, 0, Math.round(L.treeBase - H * 0.10), W, Math.round(H * 0.22), (x, y) => {
-    const t = clamp((y - (L.treeBase - H * 0.10)) / (H * 0.14), 0, 1);
-    const v = n(x, y * 2.5);
-    return [mistRgb[0], mistRgb[1], mistRgb[2], clamp(t * 135 * (0.5 + v * 0.9), 0, 150)];
+  const n = fbm2dTiling(rng, W, 40, 3);
+  const hazeTop = Math.round(L.treeBase - L.vh * 0.10);
+  shadeRegion(c, 0, hazeTop, W, Math.round(L.vh * 0.22), (x, y) => {
+    const t = clamp((y - hazeTop) / (L.vh * 0.14), 0, 1);
+    return [mistRgb[0], mistRgb[1], mistRgb[2], clamp(t * 135 * (0.5 + n(x, y * 2.5) * 0.9), 0, 150)];
   });
 
   /* ------------------------------------------------- drifting mist ribbons */
   const ribbons = [
-    makeMistStrip(W, Math.round(H * 0.16), seed + 11, PAL.mist, 0.55),
-    makeMistStrip(W, Math.round(H * 0.11), seed + 29, PAL.mistPale, 0.34),
+    makeMistStrip(W, Math.round(L.vh * 0.16), seed + 11, PAL.mist, 0.55),
+    makeMistStrip(W, Math.round(L.vh * 0.11), seed + 29, PAL.mistPale, 0.34),
   ];
   const ribbonY = [
-    Math.round(L.treeBase - H * 0.10),
-    Math.round(L.treeBase - H * 0.02),
+    Math.round(L.treeBase - L.vh * 0.10),
+    Math.round(L.treeBase - L.vh * 0.02),
   ];
 
   /* ------------------------------------------------------ the procession */
-  const proc = makeProcession(rng, L.vw, L.vh, L);
+  const proc = makeProcession(rng, L);
 
   return {
     canvas: s.canvas,
@@ -100,7 +100,7 @@ export function buildDeepForest(W, H, L, seed) {
 }
 
 /** Flat translucent wash used to push a band of trees into the distance. */
-function veil(c, W, H, y, h, col, alpha, rng) {
+function veil(c, W, y, h, col, alpha) {
   const rgb = hexToRgb(col);
   shadeRegion(c, 0, Math.round(y), W, Math.round(h), (x, iy) => {
     const t = clamp((iy - y) / h, 0, 1);
@@ -112,28 +112,22 @@ function veil(c, W, H, y, h, col, alpha, rng) {
 function makeMistStrip(W, H, seed, col, alpha) {
   const rng = makeRng(seed);
   const s = surface(W, H);
-  const n = fbm2d(rng, 56, 3);
+  const n = fbm2dTiling(rng, W, 56, 3);
   const rgb = hexToRgb(col);
   shadeRegion(s.ctx, 0, 0, W, H, (x, y) => {
-    // fade the seam so the wrap is invisible
-    const seam = Math.min(1, Math.min(x, W - x) / (W * 0.12));
     const vert = Math.sin((y / H) * Math.PI);
-    const v = n(x, y * 3.2);
-    const a = clamp((v - 0.42) * 2.4, 0, 1) * vert * seam * alpha * 255;
-    if (a < 3) return null;
-    return [rgb[0], rgb[1], rgb[2], a];
+    const a = clamp((n(x, y * 3.2) - 0.42) * 2.4, 0, 1) * vert * alpha * 255;
+    return a < 3 ? null : [rgb[0], rgb[1], rgb[2], a];
   });
   return s.canvas;
 }
 
 /* ----------------------------------------------------------- cultists */
 
-function makeProcession(rng, W, H, L) {
-  const scale = clamp(H / 360, 0.7, 2.2);
-  const unit = Math.max(9, Math.round(H * 0.036));
+function makeProcession(rng, L) {
+  const unit = Math.max(9, Math.round(L.vh * 0.036));
   const members = [];
-  const count = 4;
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < 4; i++) {
     members.push({
       offset: i * unit * rng.range(1.1, 1.8),
       height: unit * rng.range(0.85, 1.12),
@@ -147,24 +141,20 @@ function makeProcession(rng, W, H, L) {
   return {
     members,
     banner: { offset: -unit * 1.6, height: unit * 2.5 },
-    startX: L.vx(0.185),
-    span: W * 0.085,
-    baseY: L.treeBase + H * 0.05,
+    startX: L.tx(0.12),
+    span: L.sw * 0.09,
+    baseY: L.treeBase + L.vh * 0.05,
     unit,
-    scale,
   };
 }
 
 function drawProcession(ctx, p, t, ox, oy) {
   // the group creeps forward and loops, so they are always "arriving"
-  const march = ((t * 1.35) % p.span);
-  const gx = p.startX + march;
+  const gx = p.startX + ((t * 1.35) % p.span);
 
-  // banner pole
   const b = p.banner;
-  const bx = Math.round(ox + gx + b.offset);
-  const by = Math.round(oy + p.baseY - Math.sin(t * 1.1) * 0.6);
-  drawBanner(ctx, bx, by, b.height, t);
+  drawBanner(ctx, Math.round(ox + gx + b.offset),
+    Math.round(oy + p.baseY - Math.sin(t * 1.1) * 0.6), b.height, t);
 
   for (const m of p.members) {
     const x = Math.round(ox + gx + m.offset);
@@ -172,9 +162,8 @@ function drawProcession(ctx, p, t, ox, oy) {
     const y = Math.round(oy + p.baseY + Math.sin(walk * 2) * 0.5 * m.bob);
     drawCultist(ctx, x, y, m.height, walk, m.horned);
     if (m.torch) {
-      const tx = x + Math.round(m.height * 0.42);
-      const ty = y - Math.round(m.height * 0.92);
-      drawTorch(ctx, tx, ty, m.height, t * 9 * m.flick + m.phase);
+      drawTorch(ctx, x + Math.round(m.height * 0.42), y - Math.round(m.height * 0.92),
+        m.height, t * 9 * m.flick + m.phase);
     }
   }
 }
@@ -183,7 +172,6 @@ function drawCultist(c, x, y, h, walk, horned) {
   const body = mix(PAL.voidBlack, PAL.mist, 0.06);
   const hw = Math.max(1, h * 0.16);
 
-  // cloak
   fillPoly(c, [
     [x - hw * 0.7, y - h * 0.78],
     [x + hw * 0.7, y - h * 0.78],
@@ -191,7 +179,6 @@ function drawCultist(c, x, y, h, walk, horned) {
     [x - hw * 1.5, y],
   ], body);
 
-  // hood
   fillPoly(c, [
     [x - hw * 0.55, y - h * 0.72],
     [x, y - h],
@@ -199,14 +186,12 @@ function drawCultist(c, x, y, h, walk, horned) {
   ], body);
 
   if (horned) {
-    // curved horns / antler stubs on the helm
     line(c, x - hw * 0.4, y - h * 0.95, x - hw * 1.5, y - h * 1.25, body, 1);
     line(c, x - hw * 1.5, y - h * 1.25, x - hw * 1.2, y - h * 1.42, body, 1);
     line(c, x + hw * 0.4, y - h * 0.95, x + hw * 1.5, y - h * 1.25, body, 1);
     line(c, x + hw * 1.5, y - h * 1.25, x + hw * 1.2, y - h * 1.42, body, 1);
   }
 
-  // legs emerging from under the hem
   const swing = Math.sin(walk) * hw * 0.7;
   line(c, x - hw * 0.2, y - h * 0.1, x - hw * 0.2 + swing, y + h * 0.06, body, 1);
   line(c, x + hw * 0.2, y - h * 0.1, x + hw * 0.2 - swing, y + h * 0.06, body, 1);
@@ -220,7 +205,6 @@ function drawTorch(c, x, y, h, flick) {
   const size = Math.max(1, h * 0.14 * (0.75 + f * 0.5));
   glow(c, x, y, size * 11, PAL.crimsonDim, 0.38 + f * 0.24);
   glow(c, x, y, size * 4.5, PAL.amber, 0.55 + f * 0.35);
-  // flame core
   rect(c, x, y, Math.max(1, size * 0.8), Math.max(1, size * 1.3), PAL.amber);
   px(c, x, y - 1, PAL.amberPale);
   px(c, x + (f > 0.8 ? 1 : 0), y - 2, PAL.crimson);
@@ -236,9 +220,9 @@ function drawBanner(c, x, y, h, t) {
   const len = h * 0.55;
   for (let i = 0; i < len; i++) {
     const sway = Math.sin(t * 1.1 + i * 0.22) * (i / len) * 1.6;
-    const shade1 = i / len;
     const col = mix(PAL.crimsonDeep, PAL.crimsonDim, 0.25 + Math.sin(i * 0.5) * 0.15);
-    hline(c, x + 1 + sway, x + w + sway, top + i, shade1 > 0.85 ? mix(col, PAL.voidBlack, 0.4) : col);
+    hline(c, x + 1 + sway, x + w + sway, top + i,
+      i / len > 0.85 ? mix(col, PAL.voidBlack, 0.4) : col);
     if (i % 7 === 3) px(c, x + w * 0.5 + sway, top + i, PAL.crimson);
   }
 }

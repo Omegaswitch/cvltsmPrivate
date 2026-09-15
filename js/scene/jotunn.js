@@ -5,6 +5,10 @@
  * a flat silhouette one step lighter than true black so it separates from the
  * void; only the eyes carry colour. They idle, flare, narrow and settle on a
  * ~17 second cycle.
+ *
+ * It sits alone on a narrow tile, so as the wood streams past it drifts out of
+ * frame and, a while later, is standing there again — always somewhere behind
+ * you.
  */
 import { makeRng } from '../lib/rng.js';
 import { surface, rect, vline, px, line, fillPoly, mix, clamp, lerp, glow, bayer } from '../lib/paint.js';
@@ -12,14 +16,15 @@ import { PAL } from '../palette.js';
 
 const CYCLE = 17.5; // seconds between flares
 
-export function buildJotunn(W, H, L, seed) {
+export function buildJotunn(L, seed) {
+  const { W, H } = L;
   const rng = makeRng(seed);
   const s = surface(W, H);
   const c = s.ctx;
 
-  const cx = Math.round(L.vx(0.575));
+  const cx = Math.round(L.tx(0.46));
   const headY = Math.round(L.vy(0.145));
-  const headW = Math.max(11, Math.round(L.vw * 0.040));
+  const headW = Math.max(11, Math.round(L.sw * 0.046));
   const headH = Math.round(headW * 1.45);
   const bodyTop = headY + headH;
   const bodyBottom = L.horizon + L.vh * 0.03;

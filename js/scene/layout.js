@@ -1,18 +1,21 @@
 /**
  * Shared scene anchors.
  *
- * Layer canvases are wider and taller than the viewport by a parallax margin,
- * so raw canvas coordinates are misleading: x = 0.9 * W sits out in the margin
- * and is never on screen at rest. `vx`/`vy` map a 0..1 position within the
- * *visible* frame to layer coordinates, which is what composition needs.
+ * The world scrolls right to left forever, so every layer canvas is a
+ * horizontally *tiling* strip, wider than the viewport, drawn repeatedly at a
+ * wrapping offset. Two different widths matter and must not be confused:
+ *
+ *   L.W   tile width  — where things are PLACED  (use L.tx)
+ *   L.sw  screen width — how big things ARE      (use for sizing)
+ *
+ * Sizing off the tile width would make everything twice as large as intended.
  */
-export function makeLayout(W, H, mx = 0, my = 0) {
-  const vw = W - mx * 2;
+export function makeLayout(W, H, sw, my) {
   const vh = H - my * 2;
   return {
-    W, H, mx, my, vw, vh,
-    /** 0..1 across the visible frame -> layer x */
-    vx: (t) => mx + t * vw,
+    W, H, sw, my, vh,
+    /** 0..1 across the tile -> layer x (placement) */
+    tx: (t) => t * W,
     /** 0..1 down the visible frame -> layer y */
     vy: (t) => my + t * vh,
 
