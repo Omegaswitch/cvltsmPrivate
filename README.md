@@ -41,12 +41,15 @@ without ever shutting; and every one carries a pair of glowing red eyes.
 Torch-bearers pool light on the road; the rest are lit only by what leaks out
 of their own eyes.
 
-Deeper in, a **rite** is under way — a pyre, a standing stone cut with a red
-mark, hooded figures bowed around it and skull-topped stakes. Its firelight is
-baked into the layer *behind* the congregation so they read as silhouettes;
-only the flame itself is live. **Dead men lashed to poles** stand along the
-treeline. Both are baked into the tiling strip, so they come round every time
-the tile does rather than on a timer.
+Deeper in, a small **rite** burns between the trunks — a pyre, a standing
+stone cut with a red mark, hooded figures bowed around it and skull-topped
+stakes. It is deliberately small and low, standing on the forest floor of its
+own layer, so it is glimpsed between trees rather than staged. Its firelight
+is baked into the layer *behind* the congregation so they read as silhouettes;
+only the flame is live. **Dead men lashed to poles** are scattered through the
+trees, each at its own depth — so they vary in height and size rather than
+lining up at one level like a fence. Both are baked into the tiling strip, so
+they come round every time the tile does rather than on a timer.
 
 Fog is **not** an overlay: it is split into three depth bands drawn at three
 different points in the layer order — a high haze banked behind the treeline,
@@ -179,6 +182,32 @@ that can make a sound.
 - The canvas is promoted to its own compositor layer so its per-frame repaint
   never drags the interface into a repaint with it.
 
+## The walk
+
+`js/scene/gait.js` holds the cycle, built on the four standard key poses
+rather than a foot swung around an ellipse:
+
+| Pose | What happens |
+|------|--------------|
+| Contact | the foot reaches the ground, legs at full split |
+| Down | the body drops accepting the weight — hips at their **lowest** |
+| Passing | the free leg passes under the body |
+| Up | the body rises onto the ball of the foot — hips at their **highest** |
+
+Three details that are easy to get wrong and obvious once wrong: the hips
+oscillate twice per stride, lowest a quarter-step *after* contact rather than
+at it; the arms swing opposite their own leg and reach full stretch at the
+down pose, not at contact; and the knee comes from two-bone IK with fixed
+bone lengths, so the leg straightens at contact and folds through the swing
+instead of stretching to reach — that last one is the single biggest reason a
+walk reads as a puppet. Stride length is tuned so ground travel per cycle
+matches the world's scroll speed and the feet do not skate.
+
+References:
+[Walk cycle](https://en.wikipedia.org/wiki/Walk_cycle),
+[The poses: contact, down, passing and high point](https://www.linkedin.com/learning/2d-animation-walk-cycles-basics/the-poses-contact-down-passing-and-high-point),
+[Walk cycle animation blueprint](https://rustyanimator.com/walk-cycle-animation/).
+
 ## Texture
 
 Snow on the trees is placed as a few short contiguous **caps** along the upper
@@ -216,7 +245,7 @@ js/palette.js       the scene palette and depth factors
 js/runes.js         rune glyph bitmaps
 js/lib/rng.js       seeded PRNG, value noise, tiling fBm, ridgelines
 js/lib/paint.js     integer-snapped pixel primitives, seam wrapping
-js/scene/*.js       one module per layer, plus trees, crows, the
+js/scene/*.js       one module per layer, plus trees, crows, gait, the
                     traveller and the pack chasing him
 ```
 

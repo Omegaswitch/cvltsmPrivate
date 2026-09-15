@@ -14,7 +14,7 @@
 import { makeRng, fbm2dTiling } from '../lib/rng.js';
 import {
   surface, rect, hline, vline, px, line, fillPoly, disc, wrapX,
-  mix, shade, clamp, glow, hexToRgb, shadeRegion,
+  mix, shade, clamp, lerp, glow, hexToRgb, shadeRegion,
 } from '../lib/paint.js';
 import { PAL } from '../palette.js';
 import { drawForestBand, drawPine } from './trees.js';
@@ -80,14 +80,22 @@ export function buildDeepForest(L, seed) {
 
   /* ------------------------------------------ the rite, and what it leaves */
   const fires = [];
-  wrapX(W, L.tx(0.255), L.sw * 0.14, (x) => {
-    fires.push(drawRitualSite(c, makeRng(seed + 51), x, L.treeBase - L.vh * 0.045, L));
+  wrapX(W, L.tx(0.255), L.sw * 0.07, (x) => {
+    fires.push(drawRitualSite(c, makeRng(seed + 51), x, L.treeBase + L.vh * 0.012, L));
   });
 
-  for (const t of [0.075, 0.33, 0.47, 0.66, 0.885]) {
+  // scattered, and each at its own depth: fixed spacing at one height made a
+  // row of them, which reads as a fence rather than as bodies left in a wood
+  const poles = Math.max(3, Math.round(W / 230));
+  for (let i = 0; i < poles; i++) {
+    const px0 = rng.range(0, W);
+    const depth = rng();                          // 0 deep in the trees, 1 near
+    const baseY = L.treeBase + lerp(-L.vh * 0.030, L.vh * 0.028, depth);
+    const h = L.vh * lerp(0.048, 0.088, depth);
+    const lean = rng.signed(0.14);
     const sd = Math.floor(rng() * 0xffffff);
-    wrapX(W, L.tx(t), L.vh * 0.14, (x) => {
-      drawSkeletonPole(c, makeRng(sd), x, L.treeBase - L.vh * 0.018, L);
+    wrapX(W, px0, h + L.vh * 0.04, (sx) => {
+      drawSkeletonPole(c, makeRng(sd), sx, baseY, h, lean);
     });
   }
 
@@ -166,7 +174,7 @@ function makeMistStrip(W, H, seed, col, alpha) {
  * baked; the flame is painted live so it flickers.
  */
 function drawRitualSite(c, rng, x, baseY, L) {
-  const unit = Math.max(12, Math.round(L.vh * 0.052));
+  const unit = Math.max(7, Math.round(L.vh * 0.026));
   const body = mix(PAL.voidBlack, PAL.mist, 0.07);
   const wood = mix(PAL.voidBlack, PAL.bark, 0.5);
 
@@ -174,8 +182,8 @@ function drawRitualSite(c, rng, x, baseY, L) {
    * Painted live it would composite OVER the congregation and wash them out;
    * behind them it does the one job that matters here — turning them into
    * readable silhouettes. Only the flame itself is live. */
-  glow(c, x, baseY - unit * 1.1, unit * 9.5, PAL.crimsonDim, 0.55);
-  glow(c, x, baseY - unit * 0.8, unit * 4.2, PAL.amberDeep, 0.5);
+  glow(c, x, baseY - unit * 1.1, unit * 7.5, PAL.crimsonDim, 0.45);
+  glow(c, x, baseY - unit * 0.8, unit * 3.4, PAL.amberDeep, 0.42);
 
   /* scorched ground */
   const burnW = unit * 2.8;
@@ -186,7 +194,7 @@ function drawRitualSite(c, rng, x, baseY, L) {
   }
 
   /* the standing stone behind it */
-  const stoneH = unit * 3.1;
+  const stoneH = unit * 2.3;
   const stoneW = Math.max(3, Math.round(unit * 0.5));
   fillPoly(c, [
     [x - stoneW * 0.5, baseY - stoneH],
@@ -210,7 +218,7 @@ function drawRitualSite(c, rng, x, baseY, L) {
   /* the congregation, bowed toward it */
   for (const spot of [-2.75, -1.95, -1.2, 1.15, 1.9, 2.7]) {
     const fx = x + spot * unit;
-    const h = unit * rng.range(2.0, 2.6);
+    const h = unit * rng.range(1.2, 1.6);
     drawWorshipper(c, fx, baseY + rng.signed(1.5), h, rng.chance(0.5), spot < 0 ? 1 : -1, body);
   }
 
@@ -254,13 +262,12 @@ function drawWorshipper(c, x, y, h, kneeling, face, body) {
 
 /** A stake with a skull set on top of it. */
 function drawSkullStake(c, rng, x, baseY, unit, body) {
-  const h = unit * rng.range(1.5, 2.0);
+  const h = unit * rng.range(1.3, 1.8);
   rect(c, x, baseY - h, 2, h, body);
   const bone = mix(shade(mix(PAL.frostMid, '#b3ab97', 0.5), -0.38), PAL.mist, 0.18);
-  rect(c, x - 1, baseY - h - 4, 4, 4, bone);
-  px(c, x - 1, baseY - h - 3, PAL.voidBlack);
-  px(c, x + 2, baseY - h - 3, PAL.voidBlack);
-  hline(c, x - 1, x + 2, baseY - h - 1, shade(bone, -0.5));
+  rect(c, x - 1, baseY - h - 3, 3, 3, bone);
+  px(c, x - 1, baseY - h - 2, PAL.voidBlack);
+  px(c, x + 1, baseY - h - 2, PAL.voidBlack);
 }
 
 /**
@@ -268,22 +275,26 @@ function drawSkullStake(c, rng, x, baseY, unit, body) {
  * kept dim and mixed toward the mist so it sits back in the trees instead of
  * jumping forward as the brightest thing in the frame.
  */
-function drawSkeletonPole(c, rng, x, baseY, L) {
-  const h = L.vh * rng.range(0.115, 0.155);
+function drawSkeletonPole(c, rng, x, baseY, h, lean) {
+  const tilt = (dy) => Math.round(dy * lean);     // the stake is not plumb
   const bone = mix(shade(mix(PAL.frostMid, '#b3ab97', 0.5), -0.36), PAL.mist, 0.16);
   const boneDim = shade(bone, -0.4);
   const wood = mix(PAL.voidBlack, PAL.bark, 0.45);
   const rope = mix(PAL.barkMid, PAL.voidBlack, 0.35);
 
-  /* the stake, and the crossbar the arms hang from */
-  vline(c, x, baseY - h, baseY, wood);
-  vline(c, x + 1, baseY - h, baseY, shade(wood, -0.45));
+  /* the stake, leaning a little, and the crossbar the arms hang from */
+  for (let dy = 0; dy <= h; dy++) {
+    const sx = x + tilt(h - dy);
+    px(c, sx, baseY - dy, wood);
+    px(c, sx + 1, baseY - dy, shade(wood, -0.45));
+  }
+  x += tilt(h * 0.8);
   const armY = Math.round(baseY - h * 0.80);
-  const arm = Math.round(h * 0.24);
+  const arm = Math.max(2, Math.round(h * 0.24));
   hline(c, x - arm, x + arm + 1, armY, wood);
 
   /* skull, slumped forward */
-  const skullY = Math.round(baseY - h * 0.94);
+  const skullY = Math.round(baseY - h * 0.94) + tilt(-h * 0.14);
   rect(c, x - 1, skullY, 3, 3, bone);
   px(c, x - 1, skullY + 1, PAL.voidBlack);
   px(c, x + 1, skullY + 1, PAL.voidBlack);

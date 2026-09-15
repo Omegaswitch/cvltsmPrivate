@@ -6,8 +6,9 @@
  * the sprite scale with the viewport's pixel unit. The sheet is a real
  * spritesheet: the path layer blits a single source rect per frame.
  */
-import { surface, rect, px, line, fillPoly, disc, hline, mix, lerp } from '../lib/paint.js';
+import { surface, rect, px, line, fillPoly, disc, hline, mix } from '../lib/paint.js';
 import { PAL } from '../palette.js';
+import { hipBob, footReach, footLift, armSwing, joint } from './gait.js';
 
 export const FRAME_COUNT = 8;
 
@@ -49,10 +50,12 @@ export function buildRunner(bodyHeight) {
 
 /** One pose of the cycle. Origin (ox, oy) is the ground contact point. */
 function drawFrame(c, ox, oy, u, phase) {
-  const bob = Math.sin(phase * 2) * u * 0.7;        // two bounces per stride
+  // hips drop a quarter-step after each contact and rise before the next
+  const bob = hipBob(phase) * u * 0.85;
   const hipY = oy - u * 8 + bob;
   const shoulderY = oy - u * 15 + bob;
-  const lean = u * 0.9;                             // forward pitch of the torso
+  // the torso pitches forward slightly as the body rises over the front foot
+  const lean = u * (0.9 - hipBob(phase) * 0.35);
 
   const rimLit = mix(CLOAK, PAL.amber, 0.30);       // lantern side
   const rimCold = mix(CLOAK, PAL.frostMid, 0.18);   // moon side
@@ -62,7 +65,7 @@ function drawFrame(c, ox, oy, u, phase) {
   drawLeg(c, ox, hipY, u, phase + Math.PI, mix(CLOAK_DARK, CLOAK, 0.6));
 
   /* --------------------------------------------------- trailing cloak */
-  const flap = Math.sin(phase * 2 + 0.6);
+  const flap = Math.sin(phase * 2 + 0.9);
   fillPoly(c, [
     [ox - u * 1.2, shoulderY + u * 1.2],
     [ox - u * 5.5 - flap * u * 1.6, shoulderY + u * 3.5 + flap * u],
@@ -82,14 +85,19 @@ function drawFrame(c, ox, oy, u, phase) {
   hline(c, ox - u * 2.9, ox + u * 2.8, hipY + u * 2.6, CLOAK_DARK);
 
   /* --------------------------------------------------------------- arms */
-  // rear arm swings back
-  const backSwing = Math.sin(phase + Math.PI) * u * 1.6;
-  line(c, ox - u * 0.6 + lean, shoulderY + u * 1.2,
-    ox - u * 2.6 + backSwing, shoulderY + u * 4.2, CLOAK_DARK, Math.max(1, Math.round(u * 1.4)));
+  // The free arm swings opposite its own leg and is at full stretch at the
+  // down pose, not at contact. Elbow comes from the same IK as the knees.
+  const shx = ox - u * 0.6 + lean;
+  const shy = shoulderY + u * 1.2;
+  const handX = shx + armSwing(phase) * u * 2.3 - u * 1.5;
+  const handY = shy + u * 3.6;
+  const elbow = joint(shx, shy, handX, handY, u * 2.1, u * 2.0, -1);
+  line(c, shx, shy, elbow.x, elbow.y, CLOAK_DARK, Math.max(1, Math.round(u * 1.4)));
+  line(c, elbow.x, elbow.y, handX, handY, CLOAK_DARK, Math.max(1, Math.round(u * 1.2)));
 
   // lantern arm reaches forward and down, barely swinging so the light is steady
   const hx = ox + u * 5.6;
-  const hy = shoulderY + u * 4.5 + Math.sin(phase * 2) * u * 0.35;
+  const hy = shoulderY + u * 4.5 + hipBob(phase) * u * 0.3;
   line(c, ox + u * 1.4 + lean, shoulderY + u * 1.2, ox + u * 3.4, shoulderY + u * 3,
     CLOAK, Math.max(1, Math.round(u * 1.4)));
   line(c, ox + u * 3.4, shoulderY + u * 3, hx, hy, CLOAK, Math.max(1, Math.round(u * 1.2)));
@@ -119,20 +127,19 @@ function drawFrame(c, ox, oy, u, phase) {
 }
 
 function drawLeg(c, ox, hipY, u, phase, col) {
-  // Foot traces an ellipse; the knee is the bend between hip and foot.
-  // fx travels forward while sin(phase) < 0, so the foot must lift on -sin —
-  // keying the lift off +sin plants it on the forward stroke and the walk
-  // reads as moonwalking.
-  const fx = ox + Math.cos(phase) * u * 3.6;
-  const lift = Math.max(0, -Math.sin(phase)) * u * 3.2;
-  const fy = hipY + u * 7.4 - lift;
-  const kx = lerp(ox, fx, 0.45) + u * 1.1;
-  const ky = lerp(hipY, fy, 0.5);
+  const fx = ox + footReach(phase) * u * 3.5;
+  const fy = hipY + u * 7.4 - footLift(phase) * u * 3.0;
+
+  // fixed bone lengths with the knee folding forward: the leg straightens at
+  // contact and folds through the swing instead of stretching to reach
+  const knee = joint(ox, hipY, fx, fy, u * 4.25, u * 4.1, 1);
   const th = Math.max(1, Math.round(u * 1.5));
-  line(c, ox, hipY, kx, ky, col, th);
-  line(c, kx, ky, fx, fy, col, Math.max(1, th - 1));
-  // boot
-  rect(c, fx - u * 0.8, fy - u * 0.4, u * 2.2, u * 1.2, BOOT);
+  line(c, ox, hipY, knee.x, knee.y, col, th);
+  line(c, knee.x, knee.y, fx, fy, col, Math.max(1, th - 1));
+
+  // the foot rolls: flat through stance, toe down at push off
+  const toe = footReach(phase) < -0.45 ? u * 0.3 : 0;
+  rect(c, fx - u * 0.8, fy - u * 0.4 + toe, u * 2.2, u * 1.2, BOOT);
 }
 
 function drawLantern(c, x, y, u) {

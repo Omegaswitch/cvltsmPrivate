@@ -19,6 +19,7 @@
 import { makeRng } from '../lib/rng.js';
 import { rect, px, line, fillPoly, disc, mix, glow, glowEllipse } from '../lib/paint.js';
 import { PAL } from '../palette.js';
+import { hipBob, footReach, footLift, armSwing, joint } from './gait.js';
 
 const TAU = Math.PI * 2;
 
@@ -166,7 +167,7 @@ function embers(c, x, y, u, strength) {
 
 function drawCultistRunner(c, x, y, h, gait) {
   const u = h / 20;
-  const bob = Math.sin(gait * 2) * u * 0.7;
+  const bob = hipBob(gait) * u * 0.8;
   const hipY = y - u * 8 + bob;
   const shoulderY = y - u * 15 + bob;
   const lean = u * 1.1;
@@ -191,12 +192,18 @@ function drawCultistRunner(c, x, y, h, gait) {
   ], ROBE);
   disc(c, x + u * 0.3 + lean, shoulderY - u * 1.4, u * 1.7, ROBE);
 
-  const reach = Math.sin(gait) * u * 1.4;
-  line(c, x + u * 1.2 + lean, shoulderY + u * 1.4,
-    x + u * 4.4 + reach, shoulderY + u * 0.6, ROBE, Math.max(1, Math.round(u * 1.2)));
+  // reaching arm: opposite its own leg, widest at the down pose
+  const reach = armSwing(gait + Math.PI) * u * 1.5;
+  const shx = x + u * 1.2 + lean;
+  const shy = shoulderY + u * 1.4;
+  const hx = x + u * 4.4 + reach;
+  const hy = shoulderY + u * 0.6;
+  const elbow = joint(shx, shy, hx, hy, u * 1.8, u * 1.7, 1);
+  line(c, shx, shy, elbow.x, elbow.y, ROBE, Math.max(1, Math.round(u * 1.3)));
+  line(c, elbow.x, elbow.y, hx, hy, ROBE, Math.max(1, Math.round(u * 1.1)));
 
   // torch haft; the flame is painted in a later pass
-  line(c, x + u * 4.4 + reach, shoulderY + u * 0.6, x + u * 5.4, shoulderY - u * 1.6,
+  line(c, hx, hy, x + u * 5.4, shoulderY - u * 1.6,
     mix(PAL.voidBlack, PAL.bark, 0.45), 1);
 }
 
@@ -317,14 +324,12 @@ function drawHunched(c, x, y, h, gait) {
 /* ----------------------------------------------------------- shared bits */
 
 function leg(c, x, hipY, u, phase, col) {
-  // lift on the forward stroke (-sin), not the backward one — see villager.js
-  const fx = x + Math.cos(phase) * u * 3.6;
-  const fy = hipY + u * 7.4 - Math.max(0, -Math.sin(phase)) * u * 3.2;
-  const kx = x + (fx - x) * 0.45 + u * 1.1;
-  const ky = hipY + (fy - hipY) * 0.5;
+  const fx = x + footReach(phase) * u * 3.5;
+  const fy = hipY + u * 7.4 - footLift(phase) * u * 3.0;
+  const knee = joint(x, hipY, fx, fy, u * 4.25, u * 4.1, 1);
   const th = Math.max(1, Math.round(u * 1.5));
-  line(c, x, hipY, kx, ky, col, th);
-  line(c, kx, ky, fx, fy, col, Math.max(1, th - 1));
+  line(c, x, hipY, knee.x, knee.y, col, th);
+  line(c, knee.x, knee.y, fx, fy, col, Math.max(1, th - 1));
   rect(c, fx - u * 0.8, fy - u * 0.4, u * 2.2, u * 1.2, PAL.voidBlack);
 }
 
