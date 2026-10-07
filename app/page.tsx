@@ -1,36 +1,25 @@
-import { Chrome } from '@/components/Chrome';
-import { HeroSection } from '@/components/HeroSection';
-import { ObjectSection } from '@/components/ObjectSection';
-import { AnatomySection } from '@/components/AnatomySection';
-import { SigilsSection } from '@/components/SigilsSection';
+import { Header } from '@/components/Header';
+import { Hero } from '@/components/Hero';
+import { KitsSection } from '@/components/KitsSection';
+import { ColourSection } from '@/components/ColourSection';
+import { RendersSection } from '@/components/RendersSection';
 import { RitualSection } from '@/components/RitualSection';
-import { ArchiveSection } from '@/components/ArchiveSection';
-import { SetSection } from '@/components/SetSection';
-import { VoidSection } from '@/components/VoidSection';
-import { CompleteSection } from '@/components/CompleteSection';
-import { Credits } from '@/components/Credits';
+import { VendorsSection } from '@/components/VendorsSection';
+import { CreditsSection } from '@/components/CreditsSection';
 
-/**
- * The exhibition, in order. The narrative runs
- * ORDER → DISCOVERY → DISSECTION → RITUAL → CONTAMINATION → ORDER,
- * and the page follows it section by section.
- */
 export default function Page() {
   return (
     <>
-      <Chrome />
+      <Header />
       <main>
-        <HeroSection />
-        <ObjectSection />
-        <AnatomySection />
-        <SigilsSection />
+        <Hero />
+        <KitsSection />
+        <ColourSection />
+        <RendersSection />
         <RitualSection />
-        <ArchiveSection />
-        <SetSection />
-        <VoidSection />
-        <CompleteSection />
-        <Credits />
+        <VendorsSection />
       </main>
+      <CreditsSection />
     </>
   );
 }

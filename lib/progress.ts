@@ -8,6 +8,4 @@
 export const progress = {
   /** 0 in the dark opening, 1 once the object has fully emerged */
   hero: 0,
-  /** 0 when the finished object first appears, 1 once it has gone into the dark */
-  complete: 0,
 };

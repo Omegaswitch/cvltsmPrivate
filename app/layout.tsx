@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'RITUAL / 2026',
-  description: 'An object in 108 parts. A Nordic ritual keycap study.',
-  openGraph: { title: 'RITUAL / 2026', type: 'website' },
+  title: 'CVLTSM',
+  description: 'CVLTSM, a keycap set in double-shot ABS, drawn from the Nordic ritual.',
+  openGraph: { title: 'CVLTSM', type: 'website' },
 };
 
 export const viewport: Viewport = {
@@ -17,13 +17,14 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-tone="black">
+    <html lang="en" data-tone="void">
       <head>
+        <link rel="preload" href="/fonts/Valhalica-Regular.otf" as="font" type="font/otf" crossOrigin="" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;1,400&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&display=swap"
         />
       </head>
       <body>{children}</body>

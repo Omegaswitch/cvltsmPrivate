@@ -1,47 +1,31 @@
 import type { CSSProperties } from 'react';
-import type { PlateSource } from '@/types';
+import type { Plate as PlateData } from '@/types';
 
 /**
- * An image plate. With `src` it shows the photograph. Without it, it shows an
- * archival-style placeholder that names the aspect ratio and the file it is
- * waiting for, so replacing it is a matter of adding the file and setting `src`.
+ * An image slot. The box holds its aspect ratio before the image arrives, so
+ * nothing shifts when it loads. With no `src` it is an empty tile that draws
+ * nothing, so an unfilled slot reads as deliberate space.
  */
 export function Plate({
   plate,
   className = '',
-  caption,
-  eager = false,
+  as = 'figure',
 }: {
-  plate: PlateSource;
+  plate: PlateData;
   className?: string;
-  caption?: string;
-  eager?: boolean;
+  /** a div where the plate sits inside a button, which may not contain a figure */
+  as?: 'figure' | 'div';
 }) {
+  const Tag = as;
   const style = { aspectRatio: plate.ratio } as CSSProperties;
 
-  if (plate.src) {
-    return (
-      <figure className={`plate ${className}`} style={style}>
-        <img
-          src={plate.src}
-          alt={plate.alt}
-          loading={eager ? 'eager' : 'lazy'}
-          decoding="async"
-        />
-        {caption ? <figcaption className="plate__caption">{caption}</figcaption> : null}
-      </figure>
-    );
+  if (!plate.src) {
+    return <Tag className={`plate plate--empty ${className}`} style={style} role="img" aria-label={plate.alt} />;
   }
 
   return (
-    <figure className={`plate plate--empty ${className}`} style={style} role="img" aria-label={plate.alt}>
-      <span className="plate__corner plate__corner--tl" aria-hidden="true" />
-      <span className="plate__corner plate__corner--br" aria-hidden="true" />
-      <figcaption className="plate__ph">
-        <span>PLACEHOLDER</span>
-        <span>{plate.ratio}</span>
-        <span className="plate__path">{plate.path}</span>
-      </figcaption>
-    </figure>
+    <Tag className={`plate ${className}`} style={style}>
+      <img src={plate.src} alt={plate.alt} loading="lazy" decoding="async" />
+    </Tag>
   );
 }

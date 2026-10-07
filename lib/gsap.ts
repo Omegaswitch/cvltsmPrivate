@@ -6,7 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 let registered = false;
 
 /** Registers ScrollTrigger once, on the client only. */
-export function setupGsap(): typeof gsap {
+export function setupGsap(): void {
   if (!registered && typeof window !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger);
     // mobile browsers resize the viewport as their toolbars move; without this
@@ -14,7 +14,6 @@ export function setupGsap(): typeof gsap {
     ScrollTrigger.config({ ignoreMobileResize: true });
     registered = true;
   }
-  return gsap;
 }
 
-export { gsap, ScrollTrigger };
+export { ScrollTrigger };

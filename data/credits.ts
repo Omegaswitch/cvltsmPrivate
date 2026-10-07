@@ -1,7 +1,9 @@
-/** End credits. Names are placeholders until the people are confirmed. */
-export const CREDITS: { role: string; name: string }[] = [
-  { role: 'DESIGN', name: '[NAME]' },
+import type { Credit } from '@/types';
+
+/** Names read `[NAME]` until they are confirmed. */
+export const CREDITS: Credit[] = [
+  { role: 'Design', name: '[NAME]' },
   { role: '3D', name: '[NAME]' },
-  { role: 'TYPE', name: '[NAME]' },
-  { role: 'PHOTOGRAPHY', name: '[NAME]' },
+  { role: 'Type', name: '[NAME]' },
+  { role: 'Photography', name: '[NAME]' },
 ];
