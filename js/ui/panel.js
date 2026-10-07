@@ -139,7 +139,9 @@ export function createPanel({ client, onOpen, onClose }) {
   for (const el of document.querySelectorAll('[data-section]')) {
     el.addEventListener('click', (e) => {
       e.preventDefault();
-      open(el.dataset.section, el.textContent.trim(), el);
+      // the label alone: a menu item may carry decoration, such as a numeral
+      const label = el.querySelector('.nav__label') || el;
+      open(el.dataset.section, label.textContent.trim(), el);
     });
   }
 

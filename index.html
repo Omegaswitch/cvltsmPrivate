@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CVLTSM</title>
 <meta name="description" content="CVLTSM">
-<meta name="theme-color" content="#03040a">
+<meta name="theme-color" content="#050507">
 <meta name="color-scheme" content="dark">
 
 <meta property="og:type" content="website">
@@ -15,20 +15,16 @@
 <link rel="preload" href="fonts/Valhalica-Regular.otf" as="font" type="font/otf" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400&display=swap">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div class="stage">
-  <canvas id="field" role="img"
-    aria-label="A dark wheat field at night. A tall effigy of bound timber and straw stands in the middle of the crop, runes burning red down its body and along its arms."></canvas>
-</div>
-
-<div class="post" aria-hidden="true">
-  <div class="post__grain"></div>
-  <div class="post__vignette"></div>
-</div>
+<main class="scene">
+  <canvas id="sigil" aria-hidden="true"></canvas>
+  <div class="still" id="still" aria-hidden="true"></div>
+  <div class="veil" aria-hidden="true"></div>
+</main>
 
 <div class="ui">
 
@@ -36,33 +32,34 @@
     <!-- MANUFACTURER LOGO SLOT.
          Drop the artwork straight in here, e.g.
            <img src="img/manufacturer.svg" alt="Manufacturer">
-         The empty placeholder frame disappears as soon as an image is present. -->
+         The slot keeps its width and draws nothing while it is empty. -->
     <div class="crest__mfr" id="mfrLogo"></div>
 
-    <!-- CVLTSM WORDMARK.
-         Set in Valhalica for now. When the official logo artwork arrives,
-         replace the contents of this h1 with:
+    <!-- CVLTSM WORDMARK. Set in Valhalica for now. When the official logo
+         artwork arrives, replace the contents of this h1 with:
            <img src="img/cvltsm.svg" alt="CVLTSM"> -->
     <h1 class="crest__mark">CVLTSM</h1>
   </header>
 
-  <!-- The menu stands around the effigy. Each item is placed on a ring by
-       the angle and radius in its style attribute; below the breakpoint the
-       ring collapses to a column. -->
-  <nav class="ring" aria-label="Primary">
-    <a class="ring__item" style="--angle:196deg; --radius:1"   href="#lore" data-section="lore">Lore</a>
-    <a class="ring__item" style="--angle:-16deg; --radius:1"   href="#expedition" data-section="expedition">Expedition</a>
-    <a class="ring__item" style="--angle:145deg; --radius:1.05" href="#archive" data-section="archive">Archive</a>
-    <a class="ring__item" style="--angle:35deg;  --radius:1.05" href="#rites" data-section="rites">Rites</a>
+  <!-- Each section is a glyph on the sigil. data-rune is the glyph's index
+       around the ring, and hovering a section lights that glyph. -->
+  <nav class="nav" aria-label="Primary">
+    <a class="nav__item" href="#lore" data-section="lore" data-rune="0">
+      <span class="nav__numeral">I</span><span class="nav__label">Lore</span>
+    </a>
+    <a class="nav__item" href="#expedition" data-section="expedition" data-rune="4">
+      <span class="nav__numeral">II</span><span class="nav__label">Expedition</span>
+    </a>
+    <a class="nav__item" href="#archive" data-section="archive" data-rune="8">
+      <span class="nav__numeral">III</span><span class="nav__label">Archive</span>
+    </a>
+    <a class="nav__item" href="#rites" data-section="rites" data-rune="12">
+      <span class="nav__numeral">IV</span><span class="nav__label">Rites</span>
+    </a>
   </nav>
-
-  <footer class="foot">
-    <a class="ghost" href="#expedition" data-section="expedition"><span>Enter the field</span></a>
-  </footer>
 </div>
 
-<!-- Slide-up section panel. Rises over a static background; content is
-     fetched on open, with loading / empty / error states below. -->
+<!-- Section panel. Rises over the sigil, which keeps running untouched behind it. -->
 <div class="scrim" id="scrim" hidden></div>
 <section class="panel" id="panel" role="dialog" aria-modal="true"
          aria-labelledby="panelTitle" tabindex="-1" aria-hidden="true">
@@ -85,7 +82,7 @@
     <div class="state" data-for="error">
       <p class="state__title">Could not load this section</p>
       <p class="state__note" id="panelErrorNote"></p>
-      <button type="button" class="ghost ghost--sm" id="panelRetry">Try again</button>
+      <button type="button" class="btn" id="panelRetry">Try again</button>
     </div>
     <div class="state" data-for="ready">
       <ul class="entries" id="panelEntries"></ul>
@@ -93,14 +90,10 @@
   </div>
 </section>
 
-<div class="boot" id="boot">
-  <div class="boot__inner"><div class="boot__rune">&#5892;</div></div>
-</div>
-
 <noscript>
   <div class="noscript">
     <h1>CVLTSM</h1>
-    <p>This field is drawn in the browser. Enable JavaScript to see it.</p>
+    <p>This page is drawn in the browser. Enable JavaScript to see it.</p>
   </div>
 </noscript>
 
