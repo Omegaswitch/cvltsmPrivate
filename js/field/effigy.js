@@ -98,15 +98,46 @@ export function buildEffigy(w, h, horizonY, dpr, rng) {
   const armW = height * 0.042;
   const torsoW = height * 0.105;
 
+  /* A bound timber is a cylinder, so it is shaded like one. The key light is
+     the moon, high on the upper left, so the straw there catches it; the
+     fire's rim lights the far side of each piece, and the fire throws warmth
+     back onto whatever stands nearest it. Drawn as three offset strokes, so it
+     costs nothing once baked. */
+  const bound = (x1, y1, x2, y2, width) => {
+    timber(x1, y1, x2, y2, width, PAL.strawDark);
+    c.globalAlpha = 0.55;
+    timber(x1 - width * 0.22, y1 - width * 0.1, x2 - width * 0.22, y2 - width * 0.1,
+      width * 0.38, PAL.strawHi);
+    c.globalAlpha = 0.3;
+    timber(x1 + width * 0.34, y1 + width * 0.12, x2 + width * 0.34, y2 + width * 0.12,
+      width * 0.14, PAL.ember);
+    c.globalAlpha = 1;
+  };
+
+  // the contact shadow where the feet meet the crop, drawn under the legs
+  c.save();
+  c.translate(cx, footY);
+  c.scale(1, 0.12);
+  const contact = c.createRadialGradient(0, 0, 0, 0, 0, span * 0.42);
+  contact.addColorStop(0, 'rgba(0,0,0,0.65)');
+  contact.addColorStop(1, 'rgba(0,0,0,0)');
+  c.fillStyle = contact;
+  c.fillRect(-span * 0.42, -span * 0.42, span * 0.84, span * 0.84);
+  c.restore();
+
   // legs, splayed into the crop
-  timber(cx - height * 0.02, hipY, cx - height * 0.15, footY, legW, PAL.strawDark);
-  timber(cx + height * 0.02, hipY, cx + height * 0.15, footY, legW, PAL.strawDark);
+  bound(cx - height * 0.02, hipY, cx - height * 0.15, footY, legW);
+  bound(cx + height * 0.02, hipY, cx + height * 0.15, footY, legW);
   // the cross brace between them
   timber(cx - height * 0.10, footY - height * 0.10, cx + height * 0.10, footY - height * 0.10,
     legW * 0.5, PAL.strawDark);
 
   // torso: a bundle, wider at the shoulders
-  c.fillStyle = PAL.strawDark;
+  const torsoFill = c.createLinearGradient(cx - torsoW * 0.62, 0, cx + torsoW * 0.62, 0);
+  torsoFill.addColorStop(0, PAL.strawHi);
+  torsoFill.addColorStop(0.4, PAL.strawDark);
+  torsoFill.addColorStop(1, '#07050a');
+  c.fillStyle = torsoFill;
   c.beginPath();
   c.moveTo(cx - torsoW * 0.62, armY - height * 0.02);
   c.lineTo(cx + torsoW * 0.62, armY - height * 0.02);
@@ -116,15 +147,14 @@ export function buildEffigy(w, h, horizonY, dpr, rng) {
   c.fill();
 
   // arms: one beam, bound bundles hanging at the ends
-  timber(cx - span * 0.5, armY + height * 0.02, cx + span * 0.5, armY - height * 0.01,
-    armW, PAL.strawDark);
+  bound(cx - span * 0.5, armY + height * 0.02, cx + span * 0.5, armY - height * 0.01, armW);
   for (const dir of [-1, 1]) {
-    timber(cx + dir * span * 0.5, armY + dir * height * 0.005,
-      cx + dir * span * 0.54, armY + height * 0.11, armW * 0.8, PAL.strawDark);
+    bound(cx + dir * span * 0.5, armY + dir * height * 0.005,
+      cx + dir * span * 0.54, armY + height * 0.11, armW * 0.8);
   }
 
   // neck and the wheel that stands for a head
-  timber(cx, armY - height * 0.02, cx, topY + headR * 1.7, armW * 0.75, PAL.strawDark);
+  bound(cx, armY - height * 0.02, cx, topY + headR * 1.7, armW * 0.75);
   c.strokeStyle = PAL.strawDark;
   c.lineWidth = height * 0.022;
   strokeWheel(c, cx, topY + headR, headR);

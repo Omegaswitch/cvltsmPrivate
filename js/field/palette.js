@@ -40,4 +40,9 @@ export const PAL = {
 
   chaff: '#7a6250',
   star: '#9fb2cc',
+
+  /* the moon: the one cool light, which also tints the grain heads */
+  moon: '#b7c7e0',
+  moonDisc: '#cdd8e8',
+  strawHi: '#6e5040',   // straw catching that light
 };

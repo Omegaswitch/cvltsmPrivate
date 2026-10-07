@@ -88,7 +88,7 @@ function awnPath(c, topX, topY, ear) {
 }
 
 /** Every stalk of one colour and weight, in three paths. `bend` is the lean. */
-function paintGroup(c, list, col, width, bend) {
+function paintGroup(c, list, col, width, bend, head = col) {
   c.strokeStyle = col;
   c.lineWidth = width;
   c.lineCap = 'round';
@@ -96,7 +96,7 @@ function paintGroup(c, list, col, width, bend) {
   for (const s of list) stemPath(c, s.x, s.baseY, s.height, bend(s));
   c.stroke();
 
-  c.fillStyle = col;
+  c.fillStyle = head;
   c.beginPath();
   for (const s of list) {
     const l = bend(s);
@@ -117,7 +117,7 @@ const ownLean = (s) => s.lean;
  * stem. The box is the convex hull of the awn curves plus the grain column,
  * with the line weight allowed for on every side.
  */
-function makeCrown(s, col, width, dpr) {
+function makeCrown(s, col, head, width, dpr) {
   const pen = Math.max(0.35, width * 0.45) * 2;
   const hx = s.ear * 2.0 + pen;
   const up = s.ear * 2.5 + pen;
@@ -127,7 +127,7 @@ function makeCrown(s, col, width, dpr) {
   const c = sprite.ctx;
   c.lineCap = 'round';
 
-  c.fillStyle = col;
+  c.fillStyle = head;
   c.beginPath();
   headPath(c, 0, 0, s.lean, s.ear);
   c.fill();
@@ -180,11 +180,9 @@ function makeBand(w, spec, rng, light, bandY, dpr) {
     const key = (accent ? 'a' : 'b') + level;
     let bucket = buckets.get(key);
     if (!bucket) {
-      bucket = {
-        col: mix(accent ? spec.accent : spec.color, PAL.litWarm,
-          (level / LIT_LEVELS) * 0.9),
-        list: [],
-      };
+      const base = mix(accent ? spec.accent : spec.color, PAL.litWarm,
+        (level / LIT_LEVELS) * 0.9);
+      bucket = { col: base, head: mix(base, PAL.moon, 0.1), list: [] };
       buckets.set(key, bucket);
     }
     bucket.list.push({ x, baseY: foot, height, lean, ear: spec.ear });
@@ -193,7 +191,7 @@ function makeBand(w, spec, rng, light, bandY, dpr) {
     top = Math.min(top, foot - height - spec.ear * 2.4 - spec.width);
   }
 
-  for (const b of buckets.values()) paintGroup(c, b.list, b.col, spec.width, ownLean);
+  for (const b of buckets.values()) paintGroup(c, b.list, b.col, spec.width, ownLean, b.head);
 
   // dissolve the top of the band into the one behind it
   const fade = c.createLinearGradient(0, 0, 0, ch * 0.62);
@@ -270,9 +268,11 @@ export function buildWheat(w, h, horizonY, light, dpr, rng) {
     const key = `${level}:${weight}`;
     let g = byKey.get(key);
     if (!g) {
+      const col = mix(mix(PAL.wheatBlack, PAL.wheatNear, 0.45), PAL.litWarm,
+        (level / NEAR_LIT_LEVELS) * 0.6);
       g = {
-        col: mix(mix(PAL.wheatBlack, PAL.wheatNear, 0.45), PAL.litWarm,
-          (level / NEAR_LIT_LEVELS) * 0.6),
+        col,
+        head: mix(col, PAL.moon, 0.1),
         width: 1.1 + (weight / (NEAR_WEIGHTS - 1)) * 1.5,
         list: [],
       };
@@ -281,7 +281,7 @@ export function buildWheat(w, h, horizonY, light, dpr, rng) {
     }
     g.list.push(s);
     /* the head and the awns, baked once at this stalk's resting lean */
-    s.crown = makeCrown(s, g.col, g.width, dpr);
+    s.crown = makeCrown(s, g.col, g.head, g.width, dpr);
   }
 
   return {

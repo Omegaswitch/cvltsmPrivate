@@ -13,6 +13,8 @@ import { buildWheat, wind } from './wheat.js';
 import { buildEffigy } from './effigy.js';
 import { PAL } from './palette.js';
 import { blit } from './surface.js';
+import { buildMist, drawMist } from './mist.js';
+import { buildEmbers, drawEmbers } from './embers.js';
 
 const SEED = 0x63f1;
 const STEP = 1 / 120;
@@ -35,7 +37,7 @@ export function createField(canvas, opts = {}) {
 
   const state = {
     w: 0, h: 0, dpr: 1,
-    sky: null, wheat: null, effigy: null,
+    sky: null, wheat: null, effigy: null, mist: null, embers: null,
     chaff: [],
     reducedMotion: !!opts.reducedMotion,
     running: false,
@@ -59,6 +61,8 @@ export function createField(canvas, opts = {}) {
     };
     state.wheat = buildWheat(w, h, state.sky.horizonY, light, dpr, rng);
     state.effigy = buildEffigy(w, h, state.sky.horizonY, dpr, rng);
+    state.mist = buildMist(w, h, state.sky.horizonY, dpr, rng);
+    state.embers = buildEmbers(state.effigy, dpr, rng);
 
     // chaff lifting off the crop
     state.chaff = [];
@@ -115,8 +119,10 @@ export function createField(canvas, opts = {}) {
 
     blit(ctx, state.sky.surface);
     state.wheat.drawBack(ctx, t, state.w);
+    drawMist(ctx, state.mist, t);
     blit(ctx, state.effigy.body);
     state.effigy.drawFire(ctx, t);
+    drawEmbers(ctx, state.embers, t);
     drawChaff(ctx, state, t);
     state.wheat.drawFront(ctx, t);
 

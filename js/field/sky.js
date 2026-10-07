@@ -37,6 +37,27 @@ export function buildSky(w, h, dpr, rng) {
   c.fillStyle = g;
   c.fillRect(0, 0, w, horizonY * 1.12);
 
+  /* ----------------------------------------------------------------- moon */
+  // The one cool light in the scene. Its halo is baked here, so the moon costs
+  // nothing per frame, and the crop takes its tint from the same colour.
+  const mx = w * 0.2;
+  const my = h * 0.19;
+  const mr = Math.max(12, h * 0.032);
+  const halo = c.createRadialGradient(mx, my, mr * 0.5, mx, my, mr * 11);
+  halo.addColorStop(0, 'rgba(183,199,224,0.16)');
+  halo.addColorStop(0.28, 'rgba(183,199,224,0.07)');
+  halo.addColorStop(1, 'rgba(183,199,224,0)');
+  c.fillStyle = halo;
+  c.fillRect(0, 0, w, h);
+  const disc = c.createRadialGradient(mx - mr * 0.28, my - mr * 0.3, mr * 0.1, mx, my, mr);
+  disc.addColorStop(0, PAL.moonDisc);
+  disc.addColorStop(0.75, PAL.moon);
+  disc.addColorStop(1, '#6d7f9c');
+  c.fillStyle = disc;
+  c.beginPath();
+  c.arc(mx, my, mr, 0, Math.PI * 2);
+  c.fill();
+
   /* --------------------------------------------------------------- stars */
   const count = Math.round((w * h) / 26000);
   for (let i = 0; i < count; i++) {
