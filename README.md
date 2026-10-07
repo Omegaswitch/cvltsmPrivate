@@ -2,7 +2,7 @@
 
 The site for CVLTSM, a keycap set in double-shot ABS, drawn from the Nordic ritual.
 It presents the set: the kits, the colourway, the renders, the ritual, the vendors.
-It is not a shop. There are no prices and no cart.
+It is not a shop. There are no prices and no cart. A hidden hunt runs underneath it.
 
 Design rules are in [`DESIGN.md`](DESIGN.md). Read it before changing anything visual.
 
@@ -84,6 +84,24 @@ Aspect ratios are fixed by the layout. Shoot to them or crop before export. WebP
 ## The keyboard
 
 `KeyboardModel.tsx` is a stand-in: a plate and twenty-four plain caps. To use the real model, replace the body of that component. The scroll moves the group, not its parts, so the rise from the dark keeps working.
+
+## The manuscript and the hunt
+
+Behind the site lies a page of old text on dark paper (`components/Manuscript.tsx`, text in `data/manuscript.ts`). Some words are hidden in the same ink as the rest; they glow red when a cursor or a finger passes over them, and cool slowly when it moves on. Read in order, they are a riddle.
+
+Typing the answer anywhere on the home page, outside a form field, opens the next page of the hunt (on a phone, use the **Speak** field in the footer). Each page holds another riddle, and the last one ends the hunt.
+
+**Everything that decides the hunt is on the server.** The browser never receives an answer or the address of a page it has not earned:
+
+- `lib/hunt.ts` (marked `server-only`, so the build fails if it is ever imported into browser code) holds the stages: each page's address, its riddle, and the SHA-256 hashes of its accepted answers.
+- `app/api/hunt/route.ts` checks a guess. A right answer raises a signed, httpOnly progress cookie and returns the next address. A wrong one returns nothing useful. It is rate-limited to 20 attempts a minute per address.
+- `app/rite/[slug]/page.tsx` renders a hunt page only when the cookie says it has been earned. For anyone else the address is a 404, so guessing or sharing a link reveals nothing, and a forged cookie is rejected.
+
+The current answers are `key` (or `keycap`), `double shot`, and `dried blood`. Answers ignore case, spaces and punctuation.
+
+**To change a riddle:** edit its `lines` in `lib/hunt.ts` (wrap a word in `[[ ]]` to make it glow). **To change an answer:** run `node scripts/hash-answer.mjs "new answer"` and put the hash in that stage's `answers`. The first riddle is the manuscript itself, in `data/manuscript.ts`; its answers are stage 0 in `lib/hunt.ts`. To add a page, add a stage with a new random slug.
+
+**Hosting:** the hunt needs a server, so the site can no longer be exported as static files. Vercel or any Node host runs it as is. Set `HUNT_SECRET` to a long random string in production (`openssl rand -hex 32`); the server refuses to sign progress without it. Changing it resets everyone's progress.
 
 ## Motion and accessibility
 

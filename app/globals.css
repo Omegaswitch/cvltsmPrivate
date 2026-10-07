@@ -39,7 +39,7 @@ body {
   text-rendering: optimizeLegibility;
   transition: background-color 0.5s var(--ease), color 0.5s var(--ease);
 }
-body[data-tone='bone'] { background: var(--bone); color: var(--ink); }
+body[data-tone='bone'] { color: var(--ink); }
 
 h1, h2, h3, p, dl, dd, dt, ul, figure { margin: 0; padding: 0; }
 ul { list-style: none; }
@@ -74,7 +74,7 @@ body[data-tone='bone'] .header { color: var(--ink); }
 
 /* ------------------------------------------------------------- hero */
 
-.hero { position: relative; height: 100vh; height: 100svh; overflow: hidden; background: var(--void); }
+.hero { position: relative; height: 100vh; height: 100svh; overflow: hidden; }
 .scene { position: absolute; inset: 0; }
 .scene .scene-canvas { position: absolute !important; inset: 0; width: 100% !important; height: 100% !important; }
 .hero__poster { position: absolute; inset: 0; }
@@ -88,6 +88,16 @@ body[data-tone='bone'] .header { color: var(--ink); }
   display: grid;
   gap: 18px;
   justify-items: start;
+}
+/* a soft patch of bare paper behind the opening text, so the manuscript never
+   shows through the wordmark */
+.hero__text::before {
+  content: '';
+  position: absolute;
+  inset: -14vh -10vw -8vh -10vw;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgb(20 17 13 / 0.92) 40%, rgb(20 17 13 / 0));
+  pointer-events: none;
 }
 .hero__mfr { height: clamp(22px, 3.4vh, 36px); display: flex; align-items: center; }
 .hero__mfr img { width: auto; height: 100%; object-fit: contain; }
@@ -209,7 +219,7 @@ body[data-tone='bone'] .header { color: var(--ink); }
 .vendors__status { color: #3a3b36; }
 
 /* credits */
-.credits { background: var(--void); color: var(--bone); padding: calc(var(--section-y) * 0.8) var(--gutter) 40px; display: grid; gap: 56px; }
+.credits { position: relative; z-index: 1; color: var(--bone); padding: calc(var(--section-y) * 0.8) var(--gutter) 40px; display: grid; gap: 56px; }
 .credits__list { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--grid-gap); }
 .credits__item { display: grid; gap: 6px; border-top: 1px solid rgb(210 204 190 / 0.14); padding-top: 14px; }
 .credits__item dt { font-size: 0.9375rem; color: var(--bone); opacity: 0.6; }
@@ -217,9 +227,124 @@ body[data-tone='bone'] .header { color: var(--ink); }
 .credits__foot { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.9375rem; color: var(--bone); opacity: 0.7; }
 .credits__mark { font-family: var(--wordmark); font-size: 1.125rem; letter-spacing: 0.12em; }
 
+/* ------------------------------------------------------- the manuscript */
+
+/* Dark, aged paper: long fibres from noise, a burnt edge, two old stains.
+   Drawn once by the compositor; nothing here animates. */
+:root {
+  --paper-colour: #14110d;
+  --paper-image:
+    radial-gradient(125% 95% at 50% 42%, transparent 52%, rgb(0 0 0 / 0.7) 100%),
+    radial-gradient(34% 26% at 21% 30%, rgb(84 24 23 / 0.10), transparent 70%),
+    radial-gradient(28% 24% at 80% 74%, rgb(120 96 64 / 0.07), transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9 0.14' numOctaves='3' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.86 0 0 0 0 0.8 0 0 0 0 0.68 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  --ember: #b1291f;
+}
+
+main { position: relative; z-index: 1; }
+
+.manuscript { --ink-text: rgb(210 204 190 / 0.075); }
+.manuscript--page {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background-color: var(--paper-colour);
+  background-image: var(--paper-image);
+}
+.manuscript__text {
+  font-family: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
+  color: var(--ink-text);
+  hyphens: auto;
+}
+.manuscript--page .manuscript__text {
+  position: absolute;
+  top: 14vh;
+  left: 50%;
+  width: min(88vw, 1180px);
+  margin-left: calc(min(88vw, 1180px) / -2);
+  columns: 2;
+  column-gap: 7vw;
+  font-size: clamp(1.1rem, 1.55vw, 1.5rem);
+  line-height: 1.95;
+  text-align: justify;
+  will-change: transform;
+}
+.manuscript__text p { margin: 0 0 1.1em; text-indent: 1.6em; }
+.manuscript__text p:first-child { text-indent: 0; }
+.manuscript__text p:first-child::first-letter { float: left; font-size: 3.4em; line-height: 0.82; padding: 0.06em 0.08em 0 0; }
+
+/* A hidden word: the same ink as the rest until something passes over it.
+   --heat (0 to 1) is set from script; the colour and the glow follow it. */
+.mword {
+  --heat: 0;
+  color: color-mix(in srgb, var(--ember) calc(var(--heat) * 100%), var(--ink-text));
+  text-shadow:
+    0 0 calc(var(--heat) * 18px) rgb(177 41 31 / calc(var(--heat) * 0.9)),
+    0 0 calc(var(--heat) * 3px) rgb(255 120 90 / calc(var(--heat) * 0.45));
+}
+
+/* the typed line at the foot of the screen */
+.incantation {
+  position: fixed;
+  z-index: 45;
+  left: 50%;
+  bottom: 7vh;
+  transform: translateX(-50%);
+  margin: 0;
+  font-family: 'IM Fell English', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1.6rem, 3vw, 2.5rem);
+  color: var(--bone);
+  white-space: pre;
+  pointer-events: none;
+  opacity: 0;
+  text-shadow: 0 1px 14px rgb(0 0 0 / 0.85);
+  transition: opacity 0.5s var(--ease), color 0.6s var(--ease), text-shadow 0.6s var(--ease), transform 0.8s var(--ease);
+}
+.incantation.is-shown { opacity: 0.85; }
+.incantation--right { color: var(--ember); text-shadow: 0 0 20px rgb(177 41 31 / 0.9); }
+.incantation--wrong { opacity: 0 !important; transform: translate(-50%, 12px); }
+
+/* the same, as a field */
+.speak { display: flex; align-items: baseline; gap: 16px; }
+.speak__label { font-family: 'IM Fell English', Georgia, serif; font-style: italic; font-size: 1.125rem; opacity: 0.55; }
+.speak__input {
+  width: min(300px, 62vw);
+  padding: 4px 0;
+  border: 0;
+  border-bottom: 1px solid rgb(210 204 190 / 0.25);
+  background: transparent;
+  color: var(--bone);
+  font: italic 1.25rem 'IM Fell English', Georgia, serif;
+  transition: color 0.6s var(--ease), border-color 0.6s var(--ease);
+}
+.speak__input:focus-visible { outline: none; border-bottom-color: var(--ember); }
+.speak--right .speak__input { color: var(--ember); border-bottom-color: var(--ember); }
+.speak--wrong .speak__input { border-bottom-color: rgb(210 204 190 / 0.08); }
+
+/* a page of the hunt */
+.rite {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  gap: 56px;
+  padding: 18vh var(--gutter);
+  background-color: var(--paper-colour);
+  background-image: var(--paper-image);
+}
+.rite__mark { position: fixed; top: 22px; left: var(--gutter); font-family: var(--wordmark); font-size: 1.25rem; letter-spacing: 0.12em; }
+.manuscript--inline { --ink-text: rgb(210 204 190 / 0.78); }
+.manuscript--inline .manuscript__text { max-width: 30ch; font-size: clamp(1.6rem, 3.2vw, 2.6rem); line-height: 1.45; }
+.manuscript--inline .manuscript__text p { text-indent: 0; }
+.manuscript--inline .manuscript__text p:first-child::first-letter { float: none; font-size: inherit; padding: 0; }
+
 /* ------------------------------------------------------------ narrow */
 
 @media (max-width: 820px) {
+  .manuscript--page .manuscript__text { columns: 1; width: 86vw; margin-left: -43vw; top: 11vh; font-size: 1.05rem; line-height: 1.85; }
   .hero__word { font-size: 25vw; }
   .header__nav { gap: 16px; font-size: 0.875rem; }
   .header__mark { font-size: 1.0625rem; }

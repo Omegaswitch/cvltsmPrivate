@@ -25,7 +25,19 @@ Hard cuts between void and bone sections. No gradients on backgrounds, no glows,
 - **Wordmark:** Valhalica (`public/fonts/Valhalica-Regular.otf`), used for the CVLTSM wordmark only. Set in capitals, tracked, never for body copy or buttons.
 - **Interface and display:** Inter Tight, a neo-grotesk. Display sizes carry hierarchy, weight 500, tight tracking (`-0.025em`). Body 1.125rem to 1.1875rem at 1.55 leading.
 - **Sizes:** section titles `clamp(2.25rem, 4.6vw, 3.6rem)`, leads at most 60ch, body at most 46ch.
-- No monospace. No serif. No letter-spaced uppercase for headings or buttons.
+- No monospace. No serif outside the manuscript (below). No letter-spaced uppercase for headings or buttons.
+
+## The manuscript (the one exception)
+
+Behind the whole site lies a page of old text on dark, aged paper. It is the only place that breaks the rules above, and it breaks them on purpose:
+
+- **Paper:** `#14110d`, long fibres from noise, a burnt edge, two faint stains. It never animates.
+- **Text:** IM Fell English, bone at 7.5% opacity, two justified columns with a drop cap. On the hunt pages the same face is set large and legible.
+- **Hidden words:** set in the same ink as the rest, so they cannot be seen. A cursor or a finger passing near one makes it glow ember red (`#b1291f`); when it moves away the word cools over a few seconds. Read in order, the hidden words are the first riddle.
+- **Drift:** the sheet moves at 6% of the scroll, so it sits behind the page. None under reduced motion.
+- **Behind the wordmark** a patch of bare paper keeps the text from showing through the letters.
+
+The ember red appears nowhere else on the site. The void sections are transparent so the paper shows through; the bone sections cover it.
 
 ## Layout
 
@@ -75,7 +87,7 @@ Hard cuts between void and bone sections. No gradients on backgrounds, no glows,
 - Em-dashes and en-dashes in visible copy.
 - Pills, capsules, rounded containers, cards with shadows, double bezels.
 - Monospace, serif display, letter-spaced all-caps body text.
-- Neon, red glows, gradient text, glassmorphism, blurred backdrops.
+- Neon, red glows (except the hidden words of the manuscript), gradient text, glassmorphism, blurred backdrops.
 - Decorative runes, skulls, pentagrams, borders made of runes.
 - Dashed borders, corner brackets, HUD framing.
 - A second accent colour.
