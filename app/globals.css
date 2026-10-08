@@ -226,34 +226,31 @@ img { display: block; width: 100%; height: 100%; object-fit: cover; }
 /* ------------------------------------------------------- the manuscript */
 
 /* Dark, aged paper, drawn once by the compositor; nothing here animates.
-   From the top layer down: a burnt edge; three old stains; the tooth of the
-   paper, a faint relief lit from the upper left; a slow, uneven tone; and
-   darker patches where it has aged unevenly. No fine static, which reads
-   as noise rather than paper. */
+   From the top: a burnt edge, three old stains, then the grunge texture
+   (public/textures/grunge.webp, made by scripts/make-grunge.mjs) stretched
+   over the whole sheet, so it never visibly repeats. */
 :root {
   --paper-colour: #14110d;
-  --paper-image:
+  --paper:
     radial-gradient(130% 100% at 50% 45%, transparent 48%, rgb(0 0 0 / 0.55) 82%, rgb(0 0 0 / 0.85) 100%),
     radial-gradient(30% 22% at 18% 28%, rgb(90 30 22 / 0.13), transparent 70%),
     radial-gradient(26% 22% at 82% 76%, rgb(130 100 62 / 0.09), transparent 70%),
     radial-gradient(14% 10% at 66% 18%, rgb(130 100 62 / 0.06), transparent 70%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='r' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1 0.75' numOctaves='3' seed='5' stitchTiles='stitch' result='n'/%3E%3CfeDiffuseLighting in='n' surfaceScale='0.7' lighting-color='%23ffffff' result='l'%3E%3CfeDistantLight azimuth='225' elevation='55'/%3E%3C/feDiffuseLighting%3E%3CfeColorMatrix in='l' values='0 0 0 0 0.92  0 0 0 0 0.86  0 0 0 0 0.74  0.3 0 0 0 -0.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)'/%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1100' height='1100'%3E%3Cfilter id='m' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0055' numOctaves='4' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.78  0 0 0 0 0.68  0 0 0 0 0.5  0.16 0 0 0 -0.05'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='900'%3E%3Cfilter id='b' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.014' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.26 0 0 0 -0.11'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E");
+    url('/textures/grunge.webp') center / cover no-repeat,
+    #14110d;
   --ember: #b1291f;
 }
 
 main { position: relative; z-index: 1; }
 
-.manuscript { --ink-text: rgb(210 204 190 / 0.075); }
+.manuscript { --ink-text: rgb(210 204 190 / 0.075); isolation: isolate; }
 .manuscript--page {
   position: fixed;
   inset: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background-color: var(--paper-colour);
-  background-image: var(--paper-image);
+  background: var(--paper);
 }
 .manuscript__text {
   font-family: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
@@ -274,17 +271,37 @@ main { position: relative; z-index: 1; }
 }
 .manuscript__text p { margin: 0 0 1.1em; text-indent: 1.6em; }
 .manuscript__text p:first-child { text-indent: 0; }
-.manuscript__text p:first-child::first-letter { float: left; font-size: 3.4em; line-height: 0.82; padding: 0.06em 0.08em 0 0; }
+.manuscript__text p:first-child::first-letter { -webkit-initial-letter: 2; initial-letter: 2; margin-right: 0.1em; }
+/* without initial-letter (Firefox): a float sized and nudged to match */
+@supports not ((initial-letter: 2) or (-webkit-initial-letter: 2)) {
+  .manuscript__text p:first-child::first-letter { float: left; font-size: 3.55em; line-height: 0.8; margin: 0.08em 0.1em 0 0; }
+}
 
 /* A hidden word: the same ink as the rest until something passes over it.
-   --heat (0 to 1) is set from script; the colour and the glow follow it. */
+   --heat (0 to 1) is set from script. Like an ember, a word runs from ink
+   through deep red to a pale orange core as it heats, and back as it cools.
+   The glow is two blurred copies of the word behind it (the ::before halo
+   and the ::after bloom); only their opacity follows the heat, which is
+   cheaper than repainting a text-shadow on every frame. */
 .mword {
   --heat: 0;
-  color: color-mix(in srgb, var(--ember) calc(var(--heat) * 100%), var(--ink-text));
-  text-shadow:
-    0 0 calc(var(--heat) * 18px) rgb(177 41 31 / calc(var(--heat) * 0.9)),
-    0 0 calc(var(--heat) * 3px) rgb(255 120 90 / calc(var(--heat) * 0.45));
+  --warm: clamp(0, var(--heat) * 2, 1);
+  --hot: clamp(0, (var(--heat) - 0.5) * 2, 1);
+  position: relative;
+  color: color-mix(in oklab, color-mix(in oklab, #ffc48a calc(var(--hot) * 100%), var(--ember)) calc(var(--warm) * 100%), var(--ink-text));
 }
+.mword::before,
+.mword::after {
+  content: attr(data-word);
+  content: attr(data-word) / '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.mword::before { z-index: -1; color: #8f1d14; filter: blur(14px); opacity: calc(var(--heat) * 0.95); }
+.mword::after { color: #ff7a3c; filter: blur(4px); opacity: calc(var(--hot) * 0.7); mix-blend-mode: screen; }
 
 /* the typed line at the foot of the screen */
 .incantation {
@@ -333,14 +350,13 @@ main { position: relative; z-index: 1; }
   align-content: center;
   gap: 56px;
   padding: 18vh var(--gutter);
-  background-color: var(--paper-colour);
-  background-image: var(--paper-image);
+  background: var(--paper);
 }
 .rite__mark { position: fixed; top: 22px; left: var(--gutter); font-family: var(--wordmark); font-size: 1.25rem; letter-spacing: 0.12em; }
 .manuscript--inline { --ink-text: rgb(210 204 190 / 0.78); }
 .manuscript--inline .manuscript__text { max-width: 30ch; font-size: clamp(1.6rem, 3.2vw, 2.6rem); line-height: 1.45; }
 .manuscript--inline .manuscript__text p { text-indent: 0; }
-.manuscript--inline .manuscript__text p:first-child::first-letter { float: none; font-size: inherit; padding: 0; }
+.manuscript--inline .manuscript__text p:first-child::first-letter { -webkit-initial-letter: normal; initial-letter: normal; float: none; font-size: inherit; margin: 0; }
 .twigs { width: min(340px, 80vw); height: auto; stroke: rgb(210 204 190 / 0.7); stroke-width: 2.4; stroke-linecap: round; fill: none; }
 
 /* ------------------------------------------------------------ narrow */

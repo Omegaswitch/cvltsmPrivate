@@ -13,13 +13,19 @@ import { useEffect, useRef } from 'react';
  * rite pages).
  */
 
-const RADIUS = 120;          // px from a word's centre at which it starts to warm
+const RADIUS = 140;          // px from a word's centre at which it starts to warm
 const COOL = 0.4;            // fraction of heat a word keeps per second once left alone
+const FLICKER = 0.12;        // how far a lit word's brightness wavers, like a coal in a draught
+
+/** Smooth noise in 0..1 from two slow sines per word; no two words waver in step. */
+function flicker(t: number, i: number) {
+  return 0.5 + 0.3 * Math.sin(t / 97 + i * 1.7) + 0.2 * Math.sin(t / 41 + i * 4.3);
+}
 
 function words(paragraph: string, key: string) {
   return paragraph.split(/(\[\[[^\]]+\]\])/).map((part, i) =>
     part.startsWith('[[')
-      ? <span key={`${key}-${i}`} className="mword">{part.slice(2, -2)}</span>
+      ? <span key={`${key}-${i}`} className="mword" data-word={part.slice(2, -2)}>{part.slice(2, -2)}</span>
       : part,
   );
 }
@@ -59,12 +65,15 @@ export function Manuscript({ paragraphs, variant = 'page' }: { paragraphs: strin
       marked.forEach((w, i) => {
         const c = centres[i];
         const d = Math.hypot(px - c.x, py - (c.y - (fixed ? 0 : window.scrollY)));
-        const target = Math.max(0, 1 - d / RADIUS);
+        const near = Math.max(0, 1 - d / RADIUS);
+        const target = near * near * (3 - 2 * near); // eased, so the heat comes on softly at the rim
         const h = target >= heat[i]
           ? heat[i] + (target - heat[i]) * Math.min(1, dt * 12)
           : (reduced ? target : heat[i] * Math.pow(COOL, dt));
         const next = h < 0.004 ? 0 : Math.min(1, h);
-        if (Math.abs(next - heat[i]) > 0.002 || (next === 0 && heat[i] !== 0)) w.style.setProperty('--heat', next.toFixed(3));
+        // the flicker changes what is shown, never the heat itself, so it cannot keep a word lit
+        const shown = next && !reduced ? next * (1 - FLICKER * 0.5 + FLICKER * flicker(now, i)) : next;
+        if (next || heat[i]) w.style.setProperty('--heat', Math.min(1, shown).toFixed(3));
         heat[i] = next;
         if (heat[i] > 0) warm = true;
       });
