@@ -340,6 +340,7 @@ main { position: relative; z-index: 1; }
 .manuscript--inline .manuscript__text { max-width: 30ch; font-size: clamp(1.6rem, 3.2vw, 2.6rem); line-height: 1.45; }
 .manuscript--inline .manuscript__text p { text-indent: 0; }
 .manuscript--inline .manuscript__text p:first-child::first-letter { float: none; font-size: inherit; padding: 0; }
+.twigs { width: min(340px, 80vw); height: auto; stroke: rgb(210 204 190 / 0.7); stroke-width: 2.4; stroke-linecap: round; fill: none; }
 
 /* ------------------------------------------------------------ narrow */
 

@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { COOKIE, STAGES, readProgress } from '@/lib/hunt';
+import { COOKIE, STAGES, readProgress, versesFor } from '@/lib/hunt';
 import { Manuscript } from '@/components/Manuscript';
 import { Incantation, SpeakField } from '@/components/Incantation';
+import { TwigStone } from '@/components/TwigStone';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'CVLTSM', robots: { index: false, follow: false } };
@@ -18,8 +19,8 @@ export default async function RitePage({ params }: { params: Promise<{ slug: str
   const index = STAGES.findIndex((s, i) => i > 0 && s.slug === slug);
   if (index < 1) notFound();
 
-  const progress = readProgress((await cookies()).get(COOKIE)?.value);
-  if (progress < index) notFound();
+  const rite = readProgress((await cookies()).get(COOKIE)?.value);
+  if (!rite || rite.progress < index) notFound();
 
   const stage = STAGES[index];
   const last = index === STAGES.length - 1;
@@ -27,7 +28,8 @@ export default async function RitePage({ params }: { params: Promise<{ slug: str
   return (
     <main className="rite">
       <a className="rite__mark" href="/">CVLTSM</a>
-      <Manuscript paragraphs={stage.lines} variant="inline" />
+      <Manuscript paragraphs={versesFor(stage, rite.seed)} variant="inline" />
+      {stage.stone ? <TwigStone staves={stage.stone} /> : null}
       {last ? null : (
         <>
           <SpeakField stage={index} />

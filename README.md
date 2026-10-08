@@ -89,7 +89,7 @@ Aspect ratios are fixed by the layout. Shoot to them or crop before export. WebP
 
 Behind the site lies a page of old text on dark paper (`components/Manuscript.tsx`, text in `data/manuscript.ts`). Some words are hidden in the same ink as the rest; they glow red when a cursor or a finger passes over them, and cool slowly when it moves on. Read in order, they are a riddle.
 
-Typing the answer anywhere on the home page, outside a form field, opens the next page of the hunt (on a phone, use the **Speak** field in the footer). Each page holds another riddle, and the last one ends the hunt.
+Typing the answer anywhere on the home page, outside a form field, opens the next page of the hunt (on a phone, use the **Speak** field in the footer). Each page holds another riddle, and the last one ends the hunt. There are six riddles. Past the first two they lean on things a search engine or a chatbot cannot simply hand over: a cipher that has to be read off a drawing, a riddle split between visitors, and a page that changes with the hour in Stockholm. The answers and the reasoning are in [`docs/HUNT.md`](docs/HUNT.md) (spoilers).
 
 **Everything that decides the hunt is on the server.** The browser never receives an answer or the address of a page it has not earned:
 
@@ -97,9 +97,11 @@ Typing the answer anywhere on the home page, outside a form field, opens the nex
 - `app/api/hunt/route.ts` checks a guess. A right answer raises a signed, httpOnly progress cookie and returns the next address. A wrong one returns nothing useful. It is rate-limited to 20 attempts a minute per address.
 - `app/rite/[slug]/page.tsx` renders a hunt page only when the cookie says it has been earned. For anyone else the address is a 404, so guessing or sharing a link reveals nothing, and a forged cookie is rejected.
 
-The current answers are `key` (or `keycap`), `double shot`, and `dried blood`. Answers ignore case, spaces and punctuation.
+Answers ignore case, spaces, punctuation and accents, and Norse letters are spelled out (þ as th, ð as d), so `Vámóðr` and `vamodr` are the same answer.
 
-**To change a riddle:** edit its `lines` in `lib/hunt.ts` (wrap a word in `[[ ]]` to make it glow). **To change an answer:** run `node scripts/hash-answer.mjs "new answer"` and put the hash in that stage's `answers`. The first riddle is the manuscript itself, in `data/manuscript.ts`; its answers are stage 0 in `lib/hunt.ts`. To add a page, add a stage with a new random slug.
+**To change a riddle:** edit its `lines` in `lib/hunt.ts` (wrap a word in `[[ ]]` to make it glow). A stage can also carry `stone` (twig runes drawn under the riddle), `fragments` (each visitor is given one, by a seed kept in their cookie) or `hours` (a line for day and one for night, by the clock in Stockholm). **To change an answer:** run `node scripts/hash-answer.mjs "new answer"` and put the hash in that stage's `answers`. The first riddle is the manuscript itself, in `data/manuscript.ts`; its answers are stage 0 in `lib/hunt.ts`. To add a page, add a stage with a new random slug (`openssl rand -hex 5`).
+
+**To check it:** with the server running, `node scripts/check-hunt.mjs http://localhost:3000` plays the whole hunt and confirms that wrong answers, skipped stages, missing cookies and forged cookies are all refused. The script holds the answers, so treat it as a spoiler.
 
 **Hosting:** the hunt needs a server, so the site can no longer be exported as static files. Vercel or any Node host runs it as is. Set `HUNT_SECRET` to a long random string in production (`openssl rand -hex 32`); the server refuses to sign progress without it. Changing it resets everyone's progress.
 
