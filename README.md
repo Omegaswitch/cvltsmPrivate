@@ -103,7 +103,8 @@ Answers ignore case, spaces, punctuation and accents, and Norse letters are spel
 
 ## Motion and accessibility
 
-- Nothing on the page moves on its own. The manuscript text fades as the opening scrolls away; hidden words warm under the cursor and cool slowly.
+- Nothing on the page moves on its own. Behind it, the sheet has three depths that drift at different speeds with the scroll (the old image, the grunge, the text), driven by CSS scroll timelines, not script. The text fades as the opening scrolls away; hidden words warm under the cursor and cool slowly. Reduced motion keeps all of it still.
+- **The old image behind the page:** put a public-domain woodcut or engraving (dark ink on light paper) in `assets/`, run `node scripts/make-backdrop.mjs assets/<file> 0.14`, and set `backdrop: '/textures/backdrop.webp'` in `data/site.ts`.
 - The viewer closes on Escape. Links and buttons are real elements.
 
 ## What has not been measured

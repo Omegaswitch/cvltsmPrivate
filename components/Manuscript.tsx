@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { type CSSProperties, useEffect, useRef } from 'react';
 
 /*
  * Text on old paper. Hidden words, marked [[word]] in the source, share the
@@ -30,7 +30,12 @@ function words(paragraph: string, key: string) {
   );
 }
 
-export function Manuscript({ paragraphs, variant = 'page' }: { paragraphs: string[]; variant?: 'page' | 'inline' }) {
+export function Manuscript({ paragraphs, variant = 'page', backdrop }: {
+  paragraphs: string[];
+  variant?: 'page' | 'inline';
+  /** an old image deep behind the page sheet */
+  backdrop?: string;
+}) {
   const root = useRef<HTMLDivElement>(null);
   const text = useRef<HTMLDivElement>(null);
 
@@ -43,8 +48,15 @@ export function Manuscript({ paragraphs, variant = 'page' }: { paragraphs: strin
     // where each word sits, measured once and again on resize, so the frame
     // loop never asks the browser for layout while the page scrolls
     let centres: { x: number; y: number }[] = [];
+    // how far the words are moved from where they were measured: the fixed
+    // sheet's text by the parallax, a page's text by the scroll
+    const shiftNow = () => {
+      if (!fixed) return -window.scrollY;
+      const t = text.current ? getComputedStyle(text.current).transform : 'none';
+      return t === 'none' ? 0 : new DOMMatrixReadOnly(t).m42;
+    };
     const measure = () => {
-      const dy = fixed ? 0 : window.scrollY;
+      const dy = -shiftNow();
       centres = marked.map((w) => {
         const r = w.getBoundingClientRect();
         return { x: r.left + r.width / 2, y: r.top + r.height / 2 + dy };
@@ -62,9 +74,10 @@ export function Manuscript({ paragraphs, variant = 'page' }: { paragraphs: strin
       const dt = last ? Math.min(0.1, Math.max(0, (now - last) / 1000)) : 1 / 60;
       last = now;
       let warm = false;
+      const shift = shiftNow();
       marked.forEach((w, i) => {
         const c = centres[i];
-        const d = Math.hypot(px - c.x, py - (c.y - (fixed ? 0 : window.scrollY)));
+        const d = Math.hypot(px - c.x, py - (c.y + shift));
         const near = Math.max(0, 1 - d / RADIUS);
         const target = near * near * (3 - 2 * near); // eased, so the heat comes on softly at the rim
         const h = target >= heat[i]
@@ -131,6 +144,10 @@ export function Manuscript({ paragraphs, variant = 'page' }: { paragraphs: strin
 
   return (
     <div ref={root} className={`manuscript manuscript--${variant}`} aria-hidden={variant === 'page' ? true : undefined}>
+      {variant === 'page' && backdrop ? (
+        <div className="manuscript__layer manuscript__backdrop" style={{ '--backdrop': `url('${backdrop}')` } as CSSProperties} />
+      ) : null}
+      {variant === 'page' ? <div className="manuscript__layer manuscript__grunge" /> : null}
       <div ref={text} className="manuscript__text">
         {paragraphs.map((p, i) => <p key={i}>{words(p, String(i))}</p>)}
       </div>

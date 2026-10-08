@@ -8,12 +8,13 @@ import { VendorsSection } from '@/components/VendorsSection';
 import { CreditsSection } from '@/components/CreditsSection';
 import { Manuscript } from '@/components/Manuscript';
 import { Incantation } from '@/components/Incantation';
+import { SET } from '@/data/site';
 import { MANUSCRIPT } from '@/data/manuscript';
 
 export default function Page() {
   return (
     <>
-      <Manuscript paragraphs={MANUSCRIPT} />
+      <Manuscript paragraphs={MANUSCRIPT} backdrop={SET.backdrop} />
       <Header />
       <main>
         <Hero />

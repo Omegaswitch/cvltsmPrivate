@@ -31,7 +31,9 @@ One ground for the whole page. No light sections cut into it, no gradients beyon
 
 Behind the whole site lies a page of old text on dark, aged paper. It is the only place that breaks the rules above, and it breaks them on purpose:
 
-- **Paper:** `#14110d` under a grunge texture (`assets/grunge-source.webp`, baked to bone at 7% by `scripts/make-grunge.mjs`), stretched over the whole sheet so it never repeats, with a burnt edge and three old stains. It never animates.
+- **Paper:** `#14110d` under a grunge texture (`assets/grunge-source.webp`, baked to bone at 3.5% by `scripts/make-grunge.mjs`), stretched over the whole sheet so it never repeats, with a burnt edge and three old stains.
+- **Backdrop:** an old Nordic image, deepest of all, as faint bone lines (`scripts/make-backdrop.mjs` turns a woodcut or engraving into one; set `SET.backdrop`).
+- **Parallax:** three depths on the scroll timeline, run by the compositor: the backdrop slowest, the grunge nearer, the text nearest. Still under reduced motion and in browsers without scroll-driven animation.
 - **Text:** IM Fell English, bone at 7.5% opacity, two justified columns with a drop cap. On the hunt pages the same face is set large and legible.
 - **Hidden words:** set in the same ink as the rest, so they cannot be seen. A cursor or a finger passing near one heats it like an ember: ink, then deep red (`#b1291f`), then a pale orange core with a red halo, wavering slightly. When it moves away the word cools back through red over a few seconds. Read in order, the hidden words are the first riddle.
 - **Drop cap:** `initial-letter: 2`, so the first letter sits on the cap height of line one and the baseline of line two.
@@ -67,10 +69,10 @@ The ember red appears nowhere else on the site.
 
 ## Motion
 
-- Scroll-linked movement only for the fade of the manuscript text at the opening.
+- Scroll-linked movement only for the manuscript sheet: its three-depth parallax and the fade of its text at the opening.
 - Entrances: fade only, 800ms, one per section, once. No blur, no bounce, no stagger longer than two items.
 - Easing: `cubic-bezier(0.22, 1, 0.36, 1)`. Never linear for UI, never spring.
-- Reduced motion: no fades.
+- Reduced motion: no fades, no parallax.
 - Animate `transform` and `opacity` only.
 
 ## Copy

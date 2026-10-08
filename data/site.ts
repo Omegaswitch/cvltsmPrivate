@@ -5,4 +5,7 @@ export const SET = {
   year: 'MMXXVI',
   /** public path of the manufacturer mark; undefined keeps the slot empty */
   manufacturerLogo: undefined as string | undefined,
+  /** public path of the old image deep behind the manuscript (make it with
+   *  scripts/make-backdrop.mjs); undefined leaves the paper bare */
+  backdrop: undefined as string | undefined,
 } as const;

@@ -225,19 +225,20 @@ img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
 /* ------------------------------------------------------- the manuscript */
 
-/* Dark, aged paper, drawn once by the compositor; nothing here animates.
-   From the top: a burnt edge, three old stains, then the grunge texture
-   (public/textures/grunge.webp, made by scripts/make-grunge.mjs) stretched
-   over the whole sheet, so it never visibly repeats. */
+/* Dark, aged paper. Its parts: a burnt edge, three old stains, and the
+   grunge texture (public/textures/grunge.webp, from scripts/make-grunge.mjs),
+   stretched over the sheet so it never visibly repeats. A hunt page wears it
+   all as one background; behind the home page the parts are separate layers
+   so they can drift at their own depths (see the parallax, below). */
 :root {
   --paper-colour: #14110d;
-  --paper:
-    radial-gradient(130% 100% at 50% 45%, transparent 48%, rgb(0 0 0 / 0.55) 82%, rgb(0 0 0 / 0.85) 100%),
+  --paper-edge: radial-gradient(130% 100% at 50% 45%, transparent 48%, rgb(0 0 0 / 0.55) 82%, rgb(0 0 0 / 0.85) 100%);
+  --paper-stains:
     radial-gradient(30% 22% at 18% 28%, rgb(90 30 22 / 0.13), transparent 70%),
     radial-gradient(26% 22% at 82% 76%, rgb(130 100 62 / 0.09), transparent 70%),
-    radial-gradient(14% 10% at 66% 18%, rgb(130 100 62 / 0.06), transparent 70%),
-    url('/textures/grunge.webp') center / cover no-repeat,
-    #14110d;
+    radial-gradient(14% 10% at 66% 18%, rgb(130 100 62 / 0.06), transparent 70%);
+  --grunge: url('/textures/grunge.webp') center / cover no-repeat;
+  --paper: var(--paper-edge), var(--paper-stains), var(--grunge), var(--paper-colour);
   --ember: #b1291f;
 }
 
@@ -250,8 +251,29 @@ main { position: relative; z-index: 1; }
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background: var(--paper);
+  background: var(--paper-stains), var(--paper-colour);
 }
+/* the burnt edge lies over every layer, the text included */
+.manuscript--page::after { content: ''; position: absolute; inset: 0; background: var(--paper-edge); }
+.manuscript__layer { position: absolute; left: 0; right: 0; top: 0; }
+.manuscript__backdrop { height: 150vh; background: var(--backdrop) center top / auto 100% no-repeat; }
+.manuscript__grunge { height: 118vh; background: var(--grunge); }
+
+/* Parallax. Three depths, each driven by the scroll position itself, so the
+   browser moves them on the compositor with no script per frame: the old
+   image deepest and slowest to leave, the grunge a little nearer, and the
+   text nearest, rising faster as it fades. Browsers without scroll-driven
+   animation, and anyone who asks for reduced motion, get still layers. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .manuscript__backdrop { animation: drift-deep linear both; animation-timeline: scroll(root); }
+    .manuscript__grunge { animation: drift-mid linear both; animation-timeline: scroll(root); }
+    .manuscript--page .manuscript__text { animation: drift-near linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
+  }
+}
+@keyframes drift-deep { to { transform: translate3d(0, -50vh, 0); } }
+@keyframes drift-mid { to { transform: translate3d(0, -18vh, 0); } }
+@keyframes drift-near { to { transform: translate3d(0, -24vh, 0); } }
 .manuscript__text {
   font-family: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
   color: var(--ink-text);
