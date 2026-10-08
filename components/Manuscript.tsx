@@ -7,8 +7,9 @@ import { useEffect, useRef } from 'react';
  * ink of the rest until a cursor or a finger passes near them. Then they
  * ignite, and when it moves away they cool slowly, like embers.
  *
- * `page` is the fixed sheet behind the home page; it drifts a little against
- * the scroll. `inline` sets the text in the flow of a page (the rite pages).
+ * `page` is the fixed sheet behind the home page; it stays still while the
+ * page scrolls over it. `inline` sets the text in the flow of a page (the
+ * rite pages).
  */
 
 const RADIUS = 120;          // px from a word's centre at which it starts to warm
@@ -24,13 +25,23 @@ function words(paragraph: string, key: string) {
 
 export function Manuscript({ paragraphs, variant = 'page' }: { paragraphs: string[]; variant?: 'page' | 'inline' }) {
   const root = useRef<HTMLDivElement>(null);
-  const text = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = root.current;
     if (!el) return;
     const marked = [...el.querySelectorAll<HTMLElement>('.mword')];
     const heat = marked.map(() => 0);
+    const fixed = variant === 'page';
+    // where each word sits, measured once and again on resize, so the frame
+    // loop never asks the browser for layout while the page scrolls
+    let centres: { x: number; y: number }[] = [];
+    const measure = () => {
+      const dy = fixed ? 0 : window.scrollY;
+      centres = marked.map((w) => {
+        const r = w.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 + dy };
+      });
+    };
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let px = -1e4;
     let py = -1e4;
@@ -44,8 +55,8 @@ export function Manuscript({ paragraphs, variant = 'page' }: { paragraphs: strin
       last = now;
       let warm = false;
       marked.forEach((w, i) => {
-        const r = w.getBoundingClientRect();
-        const d = Math.hypot(px - (r.left + r.width / 2), py - (r.top + r.height / 2));
+        const c = centres[i];
+        const d = Math.hypot(px - c.x, py - (c.y - (fixed ? 0 : window.scrollY)));
         const target = Math.max(0, 1 - d / RADIUS);
         const h = target >= heat[i]
           ? heat[i] + (target - heat[i]) * Math.min(1, dt * 12)
@@ -71,35 +82,34 @@ export function Manuscript({ paragraphs, variant = 'page' }: { paragraphs: strin
     };
     const away = () => { px = -1e4; py = -1e4; kick(); };
 
-    // the sheet drifts a little against the scroll, so it sits behind the page
-    const drift = () => {
-      if (variant === 'page' && text.current && !reduced) {
-        text.current.style.transform = `translate3d(0, ${(-window.scrollY * 0.06).toFixed(1)}px, 0)`;
-      }
-      kick();
-    };
+    // in the flow of a page the words move with the scroll, so the pointer
+    // has to be tested again; the fixed sheet needs nothing
+    const onScroll = () => { if (!fixed && px > -1e3) kick(); };
 
     window.addEventListener('pointermove', onPointer, { passive: true });
     window.addEventListener('touchmove', onTouch, { passive: true });
     window.addEventListener('touchstart', onTouch, { passive: true });
     window.addEventListener('touchend', away, { passive: true });
     document.addEventListener('pointerleave', away);
-    window.addEventListener('scroll', drift, { passive: true });
-    drift();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', measure);
+    measure();
+    document.fonts?.ready.then(measure);
     return () => {
       window.removeEventListener('pointermove', onPointer);
       window.removeEventListener('touchmove', onTouch);
       window.removeEventListener('touchstart', onTouch);
       window.removeEventListener('touchend', away);
       document.removeEventListener('pointerleave', away);
-      window.removeEventListener('scroll', drift);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', measure);
       if (raf) cancelAnimationFrame(raf);
     };
   }, [variant]);
 
   return (
     <div ref={root} className={`manuscript manuscript--${variant}`} aria-hidden={variant === 'page' ? true : undefined}>
-      <div ref={text} className="manuscript__text">
+      <div className="manuscript__text">
         {paragraphs.map((p, i) => <p key={i}>{words(p, String(i))}</p>)}
       </div>
     </div>

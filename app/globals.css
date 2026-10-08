@@ -88,16 +88,9 @@ body[data-tone='bone'] .header { color: var(--ink); }
   display: grid;
   gap: 18px;
   justify-items: start;
-}
-/* a soft patch of bare paper behind the opening text, so the manuscript never
-   shows through the wordmark */
-.hero__text::before {
-  content: '';
-  position: absolute;
-  inset: -14vh -10vw -8vh -10vw;
-  z-index: -1;
-  background: radial-gradient(closest-side, rgb(20 17 13 / 0.92) 40%, rgb(20 17 13 / 0));
-  pointer-events: none;
+  /* a halo of paper colour around the letters, with no box to see the edge of,
+     so the manuscript behind does not run through them */
+  text-shadow: 0 0 28px #14110d, 0 0 10px #14110d;
 }
 .hero__mfr { height: clamp(22px, 3.4vh, 36px); display: flex; align-items: center; }
 .hero__mfr img { width: auto; height: 100%; object-fit: contain; }
@@ -269,7 +262,6 @@ main { position: relative; z-index: 1; }
   font-size: clamp(1.1rem, 1.55vw, 1.5rem);
   line-height: 1.95;
   text-align: justify;
-  will-change: transform;
 }
 .manuscript__text p { margin: 0 0 1.1em; text-indent: 1.6em; }
 .manuscript__text p:first-child { text-indent: 0; }

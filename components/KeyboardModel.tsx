@@ -6,31 +6,30 @@ import * as THREE from 'three';
 import { progress } from '@/lib/progress';
 
 /*
- * The keyboard, procedural until the production model exists. A plate and
- * twenty-four plain caps on stems, in four rows of six. Replace the body of
- * this component with the loaded model; the group is what the scroll moves,
- * so the emergence keeps working.
+ * The keycaps, procedural until the production model exists: twenty-four
+ * tapered caps in four rows of six, with no board under them, so they stand
+ * in the dark over the page. Replace the body of this component with the
+ * loaded model; the group is what the scroll moves, so the emergence keeps
+ * working.
  */
 
 const PITCH = 1.14;
-const CAP = { w: 0.92, h: 0.46, d: 0.92 };
-const PLATE = { w: 7.4, h: 0.16, d: 5.0 };
+const H = 0.62;
+// a square frustum: four radial segments turned 45 degrees, so its faces
+// line up with the axes. Radius is the corner distance, side / sqrt(2).
+const BOTTOM = 0.98 / Math.SQRT2;
+const TOP = 0.74 / Math.SQRT2;
 
 export default function KeyboardModel() {
   const group = useRef<THREE.Group>(null);
   const pointer = useRef({ x: 0, y: 0 });
 
-  const mats = useMemo(() => ({
-    cap: new THREE.MeshStandardMaterial({ color: '#2a2825', roughness: 0.55, metalness: 0.04, transparent: true }),
-    stem: new THREE.MeshStandardMaterial({ color: '#0c0c0b', roughness: 0.8, transparent: true }),
-    plate: new THREE.MeshStandardMaterial({ color: '#34322e', roughness: 0.8, metalness: 0.2, transparent: true }),
-  }), []);
-
-  const geo = useMemo(() => ({
-    cap: new THREE.BoxGeometry(CAP.w, CAP.h, CAP.d),
-    stem: new THREE.BoxGeometry(0.32, 0.5, 0.32),
-    plate: new THREE.BoxGeometry(PLATE.w, PLATE.h, PLATE.d),
-  }), []);
+  const cap = useMemo(() => {
+    const geometry = new THREE.CylinderGeometry(TOP, BOTTOM, H, 4, 1);
+    geometry.rotateY(Math.PI / 4);
+    const material = new THREE.MeshStandardMaterial({ color: '#2a2825', roughness: 0.5, metalness: 0.05, transparent: true });
+    return { geometry, material };
+  }, []);
 
   const keys = useMemo(() => {
     const list: { x: number; z: number }[] = [];
@@ -46,13 +45,9 @@ export default function KeyboardModel() {
   }, []);
 
   useEffect(() => () => {
-    geo.cap.dispose();
-    geo.stem.dispose();
-    geo.plate.dispose();
-    mats.cap.dispose();
-    mats.stem.dispose();
-    mats.plate.dispose();
-  }, [geo, mats]);
+    cap.geometry.dispose();
+    cap.material.dispose();
+  }, [cap]);
 
   useEffect(() => {
     const move = (e: PointerEvent) => {
@@ -74,19 +69,13 @@ export default function KeyboardModel() {
     g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, 0.9 + pointer.current.y * 0.025, k);
     g.rotation.z = THREE.MathUtils.lerp(g.rotation.z, pointer.current.x * 0.02, k);
     const opacity = THREE.MathUtils.clamp(0.06 + ease * 1.05, 0, 1);
-    mats.cap.opacity = opacity;
-    mats.stem.opacity = opacity;
-    mats.plate.opacity = opacity;
+    cap.material.opacity = opacity;
   });
 
   return (
     <group ref={group} rotation={[0.9, 0, 0]}>
-      <mesh geometry={geo.plate} material={mats.plate} position={[0, -PLATE.h / 2, 0]} receiveShadow />
       {keys.map((k, i) => (
-        <group key={i} position={[k.x, 0, k.z]}>
-          <mesh geometry={geo.stem} material={mats.stem} position={[0, 0.25, 0]} />
-          <mesh geometry={geo.cap} material={mats.cap} position={[0, CAP.h / 2 + 0.5, 0]} castShadow receiveShadow />
-        </group>
+        <mesh key={i} geometry={cap.geometry} material={cap.material} position={[k.x, 0, k.z]} />
       ))}
     </group>
   );

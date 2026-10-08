@@ -27,8 +27,6 @@ function LightRig() {
         intensity={230}
         distance={30}
         color="#e9e3d6"
-        castShadow
-        shadow-mapSize={[1024, 1024]}
       />
       <pointLight position={[6, -2, -6]} intensity={4} color="#541817" distance={18} />
     </>
@@ -39,8 +37,7 @@ export default function KeyboardScene() {
   return (
     <Canvas
       className="scene-canvas"
-      dpr={[1, 1.6]}
-      shadows
+      dpr={[1, 1.25]}
       camera={{ position: [0, 13, 16.5], fov: 24, near: 0.1, far: 90 }}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       flat
