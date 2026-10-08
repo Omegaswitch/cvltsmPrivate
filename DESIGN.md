@@ -31,7 +31,7 @@ One ground for the whole page. No light sections cut into it, no gradients beyon
 
 Behind the whole site lies a page of old text on dark, aged paper. It is the only place that breaks the rules above, and it breaks them on purpose:
 
-- **Paper:** `#14110d`, long fibres from noise, a burnt edge, two faint stains. It never animates.
+- **Paper:** `#14110d`, a slow uneven tone with darker aged patches, a faint lit tooth, a burnt edge and three old stains. No fine static: that reads as noise, not paper. It never animates.
 - **Text:** IM Fell English, bone at 7.5% opacity, two justified columns with a drop cap. On the hunt pages the same face is set large and legible.
 - **Hidden words:** set in the same ink as the rest, so they cannot be seen. A cursor or a finger passing near one makes it glow ember red (`#b1291f`); when it moves away the word cools over a few seconds. Read in order, the hidden words are the first riddle.
 - **Still:** the sheet does not move with the scroll. Its text fades out as the opening scrolls away, so it never runs behind the sections; the paper stays.
