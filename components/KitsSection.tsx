@@ -9,7 +9,7 @@ export function KitsSection() {
   const [base, numpad, novelties, deskmat] = KITS;
 
   return (
-    <section id="kits" className="section section--bone kits">
+    <section id="kits" className="section kits">
       <h2 className="section__title">Kits</h2>
 
       <div className="kits__lead">

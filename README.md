@@ -15,7 +15,7 @@ npm run build && npm start
 npm run lint      # type check
 ```
 
-Built with Next.js, React, TypeScript, GSAP (for the scroll-linked keyboard) and React Three Fiber.
+Built with Next.js, React and TypeScript. No animation or 3D libraries.
 
 ## Where things are
 
@@ -25,20 +25,20 @@ app/
   layout.tsx          metadata, the wordmark font, the Inter Tight stylesheet
   globals.css         the palette, the grid, every section's rules
 components/
-  Header.tsx          wordmark and section links; the header takes the tone beneath it
-  Hero.tsx            the opening: manufacturer slot, wordmark, keyboard
+  Header.tsx          wordmark and section links; the active one is underlined
+  Hero.tsx            the opening: manufacturer slot, wordmark, one line
   KitsSection.tsx     Base leads; Numpad and Novelties side by side; Deskmat full width
   ColourSection.tsx   the colourway strip
-  RendersSection.tsx  the render grid; a click opens a plain viewer
-  RitualSection.tsx   a statement, then plates at uneven scales
+  RendersSection.tsx  the render grid; a click opens a plain viewer (hidden until a render has a src)
+  RitualSection.tsx   a statement, then plates at uneven scales (only those with a src)
   VendorsSection.tsx  regions, with a status line each
   CreditsSection.tsx  credits and the closing wordmark
-  KeyboardModel.tsx   the stand-in keyboard (see below)
-  KeyboardScene.tsx   the canvas and its single key light
-  LazyScene.tsx       mounts the canvas only while near the screen
-  Plate.tsx           an image, or an empty tile of the same aspect
+  Manuscript.tsx      the paper and its hidden words
+  Incantation.tsx     typing an answer, and the Speak field
+  TwigStone.tsx       the twig-rune staves on a hunt page
+  Plate.tsx           an image, or a hairline frame of the same aspect
 data/                 every piece of copy and every item (edit these, not the components)
-lib/                  scroll progress, GSAP setup, media queries, WebGL check
+lib/hunt.ts           the hunt: stages, answers, signed progress (server only)
 types/index.ts        the shapes the data must match
 public/fonts/         Valhalica, the wordmark face
 public/images/        photographs and renders (not yet supplied)
@@ -81,10 +81,6 @@ Aspect ratios are fixed by the layout. Shoot to them or crop before export. WebP
 | Ritual 01 to 04 | 16/10, 4/5, 21/6, 3/5 | `public/images/ritual/01.webp` to `04.webp` |
 | Manufacturer mark | any, reserved height | set `SET.manufacturerLogo` in `data/site.ts` |
 
-## The keyboard
-
-`KeyboardModel.tsx` is a stand-in: a plate and twenty-four plain caps. To use the real model, replace the body of that component. The scroll moves the group, not its parts, so the rise from the dark keeps working.
-
 ## The manuscript and the hunt
 
 Behind the site lies a page of old text on dark paper (`components/Manuscript.tsx`, text in `data/manuscript.ts`). Some words are hidden in the same ink as the rest; they glow red when a cursor or a finger passes over them, and cool slowly when it moves on. Read in order, they are a riddle.
@@ -107,14 +103,12 @@ Answers ignore case, spaces, punctuation and accents, and Norse letters are spel
 
 ## Motion and accessibility
 
-- The keyboard rises with the scroll. Nothing else on the page moves on its own.
-- Reduced motion shows the keyboard in its final pose, with no scroll-linked motion.
-- Narrow screens and browsers without WebGL get a still poster in place of the canvas.
+- Nothing on the page moves on its own. The manuscript text fades as the opening scrolls away; hidden words warm under the cursor and cool slowly.
 - The viewer closes on Escape. Links and buttons are real elements.
 
 ## What has not been measured
 
-This was built and checked in a headless browser on a machine with no GPU. WebGL there is software-rendered, so the frame rate of the keyboard on real hardware is unknown. That is the first thing to check on a phone and a laptop.
+This was checked in a headless browser, where the web fonts are blocked, so the screenshots used fallback faces. Check the type on a real device.
 
 ## Archive
 

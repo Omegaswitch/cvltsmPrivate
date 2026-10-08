@@ -2,18 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import { SET } from '@/data/site';
+import { RENDERS } from '@/data/renders';
+
+// the renders section exists only once there are renders to show
+const HAS_RENDERS = RENDERS.some((r) => r.src);
 
 const LINKS = [
   { id: 'kits', label: 'Kits' },
   { id: 'colour', label: 'Colour' },
-  { id: 'renders', label: 'Renders' },
+  ...(HAS_RENDERS ? [{ id: 'renders', label: 'Renders' }] : []),
   { id: 'vendors', label: 'Vendors' },
-] as const;
+];
 
-/** Sections on bone. Every other section is void. */
-const BONE = new Set(['kits', 'vendors']);
 /** Every section the header tracks, top of the page first. */
-const TRACKED = ['top', 'kits', 'colour', 'renders', 'ritual', 'vendors', 'credits'];
+const TRACKED = ['top', 'kits', 'colour', ...(HAS_RENDERS ? ['renders'] : []), 'ritual', 'vendors', 'credits'];
 
 /**
  * The section whose top has most recently passed a line a third of the way
@@ -53,10 +55,6 @@ export function Header() {
       if (frame) cancelAnimationFrame(frame);
     };
   }, []);
-
-  useEffect(() => {
-    document.body.dataset.tone = BONE.has(active) ? 'bone' : 'void';
-  }, [active]);
 
   return (
     <header className="header">

@@ -8,7 +8,8 @@ import { useEffect, useRef } from 'react';
  * ignite, and when it moves away they cool slowly, like embers.
  *
  * `page` is the fixed sheet behind the home page; it stays still while the
- * page scrolls over it. `inline` sets the text in the flow of a page (the
+ * page scrolls over it, and its text fades out as the opening scrolls away,
+ * so it never runs behind the sections. `inline` sets the text in the flow of a page (the
  * rite pages).
  */
 
@@ -25,6 +26,7 @@ function words(paragraph: string, key: string) {
 
 export function Manuscript({ paragraphs, variant = 'page' }: { paragraphs: string[]; variant?: 'page' | 'inline' }) {
   const root = useRef<HTMLDivElement>(null);
+  const text = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = root.current;
@@ -84,7 +86,16 @@ export function Manuscript({ paragraphs, variant = 'page' }: { paragraphs: strin
 
     // in the flow of a page the words move with the scroll, so the pointer
     // has to be tested again; the fixed sheet needs nothing
-    const onScroll = () => { if (!fixed && px > -1e3) kick(); };
+    let fading = 0;
+    const fade = () => {
+      fading = 0;
+      const t = text.current;
+      if (t) t.style.opacity = String(Math.max(0, 1 - window.scrollY / (window.innerHeight * 0.7)));
+    };
+    const onScroll = () => {
+      if (fixed) { if (!fading) fading = requestAnimationFrame(fade); return; }
+      if (px > -1e3) kick();
+    };
 
     window.addEventListener('pointermove', onPointer, { passive: true });
     window.addEventListener('touchmove', onTouch, { passive: true });
@@ -94,6 +105,7 @@ export function Manuscript({ paragraphs, variant = 'page' }: { paragraphs: strin
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', measure);
     measure();
+    if (fixed) fade();
     document.fonts?.ready.then(measure);
     return () => {
       window.removeEventListener('pointermove', onPointer);
@@ -104,12 +116,13 @@ export function Manuscript({ paragraphs, variant = 'page' }: { paragraphs: strin
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', measure);
       if (raf) cancelAnimationFrame(raf);
+      if (fading) cancelAnimationFrame(fading);
     };
   }, [variant]);
 
   return (
     <div ref={root} className={`manuscript manuscript--${variant}`} aria-hidden={variant === 'page' ? true : undefined}>
-      <div className="manuscript__text">
+      <div ref={text} className="manuscript__text">
         {paragraphs.map((p, i) => <p key={i}>{words(p, String(i))}</p>)}
       </div>
     </div>

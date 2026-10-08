@@ -3,7 +3,7 @@ import { VENDOR_REGIONS } from '@/data/vendors';
 /** Where the set is supplied, by region. */
 export function VendorsSection() {
   return (
-    <section id="vendors" className="section section--bone vendors">
+    <section id="vendors" className="section vendors">
       <h2 className="section__title">Vendors</h2>
       <ul className="vendors__list">
         {VENDOR_REGIONS.map((r) => (

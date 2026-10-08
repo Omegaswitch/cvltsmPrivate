@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#070707',
+  themeColor: '#14110d',
   colorScheme: 'dark',
   width: 'device-width',
   initialScale: 1,
@@ -17,7 +17,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-tone="void">
+    <html lang="en">
       <head>
         <link rel="preload" href="/fonts/Valhalica-Regular.otf" as="font" type="font/otf" crossOrigin="" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

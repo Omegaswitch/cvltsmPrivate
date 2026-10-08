@@ -12,12 +12,15 @@ import { Plate } from './Plate';
 export function RendersSection() {
   const [open, setOpen] = useState<RenderPlate | null>(null);
   const close = useCallback(() => setOpen(null), []);
+  const renders = RENDERS.filter((r) => r.src);
+  // no renders yet: no section, rather than a wall of empty frames
+  if (!renders.length) return null;
 
   return (
     <section id="renders" className="section renders">
       <h2 className="section__title">Renders</h2>
       <ul className="renders__grid">
-        {RENDERS.map((r) => (
+        {renders.map((r) => (
           <li key={r.path} className={`renders__item renders__item--${r.span}`}>
             <button type="button" className="renders__button" onClick={() => setOpen(r)} aria-label={`Open: ${r.alt}`}>
               <Plate plate={r} as="div" />
