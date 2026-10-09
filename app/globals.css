@@ -263,7 +263,7 @@ img, video { display: block; }
 @keyframes sink { to { transform: scale(1.06); filter: brightness(0.45); } }
 @keyframes rise { to { transform: translate3d(0, -14vh, 0); opacity: 0; } }
 
-/* ----------------------------------------------------------- logo slots */
+/* ---------------------------------------------------------------- logos */
 
 /* the set's name in Valhalica, standing in for the logo */
 .wordmark {
@@ -278,16 +278,16 @@ img, video { display: block; }
 }
 
 /* A logo's place before the logo exists: its proportions, held by a hairline. */
-.slot { display: block; width: 100%; }
-.slot--set { aspect-ratio: 4.6 / 1; }
-.slot--manufacturer { aspect-ratio: 3.4 / 1; }
-.slot:not(.slot--filled) {
+.logo { display: block; height: auto; }
+.hero__set .logo { width: 100%; }
+.hero__set h1 { margin: 0; }
+/* a render's place before the render exists: its proportions, held by a hairline */
+.slot {
   display: grid;
   place-items: center;
   border: 1px dashed rgb(212 204 191 / 0.3);
 }
 .slot__label { color: var(--bone-dim); white-space: nowrap; }
-.slot--filled { height: auto; aspect-ratio: auto; object-fit: contain; }
 
 /* ------------------------------------------------------------ sections */
 
@@ -381,9 +381,9 @@ img, video { display: block; }
 .render { margin: 0; }
 .render--lead { grid-column: 1 / span 7; --drift: 4vh; }
 .render--side { grid-column: 9 / span 4; margin-top: 18vh; --drift: 11vh; }
-.render--wide { grid-column: 1 / -1; --drift: 3vh; }
-.render--half { grid-column: span 6; --drift: 6vh; }
-.render--half:last-child { margin-top: 12vh; --drift: 10vh; }
+.render--third { grid-column: span 4; --drift: 6vh; }
+.render--third:nth-child(4) { margin-top: 10vh; --drift: 10vh; }
+.render--third:nth-child(5) { margin-top: -6vh; --drift: 4vh; }
 .render__frame img { width: 100%; height: auto; object-fit: cover; }
 
 /* vendors: on black, torn over the renders */
@@ -454,15 +454,16 @@ img, video { display: block; }
 /* the privacy policy: plain reading on the concrete */
 .policy {
   min-height: 100vh;
-  padding: clamp(120px, 18vh, 180px) var(--gutter) 96px;
+  padding: clamp(64px, 12vh, 140px) var(--gutter) 96px;
   background: var(--ground);
 }
+.policy .title { font-size: clamp(2.4rem, 9vw, 6.5rem); overflow-wrap: anywhere; }
 .policy__body { max-width: 62ch; margin-top: clamp(40px, 7vh, 72px); font-size: 1rem; line-height: 1.65; }
 .policy__body h2 { margin: 2.2em 0 0.5em; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--bone-dim); }
 .policy__body p, .policy__body ul { margin: 0 0 1em; }
 .policy__body ul { padding-left: 1.2em; }
 .policy__body a { text-decoration: underline; text-underline-offset: 0.2em; }
-.policy__back { position: fixed; top: 26px; left: var(--gutter); z-index: 40; font-weight: 500; font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.policy__back { margin-bottom: clamp(28px, 5vh, 48px); font-weight: 500; font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; }
 
 /* ----------------------------------------------------------------- daub */
 
@@ -538,8 +539,8 @@ img, video { display: block; }
   .strip li { grid-template-columns: 1fr auto; align-items: center; }
   .strip__chip { grid-column: 1 / -1; height: 72px; }
   .renders__grid { grid-template-columns: minmax(0, 1fr); }
-  .render--lead, .render--side, .render--wide, .render--half { grid-column: 1 / -1; margin-top: 0; }
-  .render--side, .render--half:last-child { width: 78%; justify-self: end; margin-top: 0; }
+  .render--lead, .render--side, .render--third { grid-column: 1 / -1; margin-top: 0; }
+  .render--side, .render--third:nth-child(4) { width: 78%; justify-self: end; margin-top: 0; }
   .vendors__row { grid-template-columns: minmax(0, 1fr); gap: 8px; }
 }
 

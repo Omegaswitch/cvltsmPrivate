@@ -12,9 +12,9 @@ export function RendersSection() {
           <figure key={r.id} className={`render render--${r.span}`}>
             <div className="render__frame">
               {r.src ? (
-                <img src={r.src} alt={r.alt} loading="lazy" decoding="async" style={{ aspectRatio: r.ratio }} />
+                <img src={r.src} alt={r.alt} loading="lazy" decoding="async" style={{ aspectRatio: "1 / 1" }} />
               ) : (
-                <div className="slot" style={{ aspectRatio: r.ratio }} role="img" aria-label={`${r.alt} (to come)`}>
+                <div className="slot" style={{ aspectRatio: "1 / 1" }} role="img" aria-label={`${r.alt} (to come)`}>
                   <span className="slot__label" aria-hidden="true">{r.alt}</span>
                 </div>
               )}

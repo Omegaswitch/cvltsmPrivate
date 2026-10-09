@@ -1,21 +1,12 @@
-/**
- * The marks the site is built around. Until the final artwork exists, each
- * logo is undefined and its place in the layout is held by a marked slot of
- * the right size. Put the file in public/brand/ (SVG preferred) and set its
- * path here; nothing else needs to change.
- */
+/** The names and marks the site is built around. Logos live in public/brand/. */
 export const BRAND = {
   name: 'CVLTSM',
   year: '2027',
-  /** the CVLTSM keycap set logo: the focal point of the opening */
+  /** the set's logo, e.g. '/brand/cvltsm.svg'; until set, the name stands in Valhalica */
   logo: undefined as string | undefined,
-  /** the manufacturer: named and placed, but always second to the set */
-  /** the line at the very foot of every page */
+  manufacturer: { name: 'SWG', logo: '/brand/SWGX.png' },
+  /** the line at the very foot of the page */
   credit: 'manu x omegaswitch x stellaidoscope',
-  /** who answers privacy questions, as shown in the privacy policy */
+  /** who answers privacy questions */
   contact: 'omegaswitch on Discord',
-  manufacturer: {
-    name: 'SWG' as string | undefined,
-    logo: '/brand/SWGX.png' as string | undefined,
-  },
 };

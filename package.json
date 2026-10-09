@@ -1,8 +1,8 @@
 {
-  "name": "ritual-exhibition",
+  "name": "cvltsm",
   "version": "1.0.0",
   "private": true,
-  "description": "Interactive exhibition for a Nordic ritual keycap set. Not a store.",
+  "description": "The site for the CVLTSM keycap set.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

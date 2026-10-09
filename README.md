@@ -21,7 +21,6 @@ app/
 components/
   Hero.tsx               the opening: film, logo slots
   Film.tsx               the film player and its layers of damage
-  LogoSlot.tsx           a logo, or the marked space where it will go
   KitsSection.tsx        the kits, each render at its own depth
   ColourSection.tsx      the colors, pinned beneath the kits
   RendersSection.tsx     the renders on an uneven grid
@@ -43,7 +42,7 @@ scripts/                 encode-film.sh, make-textures.mjs
 ## Replacing things
 
 - **Kit renders.** Put each in `public/kits/` and set its `src` in `data/kits.ts`; until then each kit shows a dashed slot of its proportions.
-- **Renders.** Put each in `public/renders/` and set its `src` in `data/renders.ts`.
+- **Renders.** All square (4000 × 4000). Put each in `public/renders/` and set its `src` in `data/renders.ts`; export them at about 2000 × 2000 as WebP for the web.
 - **Vendors.** Add names (and links) per region in `data/vendors.ts`; until then each region reads "To be announced".
 - **Logos.** The SWG logo is `public/brand/SWGX.png`. Put the set logo in `public/brand/` and set `BRAND.logo` in `data/brand.ts`; until then CVLTSM is set in Valhalica.
 - **Clips.** The originals go in `assets/film/` (kept out of git; they are large). Each clip's source, cut and grade are a line in `scripts/encode-film.sh`; run it with `FFMPEG=/path/to/ffmpeg scripts/encode-film.sh`. It writes 480p and 360p, WebM and MP4, and a poster frame per clip to `public/film/`. Each clip's line also sets how worn it is: the height it is shrunk to before being blown back up, and how much grain is baked in. The order, lengths and transitions are in `data/film.ts`.

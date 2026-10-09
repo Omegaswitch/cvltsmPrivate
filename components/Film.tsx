@@ -81,9 +81,8 @@ export function Film() {
     };
     videos.forEach((v) => v.addEventListener('timeupdate', onTime));
 
-    const running = () => wanted && visible && tabShown;
     const sync = () => {
-      if (running()) {
+      if (wanted && visible && tabShown) {
         videos[front].play().catch(() => {});
         damage.current?.play().catch(() => {});
       } else {
@@ -92,10 +91,8 @@ export function Film() {
       }
     };
 
-    let begun = false;
-    const begin = () => {
-      if (begun) return;
-      begun = true;
+    const wanted = !reduced && !saveData;
+    if (wanted) {
       load(va, 0);
       va.classList.add('is-shown');
       if (damage.current && size === 'lg') {
@@ -103,10 +100,7 @@ export function Film() {
         damage.current.load();
       }
       sync();
-    };
-
-    const wanted = !reduced && !saveData;
-    if (wanted) begin();
+    }
 
     // out of sight: when the kits have covered it, or the tab is hidden
     const onScroll = () => {
