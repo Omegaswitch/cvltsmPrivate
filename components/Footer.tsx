@@ -12,6 +12,10 @@ export function Footer() {
         <div><dt>Manufacturer</dt><dd>{BRAND.manufacturer.name ?? 'To be announced'}</dd></div>
         <div><dt>Year</dt><dd>{BRAND.year}</dd></div>
       </dl>
+      <div className="foot__base">
+        <span>{BRAND.credit}</span>
+        <a className="daub" href="/privacy" data-label="Privacy policy"><span>Privacy policy</span></a>
+      </div>
     </footer>
   );
 }

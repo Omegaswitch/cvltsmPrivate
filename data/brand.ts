@@ -10,6 +10,10 @@ export const BRAND = {
   /** the CVLTSM keycap set logo: the focal point of the opening */
   logo: undefined as string | undefined,
   /** the manufacturer: named and placed, but always second to the set */
+  /** the line at the very foot of every page */
+  credit: 'manu x omegaswitch x stellaidoscope',
+  /** who answers privacy questions; shown in the privacy policy once set */
+  contact: undefined as string | undefined,
   manufacturer: {
     name: 'SWG' as string | undefined,
     logo: '/brand/SWGX.png' as string | undefined,
