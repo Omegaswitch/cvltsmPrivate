@@ -58,7 +58,7 @@ Four clips, about 40 seconds, looping: a window choked with wire and the masked 
 - Over the footage: a pass of real film dust and the brushed concrete as dirt. They do not sit still: they come in a pulse, two beats and a rest, and the dirt jumps on the beat. Every few seconds the picture glitches for a fraction of a second. Hairline scratches appear a few times a minute; the frame's edges are burned.
 - One sheet of grain covers the whole site, moving in hard steps like a projector, so the film's texture carries on below it.
 - The kits come up over the film on a torn edge while the film sinks back and darkens. Each kit render drifts against the scroll at its own pace. The colour section waits pinned beneath the kits, uncovered as they scroll away, its chips rising one after another.
-- **Hover:** blood is gouged across a link or button in a few uneven, shaking strokes, then the word appears over it in Uncial Antiqua, glowing and flickering on.
+- **Hover:** blood is dragged across a link or button in one smooth stroke, then the word rises out of it in Uncial Antiqua, glowing.
 
 **Loading.** A poster frame is in the page from the start; the clips load one at a time as they are needed, at 480p on phones. The whole film, both sizes and both formats, is under 5 MB. The damage loop plays on large screens only.
 
