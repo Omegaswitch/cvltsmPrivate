@@ -1,5 +1,5 @@
 /**
- * The page of old text behind the home page. [[word]] marks a hidden word:
+ * The page of old text below the film on the home page. [[word]] marks a hidden word:
  * it is set in the same ink as the rest and glows when a cursor or a finger
  * passes over it. Read in order, the hidden words are the first riddle. The
  * answer is checked on the server (lib/hunt.ts), never here.
