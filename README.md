@@ -1,6 +1,6 @@
 # CVLTSM
 
-The site for CVLTSM, a keycap set. Not a shop: a way into its world. It opens on a film, a ritual found on damaged footage, with the set's logo over it, and closes on a short colophon.
+The site for CVLTSM, a keycap set. Not a shop: a way into its world. It opens on a film, a ritual found on damaged footage, with the set's logo over it; then the kits scroll up over the film and uncover the colourway waiting beneath; then a short colophon.
 
 ```
 npm install
@@ -15,18 +15,21 @@ Next.js, React and TypeScript, built as a fully static page: any static host ser
 
 ```
 app/
-  page.tsx               the page: nav, film, colophon
+  page.tsx               the page: nav, film, kits, colour, colophon
   layout.tsx             metadata and the web font
   globals.css            every rule, in the order of the page
 components/
   Hero.tsx               the opening: film, logo slots
   Film.tsx               the film player and its layers of damage
   LogoSlot.tsx           a logo, or the marked space where it will go
-  Nav.tsx, Footer.tsx    two links; the colophon
-  TornEdge.tsx           the torn top edge of the colophon
+  KitsSection.tsx        the kits, each render at its own depth
+  ColourSection.tsx      the colourway, pinned beneath the kits
+  Nav.tsx, Footer.tsx    three links; the colophon
+  TornEdge.tsx           the torn top edge of the kits
 data/
   brand.ts               names and logo paths
   film.ts                the clips: order, length, how each arrives
+  kits.ts, colours.ts    the kits (and their render paths) and the colourway
 public/film/             the graded clips, posters and the damage loop
 public/textures/         grime, ground and grain
 public/brand/            the logos, when they exist
@@ -36,21 +39,23 @@ scripts/                 encode-film.sh, make-textures.mjs
 
 ## Replacing things
 
+- **Kit renders.** Put each in `public/kits/` and set its `src` in `data/kits.ts`; until then each kit shows a dashed slot of its proportions.
 - **Logos.** Put the files in `public/brand/` (SVG preferred) and set `BRAND.logo` and `BRAND.manufacturer.logo` (and `.name`) in `data/brand.ts`. Until then the hero shows a dashed slot of the right proportions in each place. No logo is drawn or set in type as a stand-in.
-- **Clips.** The originals go in `assets/film/` (kept out of git; they are large). Each clip's source, cut and grade are a line in `scripts/encode-film.sh`; run it with `FFMPEG=/path/to/ffmpeg scripts/encode-film.sh`. It writes 720p and 480p, WebM and MP4, and a poster frame per clip to `public/film/`. The order, lengths and transitions are in `data/film.ts`.
+- **Clips.** The originals go in `assets/film/` (kept out of git; they are large). Each clip's source, cut and grade are a line in `scripts/encode-film.sh`; run it with `FFMPEG=/path/to/ffmpeg scripts/encode-film.sh`. It writes 480p and 360p, WebM and MP4, and a poster frame per clip to `public/film/`. Each clip's line also sets how worn it is: the height it is shrunk to before being blown back up, and how much grain is baked in. The order, lengths and transitions are in `data/film.ts`.
 - **Textures.** The concrete originals are in `assets/textures/`; `node scripts/make-textures.mjs` remakes the grime, the dark ground and the grain tile.
 - **The red.** The blood in the film is one colour pass, `--film-tint` in `globals.css`. Its alpha is its strength.
 
 ## The film
 
-Four clips, about half a minute, looping: a window choked with wire and the eyes behind it; hands against frosted glass; a hooded figure with a scythe in a misty court; a cabin wall under a flashlight. All are graded to one look: near-monochrome, blacks crushed, a dirty cast, then a colour pass toward dried blood.
+Four clips, about 40 seconds, looping: a window choked with wire and the masked face behind it; hands against frosted glass; a hooded figure with a scythe in a misty court; the longer cabin sequence under a flashlight. All are graded to one look (near-monochrome, blacks crushed, a dirty cast, then a colour pass toward dried blood) and deliberately worn: shrunk to 200 to 320 lines and blown back up, grain baked in, 18 frames a second. The masked face is worn the most.
 
 - Two video elements take turns. The next clip starts on top of the one still playing and dissolves in over 2.4 seconds, so the picture never drops to black. Two of the four arrivals are broken, for under a second, by interference: scan lines, a jump of grain, the picture torn sideways.
-- Over the footage: a looping pass of real film dust and grime (screened, so it only lightens), the brushed concrete multiplied in as dirt, two hairline scratches that appear a few times a minute, and the frame's edges burned.
+- Over the footage: a pass of real film dust and the brushed concrete as dirt. They do not sit still: they come in a pulse, two beats and a rest, and the dirt jumps on the beat. Every few seconds the picture glitches for a fraction of a second. Hairline scratches appear a few times a minute; the frame's edges are burned.
 - One sheet of grain covers the whole site, moving in hard steps like a projector, so the film's texture carries on below it.
-- The colophon comes up over the film on a torn edge while the film sinks back and darkens.
+- The kits come up over the film on a torn edge while the film sinks back and darkens. Each kit render drifts against the scroll at its own pace. The colour section waits pinned beneath the kits, uncovered as they scroll away, its chips rising one after another.
+- **Hover:** a link or button is smeared over with blood-red paint, then its word is written over the paint in glowing ink.
 
-**Loading.** A poster frame is in the page from the start; the clips load one at a time as they are needed, at 480p on phones. The whole film, both sizes and both formats, is under 6 MB. The damage loop plays on large screens only.
+**Loading.** A poster frame is in the page from the start; the clips load one at a time as they are needed, at 480p on phones. The whole film, both sizes and both formats, is under 5 MB. The damage loop plays on large screens only.
 
 **When it does not play.** With reduced motion, or a data-saving connection, nothing autoplays: the first poster frame stands, and the reel's Play starts the film. It pauses when it is covered or the tab is hidden. Pause is always at hand in the reel.
 

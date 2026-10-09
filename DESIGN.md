@@ -28,7 +28,9 @@ The references set the terms: black, and one red. The red of dried blood, used a
 
 - **Gutter** `clamp(20px, 3.2vw, 52px)`. Everything aligns to it.
 - **The opening:** the film full bleed. The set's logo low on the left, about 56% of the width, where the eye settles; the manufacturer small at top left; the nav at top right; the reel at the foot on the right, opposite the logo. On phones the logo spans the width and the reel sits under it.
-- **The colophon:** four facts in a row on dark warm concrete with burned edges, its top torn, coming up over the film.
+- **Kits:** on dark concrete, its top torn, coming up over the film. The base kit at 7 of 12 columns, the numpad offset low on the right, the novelties high on the left, the deskmat full width. Each render drifts at its own depth.
+- **Colour:** pinned beneath the kits on black; one strip, each chip as wide as its share of the set, with name and hex.
+- **Colophon:** four facts in a row (set, keycaps, manufacturer SWG, year 2027).
 
 ## The film's layers, bottom to top
 
@@ -38,5 +40,7 @@ poster frame; clip under; clip dissolving in; film damage (screen, 17%); concret
 
 - Dissolve 2.4s, `cubic-bezier(0.4, 0, 0.2, 1)`. Interference 0.85s, in hard steps.
 - Grain moves in six hard steps per 0.8s, by transform only. Scratches appear for a frame or two, three times in nine seconds.
-- On scroll (CSS scroll timeline): the film scales to 1.06 and darkens as the colophon rises; the logo and reel rise and fade.
+- On scroll (CSS scroll timeline): the film scales to 1.06 and darkens as the kits rise; the logo and reel rise and fade. Kit renders drift against the scroll by 3 to 12vh. The colour chips rise in as the kits leave.
+- The film's grime and dust pulse (two beats and a rest, 5.2s), and the picture glitches briefly every 7.7s.
+- Hover: blood-red paint dragged across (0.42s), then the word written over it in glowing ink (0.55s, after 0.24s).
 - Reduced motion: no autoplay, no grain or scratch movement, no scroll effects, no dissolves.

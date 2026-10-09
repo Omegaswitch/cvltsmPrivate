@@ -1,0 +1,34 @@
+import { KITS } from '@/data/kits';
+import { TornEdge } from './TornEdge';
+
+/**
+ * The kits come up over the film on a torn edge. Each render sits at its own
+ * depth and drifts against the scroll at its own pace (globals.css).
+ */
+export function KitsSection() {
+  return (
+    <section id="kits" className="kits" aria-labelledby="kits-title">
+      <TornEdge />
+      <h2 id="kits-title" className="title">Kits</h2>
+      <div className="kits__grid">
+        {KITS.map((k) => (
+          <figure key={k.id} className={`kit kit--${k.id}`}>
+            <div className="kit__frame">
+              {k.src ? (
+                <img src={k.src} alt={`${k.name}: ${k.contents}`} loading="lazy" decoding="async" style={{ aspectRatio: k.ratio }} />
+              ) : (
+                <div className="slot" style={{ aspectRatio: k.ratio }} role="img" aria-label={`${k.name} render (to come)`}>
+                  <span className="slot__label" aria-hidden="true">{k.name} render</span>
+                </div>
+              )}
+            </div>
+            <figcaption className="kit__caption">
+              <span className="kit__name">{k.name}</span>
+              <span className="kit__contents">{k.contents}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  );
+}

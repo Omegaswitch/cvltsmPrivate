@@ -18,7 +18,7 @@ export const FILM: Clip[] = [
   { id: 'window', seconds: 10, into: 'dissolve' },
   { id: 'hands', seconds: 6, into: 'interference' },
   { id: 'figure', seconds: 10, into: 'dissolve' },
-  { id: 'cabin', seconds: 7, into: 'interference' },
+  { id: 'cabin', seconds: 17, into: 'interference' },
 ];
 
 /** how long one clip takes to dissolve into the next, in seconds */

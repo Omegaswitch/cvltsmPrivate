@@ -81,11 +81,9 @@ img, video { display: block; }
   gap: clamp(18px, 2.4vw, 36px);
   padding: 26px var(--gutter);
   color: var(--bone);
-  /* legible over the film and over the colophon alike */
-  mix-blend-mode: difference;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 0.6);
 }
-.nav a { opacity: 0.62; transition: opacity 0.4s var(--ease); }
-.nav a:hover { opacity: 1; }
+.nav a > span { opacity: 0.7; }
 
 /* ----------------------------------------------------------------- hero */
 
@@ -117,7 +115,7 @@ img, video { display: block; }
 .film__clip.is-shown { opacity: 1; z-index: 2; transition: opacity 2.4s var(--slow); }
 
 /* dust and grime moving over the picture: light only, never darkening */
-.film__damage { z-index: 3; mix-blend-mode: screen; opacity: 0.17; }
+.film__damage { z-index: 3; mix-blend-mode: screen; opacity: 0.12; animation: damage-pulse 5.2s infinite; }
 /* the concrete multiplied in: its marks become dirt on the film */
 .film__grime {
   position: absolute;
@@ -125,7 +123,8 @@ img, video { display: block; }
   z-index: 4;
   background: url('/textures/grime.webp') center / cover;
   mix-blend-mode: multiply;
-  opacity: 0.55;
+  opacity: 0.3;
+  animation: grime-pulse 5.2s infinite;
 }
 
 /* the blood in the image: a colour pass that keeps every value of the grade
@@ -136,6 +135,38 @@ img, video { display: block; }
   z-index: 4;
   background: var(--film-tint, rgb(122 28 20 / 0.32));
   mix-blend-mode: color;
+}
+
+/* The grime does not sit still: it comes in a pulse, two beats and a rest,
+   like a heart or a failing lamp, and now and then the dirt jumps. */
+@keyframes grime-pulse {
+  0%, 100% { opacity: 0.3; background-position: 50% 50%; }
+  6% { opacity: 0.85; }
+  10% { opacity: 0.4; }
+  15% { opacity: 0.78; background-position: 50% 50%; }
+  15.5% { background-position: 47% 53%; }
+  24% { opacity: 0.32; background-position: 47% 53%; }
+  24.5% { background-position: 50% 50%; }
+  61% { opacity: 0.35; }
+  63% { opacity: 0.62; }
+  66% { opacity: 0.33; }
+}
+@keyframes damage-pulse {
+  0%, 100% { opacity: 0.1; }
+  6% { opacity: 0.42; }
+  10% { opacity: 0.16; }
+  15% { opacity: 0.36; }
+  24% { opacity: 0.1; }
+}
+/* and every few seconds the picture glitches for a fraction of a second */
+.film__clip { animation: glitch 7.7s steps(1) infinite; }
+@keyframes glitch {
+  0%, 91% { transform: none; filter: none; }
+  91.5% { transform: translate3d(-1.6%, 0, 0) skewX(-3deg); filter: contrast(1.6) brightness(1.4); }
+  92.2% { transform: translate3d(1.1%, 0.5%, 0); filter: none; }
+  92.8% { transform: none; }
+  96% { transform: translate3d(0.5%, 0, 0) scaleY(1.02); filter: brightness(1.3) hue-rotate(-12deg); }
+  96.4% { transform: none; filter: none; }
 }
 
 /* scratches: two hairlines that appear now and then, in a new place each time */
@@ -233,10 +264,8 @@ img, video { display: block; }
   font: inherit;
   letter-spacing: inherit;
   text-transform: inherit;
-  opacity: 0.62;
-  transition: opacity 0.4s var(--ease);
 }
-.reel__toggle:hover { opacity: 1; }
+.reel__toggle > span { opacity: 0.7; }
 
 /* Leaving the film: it sinks back and darkens as the colophon comes up,
    and the logo rises a little faster than the page. Driven by the scroll
@@ -264,16 +293,23 @@ img, video { display: block; }
 .slot__label { color: var(--bone-dim); white-space: nowrap; }
 .slot--filled { height: auto; object-fit: contain; }
 
-/* ------------------------------------------------------------- colophon */
+/* ------------------------------------------------------------ sections */
 
-/* The colophon comes up over the film on a torn edge, on dark concrete. */
-.foot {
-  position: relative;
-  z-index: 1;
-  padding: clamp(72px, 12vh, 120px) var(--gutter) clamp(56px, 9vh, 88px);
-  background: var(--ground);
+/* section titles: grotesk capitals, large and tight, as on the references */
+.title {
+  margin: 0;
+  font-family: var(--ui);
+  font-weight: 500;
+  font-size: clamp(2.6rem, 7vw, 6.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
-/* the torn top edge, the ground continuing up into it */
+
+/* everything after the film; above it, so it slides up over it */
+.below { position: relative; z-index: 1; timeline-scope: --kits; }
+
+/* the torn top edge of the kits, the ground continuing up into it */
 .torn {
   position: absolute;
   left: 0;
@@ -282,9 +318,120 @@ img, video { display: block; }
   height: clamp(18px, 3vw, 40px);
   fill: #18140f;
 }
+
+/* kits: on dark concrete, above the colour, which waits beneath */
+.kits {
+  position: relative;
+  z-index: 2;
+  padding: clamp(110px, 16vh, 180px) var(--gutter) clamp(140px, 22vh, 240px);
+  background: var(--ground);
+  view-timeline: --kits;
+}
+.kits__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(56px, 9vh, 112px) var(--gutter);
+  margin-top: clamp(56px, 9vh, 104px);
+  align-items: start;
+}
+.kit { margin: 0; }
+.kit--base { grid-column: 1 / span 7; --drift: 4vh; }
+.kit--numpad { grid-column: 9 / span 4; margin-top: 22vh; --drift: 12vh; }
+.kit--novelties { grid-column: 2 / span 4; margin-top: -4vh; --drift: 8vh; }
+.kit--deskmat { grid-column: 1 / -1; --drift: 3vh; }
+.kit__frame img { width: 100%; height: auto; object-fit: cover; }
+.kit__caption { display: flex; justify-content: space-between; gap: 16px; margin-top: 14px; }
+.kit__name { font-weight: 500; font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.kit__contents { color: var(--bone-dim); font-size: 0.9375rem; }
+
+/* colour: pinned to the foot of the screen beneath the kits, uncovered as
+   they scroll away; its chips rise one after another as the kits leave */
+.colours {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  gap: clamp(40px, 7vh, 80px);
+  padding: 12vh var(--gutter);
+  background:
+    radial-gradient(120% 90% at 50% 50%, transparent 50%, rgb(0 0 0 / 0.65) 100%),
+    var(--black);
+}
+.strip { display: flex; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.strip li { flex-basis: 0; min-width: 0; display: grid; gap: 10px; align-content: start; }
+.strip__chip { display: block; height: clamp(180px, 34vh, 360px); box-shadow: inset 0 0 0 1px var(--hair); }
+.strip__name { font-size: 0.9375rem; }
+.strip__hex { font-size: 0.6875rem; letter-spacing: 0.08em; color: var(--bone-dim); font-variant-numeric: tabular-nums; }
+
+/* the depth: each render drifts against the scroll at its own pace, and the
+   chips rise as the kits leave. Scroll-driven, on the compositor. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .kit__frame { animation: drift linear both; animation-timeline: view(); }
+    .strip li { animation: rise-in linear both; animation-timeline: --kits; animation-range: exit 0% exit 90%; }
+  }
+}
+@keyframes drift {
+  from { transform: translate3d(0, var(--drift), 0); }
+  to { transform: translate3d(0, calc(var(--drift) * -1), 0); }
+}
+@keyframes rise-in {
+  from { transform: translate3d(0, calc(14vh + var(--i) * 7vh), 0); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* ------------------------------------------------------------- colophon */
+
+.foot {
+  position: relative;
+  z-index: 2;
+  padding: clamp(72px, 12vh, 120px) var(--gutter) clamp(56px, 9vh, 88px);
+  background: var(--ground);
+}
 .foot__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px var(--gutter); }
 .foot dt { color: var(--bone-dim); margin-bottom: 8px; }
 .foot dd { font-size: 0.9375rem; }
+
+/* ----------------------------------------------------------------- daub */
+
+/* Hover on a link or a button: a smear of blood-red paint is dragged across
+   it, then the word is written over the paint in glowing ink. Going away,
+   both wipe off quickly. */
+.daub { position: relative; display: inline-block; isolation: isolate; }
+.daub::before {
+  content: '';
+  position: absolute;
+  inset: -0.8em -0.95em;
+  z-index: -1;
+  background: url('/textures/daub.svg') center / 100% 100% no-repeat;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.22s var(--ease);
+}
+.daub::after {
+  content: attr(data-label);
+  content: attr(data-label) / '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  color: #ffeadb;
+  text-shadow: 0 0 4px rgb(255 214 190 / 0.9), 0 0 12px rgb(255 120 80 / 0.6), 0 0 22px rgb(190 40 25 / 0.55);
+  clip-path: inset(-60% 100% -60% 0);
+  transition: clip-path 0.15s var(--ease);
+}
+.daub > span { transition: opacity 0.2s var(--ease); }
+.daub:hover::before, .daub:focus-visible::before {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.42s cubic-bezier(0.7, 0, 0.3, 1);
+}
+.daub:hover::after, .daub:focus-visible::after {
+  clip-path: inset(-60% 0 -60% 0);
+  transition: clip-path 0.55s cubic-bezier(0.45, 0, 0.2, 1) 0.24s;
+}
+.daub:hover > span, .daub:focus-visible > span { opacity: 0; transition-delay: 0.3s; }
 
 /* --------------------------------------------------------------- narrow */
 
@@ -295,12 +442,19 @@ img, video { display: block; }
   .nav { padding-top: 24px; }
   .hero__maker { top: 20px; }
   .foot__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kits__grid { grid-template-columns: minmax(0, 1fr); }
+  .kit--base, .kit--numpad, .kit--novelties, .kit--deskmat { grid-column: 1 / -1; margin-top: 0; }
+  .kit--numpad, .kit--novelties { width: 78%; }
+  .kit--numpad { justify-self: end; }
+  .strip { flex-direction: column; gap: 18px; }
+  .strip li { grid-template-columns: 1fr auto; align-items: center; }
+  .strip__chip { grid-column: 1 / -1; height: 72px; }
 }
 
 /* -------------------------------------------------------- reduced motion */
 
 @media (prefers-reduced-motion: reduce) {
-  .grain::before, .film__scratches { animation: none; }
+  .grain::before, .film__scratches, .film__grime, .film__damage, .film__clip { animation: none; }
   .film__clip.is-shown { transition: none; }
   *, *::before, *::after { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
 }

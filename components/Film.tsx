@@ -166,8 +166,8 @@ export function Film() {
       <div className="reel">
         <span className="reel__count">{pad(index + 1)}<span className="reel__of"> / {pad(FILM.length)}</span></span>
         <span className="reel__time">00:{pad(second)}</span>
-        <button type="button" className="reel__toggle" onClick={toggle} aria-pressed={state === 'playing'}>
-          {state === 'playing' ? 'Pause' : 'Play'}
+        <button type="button" className="reel__toggle daub" onClick={toggle} aria-pressed={state === 'playing'} data-label={state === 'playing' ? 'Pause' : 'Play'}>
+          <span>{state === 'playing' ? 'Pause' : 'Play'}</span>
         </button>
       </div>
     </>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 72" preserveAspectRatio="none">
+  <!-- A smear of paint dragged across a word: dried-blood body, a darker wet
+       core, pale dry-brush streaks, a little splatter. The turbulence
+       displaces every edge so nothing reads as drawn by a machine. -->
+  <defs>
+    <filter id="rough" x="-10%" y="-30%" width="120%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035 0.22" numOctaves="3" seed="4" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="9" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="dry" x="-5%" y="-30%" width="110%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.9" numOctaves="2" seed="9" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.6 1.5" result="gaps"/>
+      <feComposite in="SourceGraphic" in2="gaps" operator="in"/>
+    </filter>
+  </defs>
+  <g filter="url(#rough)">
+    <path d="M10 22 C 40 12, 90 16, 130 13 S 205 10, 230 19 C 236 30, 234 44, 228 53 C 190 60, 140 57, 96 60 S 30 62, 12 54 C 6 44, 5 31, 10 22 Z" fill="#7a1a12"/>
+    <path d="M22 30 C 70 24, 130 27, 214 24 C 220 33, 218 41, 212 46 C 150 49, 80 47, 24 49 C 19 42, 18 36, 22 30 Z" fill="#5a0f0a" opacity="0.75"/>
+  </g>
+  <g filter="url(#dry)" opacity="0.5">
+    <path d="M14 20 C 70 14, 150 12, 228 18 L 229 26 C 150 21, 70 23, 13 28 Z" fill="#e9a79c"/>
+    <path d="M18 50 C 80 55, 150 52, 226 49 L 224 56 C 150 59, 80 60, 16 56 Z" fill="#d98a7e"/>
+  </g>
+  <g fill="#7a1a12" filter="url(#rough)">
+    <circle cx="236" cy="12" r="1.6"/>
+    <circle cx="6" cy="60" r="1.2"/>
+    <circle cx="232" cy="64" r="0.9"/>
+  </g>
+</svg>

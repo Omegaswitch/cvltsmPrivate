@@ -6,12 +6,12 @@
  */
 export const BRAND = {
   name: 'CVLTSM',
-  year: 'MMXXVI',
+  year: '2027',
   /** the CVLTSM keycap set logo: the focal point of the opening */
   logo: undefined as string | undefined,
   /** the manufacturer: named and placed, but always second to the set */
   manufacturer: {
-    name: undefined as string | undefined,
+    name: 'SWG' as string | undefined,
     logo: undefined as string | undefined,
   },
 };
