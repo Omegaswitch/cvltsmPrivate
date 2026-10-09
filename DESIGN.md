@@ -28,7 +28,7 @@ The references set the terms: black, and one red. The red of dried blood, used a
 
 - **Gutter** `clamp(20px, 3.2vw, 52px)`. Everything aligns to it.
 - **The opening:** the film full bleed. The set's logo low on the left, about 56% of the width, where the eye settles; the manufacturer small at top left; the nav at top right; the reel at the foot on the right, opposite the logo. On phones the logo spans the width and the reel sits under it.
-- **Kits:** on dark concrete, its top torn, coming up over the film. The base kit at 7 of 12 columns, the numpad offset low on the right, the novelties high on the left. Each render drifts at its own depth.
+- **Kits:** on dark concrete, its top torn, coming up over the film. Square renders: the base kit at 7 of 12 columns, the numpad at 4 set low on the right, the novelties at 4 in the middle below. Each kit drifts at its own depth, name and all.
 - **Colors:** pinned beneath the kits on black, uncovered as the kits' torn bottom edge scrolls away; four equal chips (Alphas base #565050, Red #A80800, Dark brown #2A2624, Cyan #B1BEC3), with name and hex.
 - **Renders:** on concrete, torn over the colors; square renders on an uneven 12-column grid (7 columns, 4 set low beside it, then three of 4), each drifting at its own depth.
 - **Vendors:** on black, torn over the renders; regions in a ruled list.

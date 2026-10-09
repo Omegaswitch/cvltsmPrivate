@@ -336,7 +336,7 @@ img, video { display: block; }
 .kit { margin: 0; }
 .kit--base { grid-column: 1 / span 7; --drift: 4vh; }
 .kit--numpad { grid-column: 9 / span 4; margin-top: 22vh; --drift: 12vh; }
-.kit--novelties { grid-column: 2 / span 4; margin-top: -4vh; --drift: 8vh; }
+.kit--novelties { grid-column: 5 / span 4; margin-top: -8vh; --drift: 8vh; }
 .kit__frame img { width: 100%; height: auto; object-fit: cover; }
 .kit__name { margin-top: 14px; font-weight: 500; font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; }
 
@@ -413,7 +413,7 @@ img, video { display: block; }
    chips rise as the kits leave. Scroll-driven, on the compositor. */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .kit__frame, .render__frame { animation: drift linear both; animation-timeline: view(); }
+    .kit, .render { animation: drift linear both; animation-timeline: view(); }
     .strip li { animation: rise-in linear both; animation-timeline: --kits; animation-range: exit 0% exit 90%; }
   }
 }

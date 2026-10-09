@@ -41,7 +41,7 @@ scripts/                 encode-film.sh, make-textures.mjs
 
 ## Replacing things
 
-- **Kit renders.** Put each in `public/kits/` and set its `src` in `data/kits.ts`; until then each kit shows a dashed slot of its proportions.
+- **Kit renders.** All square (4000 × 4000, compressed). Put each in `public/kits/` and set its `src` in `data/kits.ts`; until then each kit shows a dashed square.
 - **Renders.** All square (4000 × 4000, compressed). Put each in `public/renders/` and set its `src` in `data/renders.ts`.
 - **Vendors.** Add names (and links) per region in `data/vendors.ts`; until then each region reads "To be announced".
 - **Logos.** The SWG logo is `public/brand/SWGX.png`. Put the set logo in `public/brand/` and set `BRAND.logo` in `data/brand.ts`; until then CVLTSM is set in Valhalica.

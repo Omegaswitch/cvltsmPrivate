@@ -15,9 +15,9 @@ export function KitsSection() {
           <figure key={k.id} className={`kit kit--${k.id}`}>
             <div className="kit__frame">
               {k.src ? (
-                <img src={k.src} alt={`${k.name} kit`} loading="lazy" decoding="async" style={{ aspectRatio: k.ratio }} />
+                <img src={k.src} alt={`${k.name} kit`} loading="lazy" decoding="async" style={{ aspectRatio: "1 / 1" }} />
               ) : (
-                <div className="slot" style={{ aspectRatio: k.ratio }} role="img" aria-label={`${k.name} render (to come)`}>
+                <div className="slot" style={{ aspectRatio: "1 / 1" }} role="img" aria-label={`${k.name} render (to come)`}>
                   <span className="slot__label" aria-hidden="true">{k.name} render</span>
                 </div>
               )}
