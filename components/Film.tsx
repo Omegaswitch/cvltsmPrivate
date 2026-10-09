@@ -124,7 +124,7 @@ export function Film() {
 
     if (!reduced && !saveData) control.current.resume();
 
-    // out of sight: when the section after the film has covered it, or the tab is hidden
+    // out of sight: when the colophon has covered it, or the tab is hidden
     const onScroll = () => {
       const now = window.scrollY < window.innerHeight * 0.98;
       if (now !== visible) { visible = now; sync(); }

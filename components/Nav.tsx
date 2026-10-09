@@ -3,7 +3,7 @@ export function Nav() {
   return (
     <nav className="nav" aria-label="Sections">
       <a href="#film">Film</a>
-      <a href="#manuscript">Manuscript</a>
+      <a href="#colophon">Colophon</a>
     </nav>
   );
 }
