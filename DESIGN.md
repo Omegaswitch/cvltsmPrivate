@@ -28,7 +28,7 @@ The references set the terms: black, and one red. The red of dried blood, used a
 
 - **Gutter** `clamp(20px, 3.2vw, 52px)`. Everything aligns to it.
 - **The opening:** the film full bleed. The set's logo low on the left, about 56% of the width, where the eye settles; the manufacturer small at top left; the nav at top right; the reel at the foot on the right, opposite the logo. On phones the logo spans the width and the reel sits under it.
-- **Kits:** on dark concrete, its top torn, coming up over the film. The base kit at 7 of 12 columns, the numpad offset low on the right, the novelties high on the left, the deskmat full width. Each render drifts at its own depth.
+- **Kits:** on dark concrete, its top torn, coming up over the film. The base kit at 7 of 12 columns, the numpad offset low on the right, the novelties high on the left. Each render drifts at its own depth.
 - **Colour:** pinned beneath the kits on black; one strip, each chip as wide as its share of the set, with name and hex.
 - **Colophon:** four facts in a row (set, keycaps, manufacturer SWG, year 2027).
 

@@ -338,11 +338,8 @@ img, video { display: block; }
 .kit--base { grid-column: 1 / span 7; --drift: 4vh; }
 .kit--numpad { grid-column: 9 / span 4; margin-top: 22vh; --drift: 12vh; }
 .kit--novelties { grid-column: 2 / span 4; margin-top: -4vh; --drift: 8vh; }
-.kit--deskmat { grid-column: 1 / -1; --drift: 3vh; }
 .kit__frame img { width: 100%; height: auto; object-fit: cover; }
-.kit__caption { display: flex; justify-content: space-between; gap: 16px; margin-top: 14px; }
-.kit__name { font-weight: 500; font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; }
-.kit__contents { color: var(--bone-dim); font-size: 0.9375rem; }
+.kit__name { margin-top: 14px; font-weight: 500; font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; }
 
 /* colour: pinned to the foot of the screen beneath the kits, uncovered as
    they scroll away; its chips rise one after another as the kits leave */
@@ -443,7 +440,7 @@ img, video { display: block; }
   .hero__maker { top: 20px; }
   .foot__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .kits__grid { grid-template-columns: minmax(0, 1fr); }
-  .kit--base, .kit--numpad, .kit--novelties, .kit--deskmat { grid-column: 1 / -1; margin-top: 0; }
+  .kit--base, .kit--numpad, .kit--novelties { grid-column: 1 / -1; margin-top: 0; }
   .kit--numpad, .kit--novelties { width: 78%; }
   .kit--numpad { justify-self: end; }
   .strip { flex-direction: column; gap: 18px; }

@@ -15,17 +15,14 @@ export function KitsSection() {
           <figure key={k.id} className={`kit kit--${k.id}`}>
             <div className="kit__frame">
               {k.src ? (
-                <img src={k.src} alt={`${k.name}: ${k.contents}`} loading="lazy" decoding="async" style={{ aspectRatio: k.ratio }} />
+                <img src={k.src} alt={`${k.name} kit`} loading="lazy" decoding="async" style={{ aspectRatio: k.ratio }} />
               ) : (
                 <div className="slot" style={{ aspectRatio: k.ratio }} role="img" aria-label={`${k.name} render (to come)`}>
                   <span className="slot__label" aria-hidden="true">{k.name} render</span>
                 </div>
               )}
             </div>
-            <figcaption className="kit__caption">
-              <span className="kit__name">{k.name}</span>
-              <span className="kit__contents">{k.contents}</span>
-            </figcaption>
+            <figcaption className="kit__name">{k.name}</figcaption>
           </figure>
         ))}
       </div>

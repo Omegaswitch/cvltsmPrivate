@@ -6,14 +6,12 @@
 export interface Kit {
   id: string;
   name: string;
-  contents: string;
   ratio: string;
   src?: string;
 }
 
 export const KITS: Kit[] = [
-  { id: 'base', name: 'Base', contents: 'Alphas and modifiers', ratio: '3 / 2' },
-  { id: 'numpad', name: 'Numpad', contents: 'The full numpad', ratio: '4 / 5' },
-  { id: 'novelties', name: 'Novelties', contents: 'Accent keys', ratio: '4 / 5' },
-  { id: 'deskmat', name: 'Deskmat', contents: 'Printed deskmat', ratio: '21 / 9' },
+  { id: 'base', name: 'Base', ratio: '3 / 2' },
+  { id: 'numpad', name: 'Numpad', ratio: '4 / 5' },
+  { id: 'novelties', name: 'Novelties', ratio: '4 / 5' },
 ];
