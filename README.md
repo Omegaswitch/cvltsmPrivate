@@ -45,7 +45,7 @@ scripts/                 encode-film.sh, make-textures.mjs
 - **Kit renders.** Put each in `public/kits/` and set its `src` in `data/kits.ts`; until then each kit shows a dashed slot of its proportions.
 - **Renders.** Put each in `public/renders/` and set its `src` in `data/renders.ts`.
 - **Vendors.** Add names (and links) per region in `data/vendors.ts`; until then each region reads "To be announced".
-- **Logos.** Put the files in `public/brand/` and set `BRAND.logo` and `BRAND.manufacturer.logo` in `data/brand.ts`. Until the set logo exists, CVLTSM is set in Valhalica; until the SWG logo is in, its place is a dashed slot.
+- **Logos.** The SWG logo is `public/brand/SWGX.png`. Put the set logo in `public/brand/` and set `BRAND.logo` in `data/brand.ts`; until then CVLTSM is set in Valhalica.
 - **Clips.** The originals go in `assets/film/` (kept out of git; they are large). Each clip's source, cut and grade are a line in `scripts/encode-film.sh`; run it with `FFMPEG=/path/to/ffmpeg scripts/encode-film.sh`. It writes 480p and 360p, WebM and MP4, and a poster frame per clip to `public/film/`. Each clip's line also sets how worn it is: the height it is shrunk to before being blown back up, and how much grain is baked in. The order, lengths and transitions are in `data/film.ts`.
 - **Textures.** The concrete originals are in `assets/textures/`; `node scripts/make-textures.mjs` remakes the grime, the dark ground and the grain tile.
 - **The red.** The blood in the film is one colour pass, `--film-tint` in `globals.css`. Its alpha is its strength.
