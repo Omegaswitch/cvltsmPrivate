@@ -1,9 +1,11 @@
 import { BRAND } from '@/data/brand';
+import { TornEdge } from './TornEdge';
 
 /** The colophon: what this is, whose, and when. */
 export function Footer() {
   return (
     <footer id="colophon" className="foot">
+      <TornEdge seed={71} />
       <dl className="foot__grid">
         <div><dt>Set</dt><dd>{BRAND.name}</dd></div>
         <div><dt>Keycaps</dt><dd>Double-shot ABS</dd></div>

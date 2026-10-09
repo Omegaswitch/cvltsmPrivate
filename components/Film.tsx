@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { FILM, DISSOLVE, clipSrc, posterSrc, type Format } from '@/data/film';
 
 /*
@@ -12,22 +12,14 @@ import { FILM, DISSOLVE, clipSrc, posterSrc, type Format } from '@/data/film';
  * grime of the concrete.
  *
  * Nothing plays for anyone who has asked for reduced motion or less data:
- * they see the first poster frame and can start the film themselves. It
- * stops whenever it is out of sight.
+ * they see the first poster frame. It stops whenever it is out of sight.
  */
-
-const pad = (n: number) => String(n).padStart(2, '0');
 
 export function Film() {
   const root = useRef<HTMLDivElement>(null);
   const a = useRef<HTMLVideoElement>(null);
   const b = useRef<HTMLVideoElement>(null);
   const damage = useRef<HTMLVideoElement>(null);
-  const [index, setIndex] = useState(0);
-  const [second, setSecond] = useState(0);
-  const [state, setState] = useState<'still' | 'playing' | 'paused'>('still');
-  const wanted = useRef(false);        // the film should run (autoplay allowed, or asked for)
-  const control = useRef<{ resume: () => void; halt: () => void } | null>(null);
 
   useEffect(() => {
     const el = root.current;
@@ -79,28 +71,24 @@ export function Film() {
         }, DISSOLVE * 1000);
         front = 1 - front;
         current = next;
-        setIndex(next);
       }).catch(() => { switching = false; outgoing.loop = true; });
     };
 
     const onTime = (e: Event) => {
       const v = e.currentTarget as HTMLVideoElement;
       if (v !== videos[front]) return;
-      setSecond(Math.floor(v.currentTime));
       if (v.duration && v.currentTime >= v.duration - DISSOLVE) startNext();
     };
     videos.forEach((v) => v.addEventListener('timeupdate', onTime));
 
-    const running = () => wanted.current && visible && tabShown;
+    const running = () => wanted && visible && tabShown;
     const sync = () => {
       if (running()) {
         videos[front].play().catch(() => {});
         damage.current?.play().catch(() => {});
-        setState('playing');
       } else {
         videos.forEach((v) => v.pause());
         damage.current?.pause();
-        // out of sight only: still 'playing' as far as the control is concerned
       }
     };
 
@@ -117,14 +105,10 @@ export function Film() {
       sync();
     };
 
-    control.current = {
-      resume: () => { wanted.current = true; begin(); sync(); setState('playing'); },
-      halt: () => { wanted.current = false; sync(); setState('paused'); },
-    };
+    const wanted = !reduced && !saveData;
+    if (wanted) begin();
 
-    if (!reduced && !saveData) control.current.resume();
-
-    // out of sight: when the colophon has covered it, or the tab is hidden
+    // out of sight: when the kits have covered it, or the tab is hidden
     const onScroll = () => {
       const now = window.scrollY < window.innerHeight * 0.98;
       if (now !== visible) { visible = now; sync(); }
@@ -139,37 +123,21 @@ export function Film() {
       videos.forEach((v) => { v.removeEventListener('timeupdate', onTime); v.pause(); });
       window.removeEventListener('scroll', onScroll);
       document.removeEventListener('visibilitychange', onTab);
-      control.current = null;
     };
   }, []);
 
-  const toggle = () => {
-    if (state === 'playing') control.current?.halt();
-    else control.current?.resume();
-  };
-
   return (
-    <>
-      <div ref={root} className="film" aria-hidden="true">
-        {/* the first frame, there before any video, and all there is without motion */}
-        <img className="film__poster" src={posterSrc(FILM[0].id)} alt="" fetchPriority="high" decoding="async" />
-        <video ref={a} className="film__clip" muted playsInline preload="none" disablePictureInPicture />
-        <video ref={b} className="film__clip" muted playsInline preload="none" disablePictureInPicture />
-        <video ref={damage} className="film__damage" muted playsInline loop preload="none" disablePictureInPicture />
-        <div className="film__grime" />
-        <div className="film__tint" />
-        <div className="film__scratches" />
-        <div className="film__interference" />
-        <div className="film__shade" />
-      </div>
-
-      <div className="reel">
-        <span className="reel__count">{pad(index + 1)}<span className="reel__of"> / {pad(FILM.length)}</span></span>
-        <span className="reel__time">00:{pad(second)}</span>
-        <button type="button" className="reel__toggle daub" onClick={toggle} aria-pressed={state === 'playing'} data-label={state === 'playing' ? 'Pause' : 'Play'}>
-          <span>{state === 'playing' ? 'Pause' : 'Play'}</span>
-        </button>
-      </div>
-    </>
+    <div ref={root} className="film" aria-hidden="true">
+      {/* the first frame, there before any video, and all there is without motion */}
+      <img className="film__poster" src={posterSrc(FILM[0].id)} alt="" fetchPriority="high" decoding="async" />
+      <video ref={a} className="film__clip" muted playsInline preload="none" disablePictureInPicture />
+      <video ref={b} className="film__clip" muted playsInline preload="none" disablePictureInPicture />
+      <video ref={damage} className="film__damage" muted playsInline loop preload="none" disablePictureInPicture />
+      <div className="film__grime" />
+      <div className="film__tint" />
+      <div className="film__scratches" />
+      <div className="film__interference" />
+      <div className="film__shade" />
+    </div>
   );
 }

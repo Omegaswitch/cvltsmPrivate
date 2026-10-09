@@ -26,6 +26,8 @@ export function KitsSection() {
           </figure>
         ))}
       </div>
+      {/* the kits' own bottom edge, torn, over the colors waiting beneath */}
+      <TornEdge seed={13} side="bottom" />
     </section>
   );
 }

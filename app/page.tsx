@@ -2,6 +2,8 @@ import { Nav } from '@/components/Nav';
 import { Hero } from '@/components/Hero';
 import { KitsSection } from '@/components/KitsSection';
 import { ColourSection } from '@/components/ColourSection';
+import { RendersSection } from '@/components/RendersSection';
+import { VendorsSection } from '@/components/VendorsSection';
 import { Footer } from '@/components/Footer';
 
 export default function Page() {
@@ -10,10 +12,12 @@ export default function Page() {
       <Nav />
       <main>
         <Hero />
-        {/* the kits scroll up over the film; the colour waits pinned beneath them */}
+        {/* the kits scroll up over the film; the colors wait pinned beneath them */}
         <div className="below">
           <KitsSection />
           <ColourSection />
+          <RendersSection />
+          <VendorsSection />
         </div>
       </main>
       <Footer />

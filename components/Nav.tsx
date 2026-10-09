@@ -1,7 +1,8 @@
 const LINKS = [
-  { href: '#film', label: 'Film' },
   { href: '#kits', label: 'Kits' },
-  { href: '#colour', label: 'Colour' },
+  { href: '#colors', label: 'Colors' },
+  { href: '#renders', label: 'Renders' },
+  { href: '#vendors', label: 'Vendors' },
 ];
 
 /** The sections of the page, and nothing more. Each link is daubed on hover. */

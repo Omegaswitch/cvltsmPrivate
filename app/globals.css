@@ -2,6 +2,13 @@
    CVLTSM. A ritual found on damaged film. See DESIGN.md for the reasoning.
    ========================================================================= */
 
+@font-face {
+  font-family: 'Valhalica';
+  src: url('/fonts/Valhalica-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-display: block;
+}
+
 :root {
   --black: #070605;
   --char: #0f0c0a;
@@ -37,9 +44,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 img, video { display: block; }
 :focus-visible { outline: 1px solid var(--bone); outline-offset: 5px; }
 
-/* the small type: navigation, the reel, the colophon. Set like the margins
+/* the small type: navigation, labels, the colophon. Set like the margins
    of a film slate: capitals, a touch of air, never large. */
-.nav, .reel, .foot dt, .slot__label {
+.nav, .foot dt, .slot__label, .vendors__region {
   font-family: var(--ui);
   font-weight: 500;
   font-size: 0.6875rem;
@@ -243,29 +250,6 @@ img, video { display: block; }
 /* the manufacturer, small and high on the left, under the same margin */
 .hero__maker { position: absolute; z-index: 10; top: 22px; left: var(--gutter); width: clamp(124px, 10vw, 150px); }
 
-/* the reel: which clip, where in it, and the control, at the foot on the right */
-.reel {
-  position: absolute;
-  z-index: 10;
-  right: var(--gutter);
-  bottom: clamp(64px, 11vh, 120px);
-  display: grid;
-  grid-template-columns: auto auto;
-  gap: 6px 22px;
-  justify-items: end;
-  color: var(--bone);
-  font-variant-numeric: tabular-nums;
-}
-.reel__of { opacity: 0.5; }
-.reel__time { opacity: 0.5; }
-.reel__toggle {
-  grid-column: 1 / -1;
-  padding: 6px 0 2px;
-  font: inherit;
-  letter-spacing: inherit;
-  text-transform: inherit;
-}
-.reel__toggle > span { opacity: 0.7; }
 
 /* Leaving the film: it sinks back and darkens as the colophon comes up,
    and the logo rises a little faster than the page. Driven by the scroll
@@ -273,13 +257,25 @@ img, video { display: block; }
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
     .film { animation: sink linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
-    .hero__set, .reel { animation: rise linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
+    .hero__set { animation: rise linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
   }
 }
 @keyframes sink { to { transform: scale(1.06); filter: brightness(0.45); } }
 @keyframes rise { to { transform: translate3d(0, -14vh, 0); opacity: 0; } }
 
 /* ----------------------------------------------------------- logo slots */
+
+/* the set's name in Valhalica, standing in for the logo */
+.wordmark {
+  margin: 0;
+  font-family: 'Valhalica', serif;
+  font-weight: 400;
+  font-size: clamp(3.5rem, 13vw, 13rem);
+  line-height: 0.9;
+  letter-spacing: 0.04em;
+  color: var(--bone);
+  text-shadow: 0 2px 30px rgb(0 0 0 / 0.55);
+}
 
 /* A logo's place before the logo exists: its proportions, held by a hairline. */
 .slot { display: block; width: 100%; }
@@ -309,20 +305,23 @@ img, video { display: block; }
 /* everything after the film; above it, so it slides up over it */
 .below { position: relative; z-index: 1; timeline-scope: --kits; }
 
-/* the torn top edge of the kits, the ground continuing up into it */
+/* torn edges: each the colour of its own section (--torn) */
 .torn {
   position: absolute;
   left: 0;
-  bottom: calc(100% - 1px);
   width: 100%;
   height: clamp(18px, 3vw, 40px);
-  fill: #18140f;
+  fill: var(--torn);
+  pointer-events: none;
 }
+.torn--top { bottom: calc(100% - 1px); }
+.torn--bottom { top: calc(100% - 1px); transform: scaleY(-1); }
 
 /* kits: on dark concrete, above the colour, which waits beneath */
 .kits {
+  --torn: #18140f;
   position: relative;
-  z-index: 2;
+  z-index: 3;
   padding: clamp(110px, 16vh, 180px) var(--gutter) clamp(140px, 22vh, 240px);
   background: var(--ground);
   view-timeline: --kits;
@@ -344,6 +343,7 @@ img, video { display: block; }
 /* colour: pinned to the foot of the screen beneath the kits, uncovered as
    they scroll away; its chips rise one after another as the kits leave */
 .colours {
+  --torn: #070605;
   position: sticky;
   bottom: 0;
   z-index: 1;
@@ -358,16 +358,62 @@ img, video { display: block; }
     var(--black);
 }
 .strip { display: flex; gap: 14px; margin: 0; padding: 0; list-style: none; }
-.strip li { flex-basis: 0; min-width: 0; display: grid; gap: 10px; align-content: start; }
+.strip li { flex: 1 1 0; min-width: 0; display: grid; gap: 10px; align-content: start; }
 .strip__chip { display: block; height: clamp(180px, 34vh, 360px); box-shadow: inset 0 0 0 1px var(--hair); }
 .strip__name { font-size: 0.9375rem; }
 .strip__hex { font-size: 0.6875rem; letter-spacing: 0.08em; color: var(--bone-dim); font-variant-numeric: tabular-nums; }
+
+/* renders: back on the concrete, torn over the colors */
+.renders {
+  --torn: #18140f;
+  position: relative;
+  z-index: 2;
+  padding: clamp(110px, 16vh, 180px) var(--gutter) clamp(120px, 18vh, 200px);
+  background: var(--ground);
+}
+.renders__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(48px, 8vh, 96px) var(--gutter);
+  margin-top: clamp(56px, 9vh, 104px);
+  align-items: start;
+}
+.render { margin: 0; }
+.render--lead { grid-column: 1 / span 7; --drift: 4vh; }
+.render--side { grid-column: 9 / span 4; margin-top: 18vh; --drift: 11vh; }
+.render--wide { grid-column: 1 / -1; --drift: 3vh; }
+.render--half { grid-column: span 6; --drift: 6vh; }
+.render--half:last-child { margin-top: 12vh; --drift: 10vh; }
+.render__frame img { width: 100%; height: auto; object-fit: cover; }
+
+/* vendors: on black, torn over the renders */
+.vendors {
+  --torn: #070605;
+  position: relative;
+  z-index: 3;
+  padding: clamp(110px, 16vh, 180px) var(--gutter) clamp(110px, 16vh, 180px);
+  background:
+    radial-gradient(120% 90% at 50% 50%, transparent 50%, rgb(0 0 0 / 0.65) 100%),
+    var(--black);
+}
+.vendors__list { margin: clamp(48px, 8vh, 88px) 0 0; padding: 0; list-style: none; }
+.vendors__row {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: var(--gutter);
+  align-items: baseline;
+  padding: 22px 0;
+  border-top: 1px solid var(--hair);
+}
+.vendors__row:last-child { border-bottom: 1px solid var(--hair); }
+.vendors__names { display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: 1.125rem; }
+.vendors__tba { color: var(--bone-dim); }
 
 /* the depth: each render drifts against the scroll at its own pace, and the
    chips rise as the kits leave. Scroll-driven, on the compositor. */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .kit__frame { animation: drift linear both; animation-timeline: view(); }
+    .kit__frame, .render__frame { animation: drift linear both; animation-timeline: view(); }
     .strip li { animation: rise-in linear both; animation-timeline: --kits; animation-range: exit 0% exit 90%; }
   }
 }
@@ -383,8 +429,9 @@ img, video { display: block; }
 /* ------------------------------------------------------------- colophon */
 
 .foot {
+  --torn: #18140f;
   position: relative;
-  z-index: 2;
+  z-index: 3;
   padding: clamp(72px, 12vh, 120px) var(--gutter) clamp(56px, 9vh, 88px);
   background: var(--ground);
 }
@@ -394,48 +441,70 @@ img, video { display: block; }
 
 /* ----------------------------------------------------------------- daub */
 
-/* Hover on a link or a button: a smear of blood-red paint is dragged across
-   it, then the word is written over the paint in glowing ink. Going away,
-   both wipe off quickly. */
+/* Hover on a link or a button: blood is gouged across it in a few violent,
+   uneven strokes that lurch and shake, then the word is cut into the blood
+   in an old uncial hand, glowing, flickering on like a struck light. Going
+   away, both are gone at once. */
 .daub { position: relative; display: inline-block; isolation: isolate; }
 .daub::before {
   content: '';
   position: absolute;
-  inset: -0.8em -0.95em;
+  inset: -0.95em -1.1em;
   z-index: -1;
   background: url('/textures/daub.svg') center / 100% 100% no-repeat;
   clip-path: inset(0 100% 0 0);
-  transition: clip-path 0.22s var(--ease);
+  pointer-events: none;
 }
 .daub::after {
   content: attr(data-label);
   content: attr(data-label) / '';
   position: absolute;
-  left: 0;
-  top: 0;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -54%) rotate(-2deg);
   white-space: nowrap;
-  color: #ffeadb;
-  text-shadow: 0 0 4px rgb(255 214 190 / 0.9), 0 0 12px rgb(255 120 80 / 0.6), 0 0 22px rgb(190 40 25 / 0.55);
-  clip-path: inset(-60% 100% -60% 0);
-  transition: clip-path 0.15s var(--ease);
+  font-family: 'Uncial Antiqua', var(--ui);
+  font-size: 1.35em;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #ffe6d0;
+  text-shadow: 0 0 3px rgb(255 220 190 / 0.95), 0 0 10px rgb(255 120 70 / 0.75), 0 0 24px rgb(200 30 10 / 0.7);
+  opacity: 0;
+  pointer-events: none;
 }
-.daub > span { transition: opacity 0.2s var(--ease); }
-.daub:hover::before, .daub:focus-visible::before {
-  clip-path: inset(0 0 0 0);
-  transition: clip-path 0.42s cubic-bezier(0.7, 0, 0.3, 1);
+.daub:hover::before, .daub:focus-visible::before { animation: gouge 0.5s steps(1) forwards; }
+.daub:hover::after, .daub:focus-visible::after { animation: cut-in 0.6s steps(1) 0.34s forwards; }
+.daub:hover > span, .daub:focus-visible > span { opacity: 0; transition: opacity 0.05s 0.18s; }
+
+/* the gouge: uneven lurches, a stroke pulled back and struck again, and the
+   whole mark jolting with every blow */
+@keyframes gouge {
+  0% { clip-path: inset(0 100% 0 0); transform: translate(0, 0) rotate(0); }
+  8% { clip-path: inset(10% 71% 22% 0); transform: translate(-3px, 2px) rotate(-3deg); }
+  16% { clip-path: inset(4% 63% 6% 0); transform: translate(2px, -1px) rotate(1.5deg); }
+  22% { clip-path: inset(0 66% 0 0); transform: translate(-1px, 0) rotate(-1deg); }
+  30% { clip-path: inset(0 38% 12% 0); transform: translate(4px, 2px) rotate(2.5deg); }
+  40% { clip-path: inset(6% 31% 0 0); transform: translate(-2px, -2px) rotate(-2deg); }
+  52% { clip-path: inset(0 12% 0 0); transform: translate(3px, 1px) rotate(1deg); }
+  64% { clip-path: inset(0 14% 8% 0); transform: translate(-1px, 1px) rotate(-1deg); }
+  76% { clip-path: inset(0 0 0 0); transform: translate(2px, -1px) rotate(0.6deg); }
+  88%, 100% { clip-path: inset(0 0 0 0); transform: none; }
 }
-.daub:hover::after, .daub:focus-visible::after {
-  clip-path: inset(-60% 0 -60% 0);
-  transition: clip-path 0.55s cubic-bezier(0.45, 0, 0.2, 1) 0.24s;
+/* the word: a flicker, a dead beat, then fully lit */
+@keyframes cut-in {
+  0% { opacity: 0.9; filter: brightness(1.8); }
+  10% { opacity: 0.1; }
+  18% { opacity: 0.7; filter: none; }
+  28% { opacity: 0; }
+  42% { opacity: 1; }
+  52% { opacity: 0.55; }
+  60%, 100% { opacity: 1; }
 }
-.daub:hover > span, .daub:focus-visible > span { opacity: 0; transition-delay: 0.3s; }
 
 /* --------------------------------------------------------------- narrow */
 
 @media (max-width: 820px) {
-  .hero__set { width: calc(100% - 2 * var(--gutter)); bottom: 132px; }
-  .reel { left: var(--gutter); right: auto; bottom: 56px; justify-items: start; grid-template-columns: auto auto auto; align-items: baseline; }
-  .reel__toggle { grid-column: auto; padding: 0; }
+  .hero__set { width: calc(100% - 2 * var(--gutter)); bottom: 72px; }
   .nav { padding-top: 24px; }
   .hero__maker { top: 20px; }
   .foot__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -446,12 +515,18 @@ img, video { display: block; }
   .strip { flex-direction: column; gap: 18px; }
   .strip li { grid-template-columns: 1fr auto; align-items: center; }
   .strip__chip { grid-column: 1 / -1; height: 72px; }
+  .renders__grid { grid-template-columns: minmax(0, 1fr); }
+  .render--lead, .render--side, .render--wide, .render--half { grid-column: 1 / -1; margin-top: 0; }
+  .render--side, .render--half:last-child { width: 78%; justify-self: end; margin-top: 0; }
+  .vendors__row { grid-template-columns: minmax(0, 1fr); gap: 8px; }
 }
 
 /* -------------------------------------------------------- reduced motion */
 
 @media (prefers-reduced-motion: reduce) {
   .grain::before, .film__scratches, .film__grime, .film__damage, .film__clip { animation: none; }
+  .daub:hover::before, .daub:focus-visible::before { animation: none; clip-path: inset(0 0 0 0); }
+  .daub:hover::after, .daub:focus-visible::after { animation: none; opacity: 1; }
   .film__clip.is-shown { transition: none; }
   *, *::before, *::after { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
 }

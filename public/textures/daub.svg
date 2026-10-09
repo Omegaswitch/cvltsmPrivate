@@ -1,29 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 72" preserveAspectRatio="none">
-  <!-- A smear of paint dragged across a word: dried-blood body, a darker wet
-       core, pale dry-brush streaks, a little splatter. The turbulence
-       displaces every edge so nothing reads as drawn by a machine. -->
+  <!-- Blood gouged across a word: four claw-like slashes of uneven width and
+       angle, a dragged smear under them, dry-brush gaps and splatter. Every
+       edge is torn by turbulence so nothing looks drawn by a machine. -->
   <defs>
-    <filter id="rough" x="-10%" y="-30%" width="120%" height="160%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.035 0.22" numOctaves="3" seed="4" result="n"/>
-      <feDisplacementMap in="SourceGraphic" in2="n" scale="9" xChannelSelector="R" yChannelSelector="G"/>
+    <filter id="tear" x="-10%" y="-40%" width="120%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.06 0.35" numOctaves="3" seed="11" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="11" xChannelSelector="R" yChannelSelector="G"/>
     </filter>
-    <filter id="dry" x="-5%" y="-30%" width="110%" height="160%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.9" numOctaves="2" seed="9" result="n"/>
-      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.6 1.5" result="gaps"/>
+    <filter id="dry" x="-5%" y="-40%" width="110%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02 1.1" numOctaves="2" seed="3" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3 1.75" result="gaps"/>
       <feComposite in="SourceGraphic" in2="gaps" operator="in"/>
     </filter>
   </defs>
-  <g filter="url(#rough)">
-    <path d="M10 22 C 40 12, 90 16, 130 13 S 205 10, 230 19 C 236 30, 234 44, 228 53 C 190 60, 140 57, 96 60 S 30 62, 12 54 C 6 44, 5 31, 10 22 Z" fill="#7a1a12"/>
-    <path d="M22 30 C 70 24, 130 27, 214 24 C 220 33, 218 41, 212 46 C 150 49, 80 47, 24 49 C 19 42, 18 36, 22 30 Z" fill="#5a0f0a" opacity="0.75"/>
+  <g filter="url(#tear)">
+    <path d="M6 44 C 60 36, 140 40, 234 30 L 236 46 C 150 52, 70 58, 8 60 Z" fill="#5c0e08" opacity="0.85"/>
   </g>
-  <g filter="url(#dry)" opacity="0.5">
-    <path d="M14 20 C 70 14, 150 12, 228 18 L 229 26 C 150 21, 70 23, 13 28 Z" fill="#e9a79c"/>
-    <path d="M18 50 C 80 55, 150 52, 226 49 L 224 56 C 150 59, 80 60, 16 56 Z" fill="#d98a7e"/>
+  <g filter="url(#dry)">
+    <g filter="url(#tear)" fill="#a80800">
+      <path d="M4 26 L 74 10 L 80 16 L 10 38 Z"/>
+      <path d="M40 58 L 132 14 L 140 22 L 52 66 Z"/>
+      <path d="M104 62 L 196 6 L 201 14 L 112 68 Z"/>
+      <path d="M168 60 L 236 24 L 238 34 L 176 66 Z"/>
+    </g>
   </g>
-  <g fill="#7a1a12" filter="url(#rough)">
-    <circle cx="236" cy="12" r="1.6"/>
-    <circle cx="6" cy="60" r="1.2"/>
-    <circle cx="232" cy="64" r="0.9"/>
+  <g fill="#a80800" filter="url(#tear)">
+    <circle cx="86" cy="10" r="2.4"/><circle cx="148" cy="8" r="1.4"/><circle cx="208" cy="4" r="1.8"/>
+    <circle cx="22" cy="66" r="1.5"/><circle cx="230" cy="66" r="1.1"/><circle cx="118" cy="70" r="1"/>
+    <path d="M200 14 L 204 30 L 202 31 Z"/><path d="M134 22 L 136 40 L 134 40 Z"/>
   </g>
 </svg>

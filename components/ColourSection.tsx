@@ -1,18 +1,19 @@
 import type { CSSProperties } from 'react';
+import { TornEdge } from './TornEdge';
 import { COLOURS } from '@/data/colours';
 
 /**
- * The colourway as one strip, each chip as wide as its share of the set.
- * It waits pinned beneath the kits and is uncovered as they scroll away;
- * the chips rise one after another as it comes into view (globals.css).
+ * The colourway as one strip of equal chips. It waits pinned beneath the
+ * kits and is uncovered as their torn bottom edge scrolls away; the chips
+ * rise one after another as it comes into view (globals.css).
  */
 export function ColourSection() {
   return (
-    <section id="colour" className="colours" aria-labelledby="colour-title">
-      <h2 id="colour-title" className="title">Colour</h2>
+    <section id="colors" className="colours" aria-labelledby="colors-title">
+      <h2 id="colors-title" className="title">Colors</h2>
       <ul className="strip">
         {COLOURS.map((c, i) => (
-          <li key={c.name} style={{ flexGrow: c.share, '--i': i } as CSSProperties}>
+          <li key={c.name} style={{ '--i': i } as CSSProperties}>
             <span className="strip__chip" style={{ background: c.hex }} />
             <span className="strip__name">{c.name}</span>
             <span className="strip__hex">{c.hex}</span>

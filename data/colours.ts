@@ -1,10 +1,7 @@
-/**
- * The colourway, in the order of the strip. `share` is how much of the set
- * the colour covers; the chips are sized by it.
- */
+/** The colourway, in the order of the strip. */
 export const COLOURS = [
-  { name: 'Void', hex: '#070707', share: 4 },
-  { name: 'Ash', hex: '#686762', share: 3 },
-  { name: 'Bone', hex: '#D2CCBE', share: 2 },
-  { name: 'Dried blood', hex: '#541817', share: 1.4 },
+  { name: 'Alphas base', hex: '#565050' },
+  { name: 'Red', hex: '#A80800' },
+  { name: 'Dark brown', hex: '#2A2624' },
+  { name: 'Cyan', hex: '#B1BEC3' },
 ];

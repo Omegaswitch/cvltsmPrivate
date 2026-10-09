@@ -12,6 +12,7 @@ export const BRAND = {
   /** the manufacturer: named and placed, but always second to the set */
   manufacturer: {
     name: 'SWG' as string | undefined,
+    /** e.g. '/brand/swg.svg' once the file is in public/brand/ */
     logo: undefined as string | undefined,
   },
 };

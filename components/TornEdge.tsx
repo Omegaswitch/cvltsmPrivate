@@ -1,7 +1,8 @@
 /**
- * A torn edge along the top of a section, as if the page had been ripped
- * from something. The tear is drawn from a fixed seed, so it is the same on
- * every visit and on the server and the client alike.
+ * A torn edge, as if the section had been ripped from something. On `top`
+ * it rises above the section; on `bottom` it hangs below it, over whatever
+ * comes next. Its colour is the section's own (--torn). The tear is drawn
+ * from a fixed seed, so it is the same on every visit, server and client.
  */
 function tear(seed: number, points = 90) {
   let s = seed;
@@ -15,9 +16,9 @@ function tear(seed: number, points = 90) {
   return `M0 40 ${edge.join(' ')} L1000 40 Z`;
 }
 
-export function TornEdge({ seed = 7 }: { seed?: number }) {
+export function TornEdge({ seed = 7, side = 'top' }: { seed?: number; side?: 'top' | 'bottom' }) {
   return (
-    <svg className="torn" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true">
+    <svg className={`torn torn--${side}`} viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true">
       <path d={tear(seed)} />
     </svg>
   );
