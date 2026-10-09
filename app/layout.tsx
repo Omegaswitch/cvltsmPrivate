@@ -3,12 +3,12 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'CVLTSM',
-  description: 'CVLTSM, a keycap set in double-shot ABS, drawn from the Nordic ritual.',
+  description: 'CVLTSM, a keycap set.',
   openGraph: { title: 'CVLTSM', type: 'website' },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#14110d',
+  themeColor: '#070605',
   colorScheme: 'dark',
   width: 'device-width',
   initialScale: 1,
@@ -19,7 +19,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        <link rel="preload" href="/fonts/Valhalica-Regular.otf" as="font" type="font/otf" crossOrigin="" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link

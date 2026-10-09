@@ -27,7 +27,7 @@ export default async function RitePage({ params }: { params: Promise<{ slug: str
 
   return (
     <main className="rite">
-      <a className="rite__mark" href="/">CVLTSM</a>
+      <a className="rite__back meta" href="/">Return</a>
       <Manuscript paragraphs={versesFor(stage, rite.seed)} variant="inline" />
       {stage.stone ? <TwigStone staves={stage.stone} /> : null}
       {last ? null : (
@@ -36,6 +36,7 @@ export default async function RitePage({ params }: { params: Promise<{ slug: str
           <Incantation stage={index} />
         </>
       )}
+      <div className="grain" aria-hidden="true" />
     </main>
   );
 }

@@ -1,290 +1,298 @@
 /* =========================================================================
-   CVLTSM. Void, bone and one accent. Hard cuts between the two grounds.
-   See DESIGN.md for the reasoning behind every value here.
+   CVLTSM. A ritual found on damaged film. See DESIGN.md for the reasoning.
    ========================================================================= */
 
-@font-face {
-  font-family: 'Valhalica';
-  src: url('/fonts/Valhalica-Regular.otf') format('opentype');
-  font-weight: 400;
-  font-display: swap;
-}
-
 :root {
-  --void: #070707;
-  --bone: #d2ccbe;
-  --ash: #686762;
-  --blood: #541817;
+  --black: #070605;
+  --char: #0f0c0a;
+  --bone: #d4ccbf;
+  --bone-dim: rgb(212 204 191 / 0.56);
+  --hair: rgb(212 204 191 / 0.16);
+  --blood: #7d1d15;
+  --ember: #b1291f;
 
-  --sans: 'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --wordmark: 'Valhalica', 'Trajan Pro', Georgia, serif;
+  --ui: 'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --serif: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
 
-  --gutter: clamp(20px, 3.4vw, 56px);
-  --section-y: clamp(96px, 12vw, 136px);
-  --grid-gap: clamp(16px, 2vw, 28px);
+  --gutter: clamp(20px, 3.2vw, 52px);
+  --slow: cubic-bezier(0.4, 0, 0.2, 1);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* everything below the film stands on dark concrete, its edges burned
+     like the film's frame */
+  --ground:
+    radial-gradient(130% 90% at 50% 40%, transparent 50%, rgb(0 0 0 / 0.6) 100%),
+    url('/textures/ground.webp') center / cover,
+    var(--char);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { color-scheme: dark; background: var(--void); scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html { color-scheme: dark; background: var(--black); -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
-  background: var(--void);
+  background: var(--black);
   color: var(--bone);
-  font-family: var(--sans);
-  font-size: 1.125rem;
-  line-height: 1.55;
+  font: 400 1rem/1.5 var(--ui);
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+}
+p, dl, dd, dt, figure { margin: 0; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+img, video { display: block; }
+:focus-visible { outline: 1px solid var(--ember); outline-offset: 5px; }
+
+/* the small type: navigation, the reel, the colophon. Set like the margins
+   of a film slate: capitals, a touch of air, never large. */
+.meta, .nav, .reel, .foot dt, .slot__label {
+  font-family: var(--ui);
+  font-weight: 500;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-h1, h2, h3, p, dl, dd, dt, ul, figure { margin: 0; padding: 0; }
-ul { list-style: none; }
-a { color: inherit; text-decoration: none; text-underline-offset: 0.2em; }
-button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
-img { display: block; width: 100%; height: 100%; object-fit: cover; }
-:focus-visible { outline: 1px solid var(--blood); outline-offset: 6px; }
-[hidden] { display: none !important; }
+/* ---------------------------------------------------------------- grain */
 
-/* ------------------------------------------------------------ header */
+/* One sheet of grain over the whole site, so the film never quite ends.
+   It moves by transform alone, in a few hard steps, like a projector. */
+.grain { position: fixed; inset: 0; z-index: 90; overflow: hidden; pointer-events: none; }
+.grain::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: url('/textures/grain.png');
+  opacity: 0.085;
+  animation: grain 0.8s steps(1) infinite;
+}
+@keyframes grain {
+  0% { transform: translate3d(0, 0, 0); }
+  17% { transform: translate3d(-7%, 4%, 0); }
+  34% { transform: translate3d(5%, -9%, 0); }
+  51% { transform: translate3d(-3%, 11%, 0); }
+  68% { transform: translate3d(9%, 2%, 0); }
+  85% { transform: translate3d(-10%, -6%, 0); }
+}
 
-.header {
+/* ------------------------------------------------------------------ nav */
+
+.nav {
   position: fixed;
   top: 0;
-  left: 0;
   right: 0;
   z-index: 40;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 22px var(--gutter);
+  gap: clamp(18px, 2.4vw, 36px);
+  padding: 26px var(--gutter);
   color: var(--bone);
+  /* legible over the film and over the manuscript alike */
+  mix-blend-mode: difference;
 }
-/* paper fading in under the header, so text scrolling beneath never collides with it */
-.header::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 -28px;
-  z-index: -1;
-  background: linear-gradient(rgb(20 17 13) 45%, rgb(20 17 13 / 0));
-  pointer-events: none;
-}
-.header__mark { font-family: var(--wordmark); font-size: 1.25rem; letter-spacing: 0.12em; }
-.header__nav { display: flex; gap: clamp(16px, 2.6vw, 40px); font-size: 0.9375rem; font-weight: 500; }
-.header__nav a { opacity: 0.6; transition: opacity 0.4s var(--ease); }
-.header__nav a:hover, .header__nav a.is-active { opacity: 1; }
-.header__nav a.is-active { text-decoration: underline; text-underline-offset: 0.35em; }
+.nav a { opacity: 0.62; transition: opacity 0.4s var(--ease); }
+.nav a:hover { opacity: 1; }
 
-/* ------------------------------------------------------------- hero */
+/* ----------------------------------------------------------------- hero */
 
-.hero { position: relative; min-height: 100vh; min-height: 100dvh; overflow: hidden; }
-.hero__text {
-  position: absolute;
-  z-index: 2;
-  left: var(--gutter);
-  right: var(--gutter);
-  bottom: clamp(56px, 12vh, 120px);
-  display: grid;
-  gap: 18px;
-  justify-items: start;
-  /* a halo of paper colour around the letters, with no box to see the edge of,
-     so the manuscript behind does not run through them */
-  text-shadow: 0 0 28px #14110d, 0 0 10px #14110d;
-}
-.hero__mfr { height: clamp(22px, 3.4vh, 36px); display: flex; align-items: center; }
-.hero__mfr img { width: auto; height: 100%; object-fit: contain; }
-.hero__word {
-  font-family: var(--wordmark);
-  font-weight: 400;
-  font-size: clamp(3.5rem, 15vw, 14rem);
-  line-height: 0.9;
-  letter-spacing: 0.06em;
-  color: var(--bone);
-}
-.hero__line { max-width: 36ch; font-size: 1.0625rem; color: var(--bone); opacity: 0.8; }
-.hero__link { font-weight: 500; text-decoration: underline; text-underline-offset: 0.3em; }
-.hero__link:hover { color: var(--bone); opacity: 0.8; }
-
-/* --------------------------------------------------------- sections */
-
-.section {
-  padding: var(--section-y) var(--gutter);
-  max-width: 1600px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: clamp(48px, 6vw, 72px);
-  scroll-margin-top: 96px;
-}
-.section__title {
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: clamp(2.75rem, 6vw, 5rem);
-  line-height: 1;
-  letter-spacing: -0.01em;
-  text-wrap: balance;
-}
-
-/* the plate: holds its aspect before its image loads */
-.plate { position: relative; overflow: hidden; background: #111110; }
-/* no image yet: a hairline frame on the paper, not a slab */
-.plate--empty { background: none; box-shadow: inset 0 0 0 1px rgb(210 204 190 / 0.14); }
-
-/* kits */
-.kits__lead { display: grid; grid-template-columns: 7fr 5fr; gap: clamp(32px, 5vw, 80px); align-items: end; }
-.kits__lead-text { display: grid; gap: 10px; max-width: 44ch; }
-.kits__pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--grid-gap); }
-.kit { display: grid; gap: 14px; align-content: start; }
-.kit__name { font-family: var(--serif); font-weight: 400; font-size: clamp(1.6rem, 2.4vw, 2.1rem); }
-.kit__summary { max-width: 44ch; color: rgb(210 204 190 / 0.68); }
-.kit--wide { display: grid; gap: 18px; }
-.kit__row { display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: 24px; }
-.kit__row .kit__summary { justify-self: end; text-align: right; }
-
-/* colour */
-.strip { display: grid; grid-template-columns: 4fr 3fr 2fr 1.4fr; }
-.strip li { display: grid; gap: 12px; min-width: 0; padding-right: var(--grid-gap); }
-.strip__chip { display: block; height: clamp(140px, 18vw, 220px); box-shadow: inset 0 0 0 1px rgb(210 204 190 / 0.12); }
-.strip__name { font-size: 0.9375rem; color: var(--bone); opacity: 0.8; }
-
-/* renders */
-.renders__grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: clamp(28px, 4vw, 56px) var(--grid-gap); align-items: start; }
-.renders__item { min-width: 0; }
-.renders__button { display: block; width: 100%; text-align: left; }
-.renders__button .plate { width: 100%; transition: opacity 0.6s var(--ease); }
-.renders__button:hover .plate { opacity: 0.8; }
-.renders__item--lead { grid-column: 1 / span 7; }
-.renders__item--side { grid-column: 9 / span 4; margin-top: 22vh; }
-.renders__item--half { grid-column: span 6; }
-.renders__item--full { grid-column: 1 / -1; }
-
-.viewer {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  background: #000;
-  display: grid;
-  place-items: center;
-  padding: 72px var(--gutter);
-}
-.viewer__close { position: absolute; top: 22px; right: var(--gutter); font-weight: 500; text-decoration: underline; text-underline-offset: 0.3em; }
-.viewer__frame { width: 100%; max-width: min(92vw, 1400px); max-height: 80svh; display: grid; }
-.viewer__frame .plate { width: 100%; max-height: 80svh; }
-
-/* ritual */
-.ritual { padding-top: var(--section-y); }
-.ritual__title {
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(3rem, 9vw, 9rem);
-  line-height: 0.95;
-  letter-spacing: -0.02em;
-  text-wrap: balance;
-  max-width: 12ch;
-  margin-bottom: clamp(24px, 6vw, 96px);
-}
-.ritual__title:last-child { margin-bottom: 0; }
-.ritual__item { display: grid; margin-bottom: clamp(96px, 16vh, 200px); }
-.ritual__item .plate { width: 100%; }
-.ritual__item--wide { width: 80vw; }
-.ritual__item--small { width: 25vw; }
-.ritual__item--strip { width: 100vw; margin-left: calc(var(--gutter) * -1); }
-.ritual__item--tall { width: 38vw; }
-.ritual__item--right { margin-left: auto; }
-.ritual__item--left { margin-right: auto; }
-.ritual__item--centre { margin-left: auto; margin-right: auto; }
-.ritual__item--strip .plate { aspect-ratio: 21 / 6 !important; }
-/* the strip runs edge to edge whatever its alignment class says */
-.ritual__item.ritual__item--strip { width: 100vw; margin-left: calc(var(--gutter) * -1); margin-right: 0; }
-
-/* vendors */
-.vendors__list { display: grid; }
-.vendors__row {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 24px;
-  padding: 22px 0;
-  border-top: 1px solid rgb(210 204 190 / 0.14);
-  font-size: 1.125rem;
-}
-.vendors__row:last-child { border-bottom: 1px solid rgb(210 204 190 / 0.14); }
-.vendors__region { font-weight: 500; }
-.vendors__status { color: rgb(210 204 190 / 0.6); }
-
-/* credits */
-.credits { position: relative; z-index: 1; color: var(--bone); padding: calc(var(--section-y) * 0.8) var(--gutter) 40px; display: grid; gap: 56px; }
-.credits__list { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--grid-gap); }
-.credits__item { display: grid; gap: 6px; border-top: 1px solid rgb(210 204 190 / 0.14); padding-top: 14px; }
-.credits__item dt { font-size: 0.9375rem; color: var(--bone); opacity: 0.6; }
-.credits__item dd { font-size: 1.0625rem; }
-.credits__foot { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.9375rem; color: var(--bone); opacity: 0.7; }
-.credits__mark { font-family: var(--wordmark); font-size: 1.125rem; letter-spacing: 0.12em; }
-
-/* ------------------------------------------------------- the manuscript */
-
-/* Dark, aged paper. Its parts: a burnt edge, three old stains, and the
-   grunge texture (public/textures/grunge.webp, from scripts/make-grunge.mjs),
-   stretched over the sheet so it never visibly repeats. A hunt page wears it
-   all as one background; behind the home page the parts are separate layers
-   so they can drift at their own depths (see the parallax, below). */
-:root {
-  --paper-colour: #14110d;
-  --paper-edge: radial-gradient(130% 100% at 50% 45%, transparent 48%, rgb(0 0 0 / 0.55) 82%, rgb(0 0 0 / 0.85) 100%);
-  --paper-stains:
-    radial-gradient(30% 22% at 18% 28%, rgb(90 30 22 / 0.13), transparent 70%),
-    radial-gradient(26% 22% at 82% 76%, rgb(130 100 62 / 0.09), transparent 70%),
-    radial-gradient(14% 10% at 66% 18%, rgb(130 100 62 / 0.06), transparent 70%);
-  --grunge: url('/textures/grunge.webp') center / cover no-repeat;
-  --paper: var(--paper-edge), var(--paper-stains), var(--grunge), var(--paper-colour);
-  --ember: #b1291f;
-}
-
-main { position: relative; z-index: 1; }
-
-.manuscript { --ink-text: rgb(210 204 190 / 0.075); isolation: isolate; }
-.manuscript--page {
-  position: fixed;
-  inset: 0;
+/* The film holds the screen while the manuscript slides up over it. */
+.hero {
+  position: sticky;
+  top: 0;
   z-index: 0;
+  height: 100vh;
+  height: 100svh;
   overflow: hidden;
-  pointer-events: none;
-  background: var(--paper-stains), var(--paper-colour);
+  background: var(--black);
 }
-/* the burnt edge lies over every layer, the text included */
-.manuscript--page::after { content: ''; position: absolute; inset: 0; background: var(--paper-edge); }
-.manuscript__layer { position: absolute; left: 0; right: 0; top: 0; }
-.manuscript__backdrop { height: 150vh; background: var(--backdrop) center top / auto 100% no-repeat; }
-.manuscript__grunge { height: 118vh; background: var(--grunge); }
 
-/* Parallax. Three depths, each driven by the scroll position itself, so the
-   browser moves them on the compositor with no script per frame: the old
-   image deepest and slowest to leave, the grunge a little nearer, and the
-   text nearest, rising faster as it fades. Browsers without scroll-driven
-   animation, and anyone who asks for reduced motion, get still layers. */
+.film { position: absolute; inset: 0; overflow: hidden; }
+.film__poster,
+.film__clip,
+.film__damage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* the clips: hidden until shown; the incoming one dissolves in on top of
+   the outgoing one, which stays fully up beneath it until the dissolve ends */
+.film__clip { opacity: 0; }
+.film__clip.is-under { opacity: 1; z-index: 1; }
+.film__clip.is-shown { opacity: 1; z-index: 2; transition: opacity 2.4s var(--slow); }
+
+/* dust and grime moving over the picture: light only, never darkening */
+.film__damage { z-index: 3; mix-blend-mode: screen; opacity: 0.17; }
+/* the concrete multiplied in: its marks become dirt on the film */
+.film__grime {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: url('/textures/grime.webp') center / cover;
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+}
+
+/* the blood in the image: a colour pass that keeps every value of the grade
+   and moves its hue toward dried blood, as in the duotone references */
+.film__tint {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: var(--film-tint, rgb(122 28 20 / 0.32));
+  mix-blend-mode: color;
+}
+
+/* scratches: two hairlines that appear now and then, in a new place each time */
+.film__scratches {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 0.5px), rgb(230 220 205 / 0.32) 50%, transparent calc(50% + 0.5px)) no-repeat,
+    linear-gradient(90deg, transparent calc(50% - 0.6px), rgb(10 8 6 / 0.55) 50%, transparent calc(50% + 0.6px)) no-repeat;
+  background-size: 2px 100%, 3px 100%;
+  opacity: 0;
+  animation: scratch 9s steps(1) infinite;
+}
+@keyframes scratch {
+  0%, 100% { opacity: 0; }
+  31% { opacity: 1; background-position: 23% 0, 71% 0; }
+  32% { opacity: 0.6; background-position: 23.4% 0, 70.8% 0; }
+  33% { opacity: 0; }
+  64% { opacity: 0.8; background-position: 58% 0, 12% 0; }
+  65.5% { opacity: 0; }
+  88% { opacity: 0.5; background-position: 86% 0, 39% 0; }
+  89% { opacity: 0; }
+}
+
+/* the signal failing for a moment as some clips arrive */
+.film__interference {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    repeating-linear-gradient(0deg, rgb(212 204 191 / 0.08) 0 1px, transparent 1px 3px),
+    url('/textures/grain.png');
+  mix-blend-mode: screen;
+}
+.film[data-interfere] .film__interference { animation: interfere 0.85s steps(1) both; }
+.film[data-interfere] .film__clip.is-shown { animation: tear 0.85s steps(1) both; }
+@keyframes interfere {
+  0% { opacity: 0.7; background-position: 0 0, 0 0; }
+  12% { opacity: 0.2; background-position: 0 3px, 40px -30px; }
+  22% { opacity: 0.55; background-position: 0 -2px, -60px 20px; }
+  38% { opacity: 0; }
+  58% { opacity: 0.3; background-position: 0 1px, 15px 70px; }
+  70%, 100% { opacity: 0; }
+}
+@keyframes tear {
+  0% { transform: translate3d(-1.2%, 0, 0); filter: brightness(1.5) contrast(1.3); }
+  12% { transform: translate3d(0.8%, 0, 0); filter: none; }
+  22% { transform: translate3d(-0.4%, 0.6%, 0); filter: brightness(1.25); }
+  38%, 100% { transform: none; filter: none; }
+}
+
+/* shading: the frame's edges burned, the foot dark enough for the logo */
+.film__shade {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  background:
+    linear-gradient(180deg, rgb(7 6 5 / 0.55) 0%, transparent 18%, transparent 52%, rgb(7 6 5 / 0.82) 100%),
+    radial-gradient(120% 95% at 50% 45%, transparent 55%, rgb(0 0 0 / 0.7) 100%);
+}
+
+/* the set's logo, low on the left */
+.hero__set {
+  position: absolute;
+  z-index: 10;
+  left: var(--gutter);
+  bottom: clamp(64px, 11vh, 120px);
+  width: min(56vw, 880px);
+}
+/* the manufacturer, small and high on the left, under the same margin */
+.hero__maker { position: absolute; z-index: 10; top: 22px; left: var(--gutter); width: clamp(124px, 10vw, 150px); }
+
+/* the reel: which clip, where in it, and the control, at the foot on the right */
+.reel {
+  position: absolute;
+  z-index: 10;
+  right: var(--gutter);
+  bottom: clamp(64px, 11vh, 120px);
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 6px 22px;
+  justify-items: end;
+  color: var(--bone);
+  font-variant-numeric: tabular-nums;
+}
+.reel__of { opacity: 0.5; }
+.reel__time { opacity: 0.5; }
+.reel__toggle {
+  grid-column: 1 / -1;
+  padding: 6px 0 2px;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  opacity: 0.62;
+  transition: opacity 0.4s var(--ease);
+}
+.reel__toggle:hover { opacity: 1; }
+
+/* Leaving the film: it sinks back and darkens as the manuscript comes up,
+   and the logo rises a little faster than the page. Driven by the scroll
+   itself, on the compositor; still where unsupported or unwanted. */
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
-    .manuscript__backdrop { animation: drift-deep linear both; animation-timeline: scroll(root); }
-    .manuscript__grunge { animation: drift-mid linear both; animation-timeline: scroll(root); }
-    .manuscript--page .manuscript__text { animation: drift-near linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
+    .film { animation: sink linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
+    .hero__set, .reel { animation: rise linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
   }
 }
-@keyframes drift-deep { to { transform: translate3d(0, -50vh, 0); } }
-@keyframes drift-mid { to { transform: translate3d(0, -18vh, 0); } }
-@keyframes drift-near { to { transform: translate3d(0, -24vh, 0); } }
-.manuscript__text {
-  font-family: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
-  color: var(--ink-text);
-  hyphens: auto;
+@keyframes sink { to { transform: scale(1.06); filter: brightness(0.45); } }
+@keyframes rise { to { transform: translate3d(0, -14vh, 0); opacity: 0; } }
+
+/* ----------------------------------------------------------- logo slots */
+
+/* A logo's place before the logo exists: its proportions, held by a hairline. */
+.slot { display: block; width: 100%; }
+.slot--set { aspect-ratio: 4.6 / 1; }
+.slot--manufacturer { aspect-ratio: 3.4 / 1; }
+.slot:not(.slot--filled) {
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgb(212 204 191 / 0.3);
 }
-.manuscript--page .manuscript__text {
+.slot__label { color: var(--bone-dim); white-space: nowrap; }
+.slot--filled { height: auto; object-fit: contain; }
+
+/* ----------------------------------------------------------- manuscript */
+
+.sheet {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  padding: clamp(120px, 18vh, 200px) var(--gutter) clamp(120px, 16vh, 180px);
+  background: var(--ground);
+  overflow-x: clip;
+}
+/* the torn top edge, the sheet's own ground continuing up into it */
+.torn {
   position: absolute;
-  top: 14vh;
-  left: 50%;
-  width: min(88vw, 1180px);
-  margin-left: calc(min(88vw, 1180px) / -2);
+  left: 0;
+  bottom: calc(100% - 1px);
+  width: 100%;
+  height: clamp(18px, 3vw, 40px);
+  fill: #18140f;
+}
+
+.manuscript { --ink-text: rgb(212 204 191 / 0.13); isolation: isolate; }
+.manuscript__text { font-family: var(--serif); color: var(--ink-text); hyphens: auto; }
+.manuscript--sheet .manuscript__text {
+  max-width: 1180px;
+  margin: 0 auto;
   columns: 2;
   column-gap: 7vw;
   font-size: clamp(1.1rem, 1.55vw, 1.5rem);
@@ -294,7 +302,6 @@ main { position: relative; z-index: 1; }
 .manuscript__text p { margin: 0 0 1.1em; text-indent: 1.6em; }
 .manuscript__text p:first-child { text-indent: 0; }
 .manuscript__text p:first-child::first-letter { -webkit-initial-letter: 2; initial-letter: 2; margin-right: 0.1em; }
-/* without initial-letter (Firefox): a float sized and nudged to match */
 @supports not ((initial-letter: 2) or (-webkit-initial-letter: 2)) {
   .manuscript__text p:first-child::first-letter { float: left; font-size: 3.55em; line-height: 0.8; margin: 0.08em 0.1em 0 0; }
 }
@@ -310,6 +317,9 @@ main { position: relative; z-index: 1; }
   --warm: clamp(0, var(--heat) * 2, 1);
   --hot: clamp(0, (var(--heat) - 0.5) * 2, 1);
   position: relative;
+  /* never broken across lines: the glow copies are one piece */
+  hyphens: none;
+  white-space: nowrap;
   color: color-mix(in oklab, color-mix(in oklab, #ffc48a calc(var(--hot) * 100%), var(--ember)) calc(var(--warm) * 100%), var(--ink-text));
 }
 .mword::before,
@@ -325,6 +335,22 @@ main { position: relative; z-index: 1; }
 .mword::before { z-index: -1; color: #8f1d14; filter: blur(14px); opacity: calc(var(--heat) * 0.95); }
 .mword::after { color: #ff7a3c; filter: blur(4px); opacity: calc(var(--hot) * 0.7); mix-blend-mode: screen; }
 
+/* ------------------------------------------------------------- colophon */
+
+.foot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 56px;
+  padding: 64px var(--gutter) 48px;
+  background: var(--char);
+}
+.foot__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px var(--gutter); }
+.foot dt { color: var(--bone-dim); margin-bottom: 8px; }
+.foot dd { font-size: 0.9375rem; }
+
+/* ------------------------------------------------------------- the hunt */
+
 /* the typed line at the foot of the screen */
 .incantation {
   position: fixed;
@@ -333,7 +359,7 @@ main { position: relative; z-index: 1; }
   bottom: 7vh;
   transform: translateX(-50%);
   margin: 0;
-  font-family: 'IM Fell English', Georgia, serif;
+  font-family: var(--serif);
   font-style: italic;
   font-size: clamp(1.6rem, 3vw, 2.5rem);
   color: var(--bone);
@@ -349,20 +375,20 @@ main { position: relative; z-index: 1; }
 
 /* the same, as a field */
 .speak { display: flex; align-items: baseline; gap: 16px; }
-.speak__label { font-family: 'IM Fell English', Georgia, serif; font-style: italic; font-size: 1.125rem; opacity: 0.55; }
+.speak__label { font-family: var(--serif); font-style: italic; font-size: 1.125rem; opacity: 0.55; }
 .speak__input {
   width: min(300px, 62vw);
   padding: 4px 0;
   border: 0;
-  border-bottom: 1px solid rgb(210 204 190 / 0.25);
+  border-bottom: 1px solid rgb(212 204 191 / 0.25);
   background: transparent;
   color: var(--bone);
-  font: italic 1.25rem 'IM Fell English', Georgia, serif;
+  font: italic 1.25rem var(--serif);
   transition: color 0.6s var(--ease), border-color 0.6s var(--ease);
 }
 .speak__input:focus-visible { outline: none; border-bottom-color: var(--ember); }
 .speak--right .speak__input { color: var(--ember); border-bottom-color: var(--ember); }
-.speak--wrong .speak__input { border-bottom-color: rgb(210 204 190 / 0.08); }
+.speak--wrong .speak__input { border-bottom-color: rgb(212 204 191 / 0.08); }
 
 /* a page of the hunt */
 .rite {
@@ -372,44 +398,32 @@ main { position: relative; z-index: 1; }
   align-content: center;
   gap: 56px;
   padding: 18vh var(--gutter);
-  background: var(--paper);
+  background: var(--ground);
 }
-.rite__mark { position: fixed; top: 22px; left: var(--gutter); font-family: var(--wordmark); font-size: 1.25rem; letter-spacing: 0.12em; }
-.manuscript--inline { --ink-text: rgb(210 204 190 / 0.78); }
+.rite__back { position: fixed; top: 26px; left: var(--gutter); opacity: 0.62; }
+.rite__back:hover { opacity: 1; }
+.manuscript--inline { --ink-text: rgb(212 204 191 / 0.8); }
 .manuscript--inline .manuscript__text { max-width: 30ch; font-size: clamp(1.6rem, 3.2vw, 2.6rem); line-height: 1.45; }
 .manuscript--inline .manuscript__text p { text-indent: 0; }
 .manuscript--inline .manuscript__text p:first-child::first-letter { -webkit-initial-letter: normal; initial-letter: normal; float: none; font-size: inherit; margin: 0; }
-.twigs { width: min(340px, 80vw); height: auto; stroke: rgb(210 204 190 / 0.7); stroke-width: 2.4; stroke-linecap: round; fill: none; }
+.twigs { width: min(340px, 80vw); height: auto; stroke: rgb(212 204 191 / 0.7); stroke-width: 2.4; stroke-linecap: round; fill: none; }
 
-/* ------------------------------------------------------------ narrow */
+/* --------------------------------------------------------------- narrow */
 
 @media (max-width: 820px) {
-  .manuscript--page .manuscript__text { columns: 1; width: 86vw; margin-left: -43vw; top: 11vh; font-size: 1.05rem; line-height: 1.85; }
-  .hero__word { font-size: 25vw; }
-  .header__nav { gap: 16px; font-size: 0.875rem; }
-  .header__mark { font-size: 1.0625rem; }
-  .kits__lead { grid-template-columns: 1fr; }
-  .kits__pair { grid-template-columns: 1fr; }
-  .kit__row { grid-template-columns: 1fr; }
-  .kit__row .kit__summary { justify-self: start; text-align: left; }
-  .strip { grid-template-columns: 1fr; gap: 14px; }
-  .strip li { grid-template-columns: 1fr auto; align-items: center; }
-  .strip__chip { height: 52px; grid-column: 1 / -1; }
-  .renders__grid { grid-template-columns: 1fr; }
-  .renders__item--lead, .renders__item--side, .renders__item--half, .renders__item--full { grid-column: 1 / -1; margin-top: 0; }
-  .ritual__item--wide, .ritual__item--small, .ritual__item--tall { width: 100%; }
-  .ritual__item--small { width: 62vw; }
-  .vendors__row { grid-template-columns: 1fr; gap: 6px; }
-  .credits__list { grid-template-columns: repeat(2, 1fr); }
+  .hero__set { width: calc(100% - 2 * var(--gutter)); bottom: 132px; }
+  .reel { left: var(--gutter); right: auto; bottom: 56px; justify-items: start; grid-template-columns: auto auto auto; align-items: baseline; }
+  .reel__toggle { grid-column: auto; padding: 0; }
+  .nav { padding-top: 24px; }
+  .hero__maker { top: 20px; }
+  .manuscript--sheet .manuscript__text { columns: 1; font-size: 1.05rem; line-height: 1.85; }
+  .foot__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* ------------------------------------------------------ reduced motion */
+/* -------------------------------------------------------- reduced motion */
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after {
-    transition-duration: 0.001ms !important;
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-  }
+  .grain::before, .film__scratches { animation: none; }
+  .film__clip.is-shown { transition: none; }
+  *, *::before, *::after { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
 }

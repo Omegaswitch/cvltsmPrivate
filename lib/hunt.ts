@@ -29,7 +29,7 @@ export interface Stage {
 
 export const STAGES: Stage[] = [
   {
-    // stage 0: the riddle is the manuscript behind the home page (data/manuscript.ts)
+    // stage 0: the riddle is the manuscript on the home page (data/manuscript.ts)
     slug: '',
     lines: [],
     answers: [

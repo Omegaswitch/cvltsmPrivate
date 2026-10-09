@@ -1,89 +1,70 @@
 # CVLTSM
 
-The site for CVLTSM, a keycap set in double-shot ABS, drawn from the Nordic ritual.
-It presents the set: the kits, the colourway, the renders, the ritual, the vendors.
-It is not a shop. There are no prices and no cart. A hidden hunt runs underneath it.
+The site for CVLTSM, a keycap set. Not a shop: a way into its world. It opens on a film, a ritual found on damaged footage, with the set's logo over it; below that, a manuscript that hides the first riddle of a hunt.
 
-Design rules are in [`DESIGN.md`](DESIGN.md). Read it before changing anything visual.
-
-## Run it
-
-```sh
+```
 npm install
-npm run dev       # http://localhost:3000
+npm run dev      # http://localhost:3000
 npm run build && npm start
-npm run lint      # type check
+npm run lint     # type check
 ```
 
-Built with Next.js, React and TypeScript. No animation or 3D libraries.
+Next.js, React and TypeScript. No animation or 3D libraries: the film is plain video, the degradation is CSS, and the scroll effects run on CSS scroll timelines.
 
 ## Where things are
 
 ```
 app/
-  page.tsx            the sections, in order
-  layout.tsx          metadata, the wordmark font, the Inter Tight stylesheet
-  globals.css         the palette, the grid, every section's rules
+  page.tsx               the page: nav, film, manuscript, colophon
+  layout.tsx             metadata and the two web fonts
+  globals.css            every rule, in the order of the page
+  rite/[slug]/page.tsx   a page of the hunt (server)
+  api/hunt/route.ts      checks a guess (server)
 components/
-  Header.tsx          wordmark and section links; the active one is underlined
-  Hero.tsx            the opening: manufacturer slot, wordmark, one line
-  KitsSection.tsx     Base leads; Numpad and Novelties side by side; Deskmat full width
-  ColourSection.tsx   the colourway strip
-  RendersSection.tsx  the render grid; a click opens a plain viewer (hidden until a render has a src)
-  RitualSection.tsx   a statement, then plates at uneven scales (only those with a src)
-  VendorsSection.tsx  regions, with a status line each
-  CreditsSection.tsx  credits and the closing wordmark
-  Manuscript.tsx      the paper and its hidden words
-  Incantation.tsx     typing an answer, and the Speak field
-  TwigStone.tsx       the twig-rune staves on a hunt page
-  Plate.tsx           an image, or a hairline frame of the same aspect
-data/                 every piece of copy and every item (edit these, not the components)
-lib/hunt.ts           the hunt: stages, answers, signed progress (server only)
-types/index.ts        the shapes the data must match
-public/fonts/         Valhalica, the wordmark face
-public/images/        photographs and renders (not yet supplied)
-archive/              earlier designs, kept whole
+  Hero.tsx               the opening: film, logo slots
+  Film.tsx               the film player and its layers of damage
+  LogoSlot.tsx           a logo, or the marked space where it will go
+  Nav.tsx, Footer.tsx    two links; the colophon
+  TornEdge.tsx           the torn top edge of the manuscript
+  Manuscript.tsx         the old text and its hidden, glowing words
+  Incantation.tsx        typing an answer, and the Speak field
+  TwigStone.tsx          the twig-rune staves on a hunt page
+data/
+  brand.ts               names and logo paths
+  film.ts                the clips: order, length, how each arrives
+  manuscript.ts          the text of the first riddle
+lib/hunt.ts              the hunt (server only)
+public/film/             the graded clips, posters and the damage loop
+public/textures/         grime, ground and grain
+public/brand/            the logos, when they exist
+assets/                  originals the textures (and, locally, the film) are made from
+scripts/                 encode-film.sh, make-textures.mjs, hunt tools
+docs/HUNT.md             the hunt's answers (spoilers)
 ```
 
-## Content
+## Replacing things
 
-Everything on the page comes from `data/`:
+- **Logos.** Put the files in `public/brand/` (SVG preferred) and set `BRAND.logo` and `BRAND.manufacturer.logo` (and `.name`) in `data/brand.ts`. Until then the hero shows a dashed slot of the right proportions in each place. No logo is drawn or set in type as a stand-in.
+- **Clips.** The originals go in `assets/film/` (kept out of git; they are large). Each clip's source, cut and grade are a line in `scripts/encode-film.sh`; run it with `FFMPEG=/path/to/ffmpeg scripts/encode-film.sh`. It writes 720p and 480p, WebM and MP4, and a poster frame per clip to `public/film/`. The order, lengths and transitions are in `data/film.ts`.
+- **Textures.** The concrete originals are in `assets/textures/`; `node scripts/make-textures.mjs` remakes the grime, the dark ground and the grain tile.
+- **The red.** The blood in the film is one colour pass, `--film-tint` in `globals.css`. Its alpha is its strength.
 
-| File | Holds |
-|---|---|
-| `site.ts` | the name, the one line under the wordmark, the year, the manufacturer logo path |
-| `kits.ts` | the four kits: name, one line, photograph |
-| `colours.ts` | the colourway chips, in strip order |
-| `renders.ts` | the renders, each with its place on the grid |
-| `ritual.ts` | the ritual statement and its plates |
-| `vendors.ts` | the regions, and vendor names once confirmed |
-| `credits.ts` | the credits; names read `[NAME]` until confirmed |
+## The film
 
-## Replacing placeholders
+Four clips, about half a minute, looping: a window choked with wire and the eyes behind it; hands against frosted glass; a hooded figure with a scythe in a misty court; a cabin wall under a flashlight. All are graded to one look: near-monochrome, blacks crushed, a dirty cast, then a colour pass toward dried blood.
 
-Every image is a `Plate`. Until a file exists, its slot is an empty tile with the right aspect ratio, so the layout is already correct.
+- Two video elements take turns. The next clip starts on top of the one still playing and dissolves in over 2.4 seconds, so the picture never drops to black. Two of the four arrivals are broken, for under a second, by interference: scan lines, a jump of grain, the picture torn sideways.
+- Over the footage: a looping pass of real film dust and grime (screened, so it only lightens), the brushed concrete multiplied in as dirt, two hairline scratches that appear a few times a minute, and the frame's edges burned.
+- One sheet of grain covers the whole site, moving in hard steps like a projector, so the film's texture carries on below it.
+- The manuscript slides up over the film on a torn edge while the film sinks back and darkens.
 
-To fill a slot, put the file at the path in `data/` (under `public/`) and set `src` on that entry, for example:
+**Loading.** A poster frame is in the page from the start; the clips load one at a time as they are needed, at 480p on phones. The whole film, both sizes and both formats, is under 6 MB. The damage loop plays on large screens only.
 
-```ts
-{ name: 'Base', ..., plate: { ratio: '3 / 2', path: '/images/kits/base.webp', src: '/images/kits/base.webp', alt: '…' } }
-```
-
-Aspect ratios are fixed by the layout. Shoot to them or crop before export. WebP is the format used.
-
-| Slot | Ratio | File |
-|---|---|---|
-| Base kit | 3 / 2 | `public/images/kits/base.webp` |
-| Numpad | 4 / 5 | `public/images/kits/numpad.webp` |
-| Novelties | 4 / 5 | `public/images/kits/novelties.webp` |
-| Deskmat | 21 / 9 | `public/images/kits/deskmat.webp` |
-| Renders 01 to 05 | 4/3, 4/5, 3/2, 3/4, 21/8 | `public/images/renders/01.webp` to `05.webp` |
-| Ritual 01 to 04 | 16/10, 4/5, 21/6, 3/5 | `public/images/ritual/01.webp` to `04.webp` |
-| Manufacturer mark | any, reserved height | set `SET.manufacturerLogo` in `data/site.ts` |
+**When it does not play.** With reduced motion, or a data-saving connection, nothing autoplays: the first poster frame stands, and the reel's Play starts the film. It pauses when the manuscript has covered it and when the tab is hidden. Pause is always at hand in the reel.
 
 ## The manuscript and the hunt
 
-Behind the site lies a page of old text on dark paper (`components/Manuscript.tsx`, text in `data/manuscript.ts`). Some words are hidden in the same ink as the rest; they glow red when a cursor or a finger passes over them, and cool slowly when it moves on. Read in order, they are a riddle.
+Below the film lies a page of old text (`components/Manuscript.tsx`, text in `data/manuscript.ts`). Some words are hidden in the same ink as the rest; they glow red when a cursor or a finger passes over them, and cool slowly when it moves on. Read in order, they are a riddle.
 
 Typing the answer anywhere on the home page, outside a form field, opens the next page of the hunt (on a phone, use the **Speak** field in the footer). Each page holds another riddle, and the last one ends the hunt. There are six riddles. Past the first two they lean on things a search engine or a chatbot cannot simply hand over: a cipher that has to be read off a drawing, a riddle split between visitors, and a page that changes with the hour in Stockholm. The answers and the reasoning are in [`docs/HUNT.md`](docs/HUNT.md) (spoilers).
 
@@ -103,14 +84,14 @@ Answers ignore case, spaces, punctuation and accents, and Norse letters are spel
 
 ## Motion and accessibility
 
-- Nothing on the page moves on its own. Behind it, the sheet has three depths that drift at different speeds with the scroll (the old image, the grunge, the text), driven by CSS scroll timelines, not script. The text fades as the opening scrolls away; hidden words warm under the cursor and cool slowly. Reduced motion keeps all of it still.
-- **The old image behind the page:** put a public-domain woodcut or engraving (dark ink on light paper) in `assets/`, run `node scripts/make-backdrop.mjs assets/<file> 0.14`, and set `backdrop: '/textures/backdrop.webp'` in `data/site.ts`.
-- The viewer closes on Escape. Links and buttons are real elements.
+- The film has a Pause control and plays nothing on its own under reduced motion or data saving. Under reduced motion the grain and scratches are still too, and the scroll effects are off.
+- The logo slots are images with a label; the film is decorative and hidden from assistive technology.
+- Links and buttons are real elements; the manuscript is real text.
 
 ## What has not been measured
 
-This was checked in a headless browser, where the web fonts are blocked, so the screenshots used fallback faces. Check the type on a real device.
+Checked in a headless browser with software rendering and the web fonts blocked. Video smoothness, the cost of the blend layers on a phone's GPU, and the type in its real faces are the first things to look at on real devices.
 
 ## Archive
 
-Earlier work is kept whole and runnable under `archive/`: `sigil/` (the WebGL sigil site), `wheat-field/`, and `pixel-wood/`.
+Earlier designs are kept whole under `archive/`.

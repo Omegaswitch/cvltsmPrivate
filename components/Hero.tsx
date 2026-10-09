@@ -1,18 +1,17 @@
-import { SET } from '@/data/site';
+import { Film } from './Film';
+import { LogoSlot } from './LogoSlot';
 
-/** The opening: the wordmark on the paper, a line, and the way in. */
+/**
+ * The opening: the film full bleed, the set's logo low on the left where the
+ * eye settles, the manufacturer small and high on the right, and the reel's
+ * count and control at the foot opposite the logo.
+ */
 export function Hero() {
   return (
-    <section id="top" className="hero">
-      <div className="hero__text">
-        {/* manufacturer slot: reserved height, so the wordmark does not move when the mark arrives */}
-        <div className="hero__mfr">
-          {SET.manufacturerLogo ? <img src={SET.manufacturerLogo} alt="Manufacturer" /> : null}
-        </div>
-        <h1 className="hero__word">{SET.name}</h1>
-        <p className="hero__line">{SET.line}</p>
-        <a className="hero__link" href="#kits">View the kits</a>
-      </div>
+    <section id="film" className="hero" aria-label="Film">
+      <Film />
+      <div className="hero__set"><LogoSlot of="set" /></div>
+      <div className="hero__maker"><LogoSlot of="manufacturer" /></div>
     </section>
   );
 }

@@ -4,7 +4,7 @@ Six riddles. The first two belong to the set itself. The four after them reach i
 
 | # | Page | Riddle | Answer |
 |---|------|--------|--------|
-| 0 | home | The manuscript behind the page. Its glowing words read: pressed, never broken, struck, never bleeding, carry the mark, Name. | `key` (or `keycap`) |
+| 0 | home | The manuscript below the film. Its glowing words read: pressed, never broken, struck, never bleeding, carry the mark, Name. | `key` (or `keycap`) |
 | 1 | `/rite/ae3f9c71b2` | Two pours, one body; the legend poured in a second time. | `double shot` |
 | 2 | `/rite/444cce3874` | Five staves in the twig runes of the Rök stone. | `Vámóðr` (also `vamodr`, `vamod`, `uamuth`) |
 | 3 | `/rite/6f294ec0f7` | Four fragments, one per visitor. | `Yggr` |

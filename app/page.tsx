@@ -1,30 +1,24 @@
-import { Header } from '@/components/Header';
+import { Nav } from '@/components/Nav';
 import { Hero } from '@/components/Hero';
-import { KitsSection } from '@/components/KitsSection';
-import { ColourSection } from '@/components/ColourSection';
-import { RendersSection } from '@/components/RendersSection';
-import { RitualSection } from '@/components/RitualSection';
-import { VendorsSection } from '@/components/VendorsSection';
-import { CreditsSection } from '@/components/CreditsSection';
 import { Manuscript } from '@/components/Manuscript';
+import { Footer } from '@/components/Footer';
+import { TornEdge } from '@/components/TornEdge';
 import { Incantation } from '@/components/Incantation';
-import { SET } from '@/data/site';
 import { MANUSCRIPT } from '@/data/manuscript';
 
 export default function Page() {
   return (
     <>
-      <Manuscript paragraphs={MANUSCRIPT} backdrop={SET.backdrop} />
-      <Header />
+      <Nav />
       <main>
         <Hero />
-        <KitsSection />
-        <ColourSection />
-        <RendersSection />
-        <RitualSection />
-        <VendorsSection />
+        <section id="manuscript" className="sheet" aria-label="Manuscript">
+          <TornEdge />
+          <Manuscript paragraphs={MANUSCRIPT} variant="sheet" />
+        </section>
       </main>
-      <CreditsSection />
+      <Footer />
+      <div className="grain" aria-hidden="true" />
       <Incantation stage={0} />
     </>
   );

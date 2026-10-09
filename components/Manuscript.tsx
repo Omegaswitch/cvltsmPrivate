@@ -1,16 +1,14 @@
 'use client';
 
-import { type CSSProperties, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 /*
- * Text on old paper. Hidden words, marked [[word]] in the source, share the
- * ink of the rest until a cursor or a finger passes near them. Then they
- * ignite, and when it moves away they cool slowly, like embers.
+ * An old text. Hidden words, marked [[word]] in the source, share the ink of
+ * the rest until a cursor or a finger passes near them. Then they ignite,
+ * and when it moves away they cool slowly, like embers.
  *
- * `page` is the fixed sheet behind the home page; it stays still while the
- * page scrolls over it, and its text fades out as the opening scrolls away,
- * so it never runs behind the sections. `inline` sets the text in the flow of a page (the
- * rite pages).
+ * `sheet` is the manuscript section of the home page: faint, two columns,
+ * the hidden words lost in it. `inline` is a hunt page: large and legible.
  */
 
 const RADIUS = 140;          // px from a word's centre at which it starts to warm
@@ -30,33 +28,19 @@ function words(paragraph: string, key: string) {
   );
 }
 
-export function Manuscript({ paragraphs, variant = 'page', backdrop }: {
-  paragraphs: string[];
-  variant?: 'page' | 'inline';
-  /** an old image deep behind the page sheet */
-  backdrop?: string;
-}) {
+export function Manuscript({ paragraphs, variant }: { paragraphs: string[]; variant: 'sheet' | 'inline' }) {
   const root = useRef<HTMLDivElement>(null);
-  const text = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = root.current;
     if (!el) return;
     const marked = [...el.querySelectorAll<HTMLElement>('.mword')];
     const heat = marked.map(() => 0);
-    const fixed = variant === 'page';
-    // where each word sits, measured once and again on resize, so the frame
-    // loop never asks the browser for layout while the page scrolls
+    // where each word sits on the page, measured once and again on resize, so
+    // the frame loop never asks the browser for layout while the page scrolls
     let centres: { x: number; y: number }[] = [];
-    // how far the words are moved from where they were measured: the fixed
-    // sheet's text by the parallax, a page's text by the scroll
-    const shiftNow = () => {
-      if (!fixed) return -window.scrollY;
-      const t = text.current ? getComputedStyle(text.current).transform : 'none';
-      return t === 'none' ? 0 : new DOMMatrixReadOnly(t).m42;
-    };
     const measure = () => {
-      const dy = -shiftNow();
+      const dy = window.scrollY;
       centres = marked.map((w) => {
         const r = w.getBoundingClientRect();
         return { x: r.left + r.width / 2, y: r.top + r.height / 2 + dy };
@@ -74,7 +58,7 @@ export function Manuscript({ paragraphs, variant = 'page', backdrop }: {
       const dt = last ? Math.min(0.1, Math.max(0, (now - last) / 1000)) : 1 / 60;
       last = now;
       let warm = false;
-      const shift = shiftNow();
+      const shift = -window.scrollY;
       marked.forEach((w, i) => {
         const c = centres[i];
         const d = Math.hypot(px - c.x, py - (c.y + shift));
@@ -106,18 +90,8 @@ export function Manuscript({ paragraphs, variant = 'page', backdrop }: {
     };
     const away = () => { px = -1e4; py = -1e4; kick(); };
 
-    // in the flow of a page the words move with the scroll, so the pointer
-    // has to be tested again; the fixed sheet needs nothing
-    let fading = 0;
-    const fade = () => {
-      fading = 0;
-      const t = text.current;
-      if (t) t.style.opacity = String(Math.max(0, 1 - window.scrollY / (window.innerHeight * 0.7)));
-    };
-    const onScroll = () => {
-      if (fixed) { if (!fading) fading = requestAnimationFrame(fade); return; }
-      if (px > -1e3) kick();
-    };
+    // the words move under a still pointer as the page scrolls, so test again
+    const onScroll = () => { if (px > -1e3) kick(); };
 
     window.addEventListener('pointermove', onPointer, { passive: true });
     window.addEventListener('touchmove', onTouch, { passive: true });
@@ -127,7 +101,6 @@ export function Manuscript({ paragraphs, variant = 'page', backdrop }: {
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', measure);
     measure();
-    if (fixed) fade();
     document.fonts?.ready.then(measure);
     return () => {
       window.removeEventListener('pointermove', onPointer);
@@ -138,17 +111,12 @@ export function Manuscript({ paragraphs, variant = 'page', backdrop }: {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', measure);
       if (raf) cancelAnimationFrame(raf);
-      if (fading) cancelAnimationFrame(fading);
     };
-  }, [variant]);
+  }, []);
 
   return (
-    <div ref={root} className={`manuscript manuscript--${variant}`} aria-hidden={variant === 'page' ? true : undefined}>
-      {variant === 'page' && backdrop ? (
-        <div className="manuscript__layer manuscript__backdrop" style={{ '--backdrop': `url('${backdrop}')` } as CSSProperties} />
-      ) : null}
-      {variant === 'page' ? <div className="manuscript__layer manuscript__grunge" /> : null}
-      <div ref={text} className="manuscript__text">
+    <div ref={root} className={`manuscript manuscript--${variant}`}>
+      <div className="manuscript__text">
         {paragraphs.map((p, i) => <p key={i}>{words(p, String(i))}</p>)}
       </div>
     </div>

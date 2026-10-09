@@ -1,97 +1,46 @@
-# Design system: CVLTSM
+# CVLTSM: design
 
-The source of truth for the CVLTSM keycap set site. Tokens live in `app/globals.css`. When this file and the CSS disagree, the CSS is right and this file needs updating.
+## The idea
 
-## What it is
+A Nordic cult's ritual, found on damaged film. The site should feel like being shown something you were not meant to see: an archival recording, an underground film, the visual world of a black metal record. Not a product page with horror effects added.
 
-CVLTSM is a keycap set: double-shot ABS, a Nordic ritual theme. The site presents the set. It is not a shop: no prices, no cart, no product cards, no calls to action beyond following the page.
+The references set the terms: black, and one red. The red of dried blood, used as a duotone over the image, never as a fill. Small type set like the margin of a film slate. Torn edges. Grime that is real (concrete, film dust), not generated noise.
 
-It should feel like a printed record sleeve or a museum catalogue, not an app and not a horror game. Few elements, a lot of dark space, one thing per section.
+## Rules
 
-## Palette
+- **Composition over effects.** A strong grid, wide negative space, few elements, each placed on purpose. Degradation sits over a clean structure, never instead of one.
+- **No invented copy.** No taglines, eyebrows or marketing sentences. The identity comes from the logos, the footage and the composition. Text that appears states facts (set, keycaps, manufacturer, year) or belongs to the hunt.
+- **No stand-in logos.** Until the artwork exists, its place is a dashed slot of the right proportions. Nothing is drawn or set in a font in its place.
+- **Restraint in motion.** Slow dissolves; interference rarely and briefly; nothing flashing. Motion serves the film.
 
-Four colours and one accent. Nothing else.
+## Colour
 
-- **Paper** `#14110D`: the ground of the whole site, textured (see the manuscript, below).
-- **Void** `#070707`: the colour of the set's dark caps, and the edges of the paper. Never pure black.
-- **Bone** `#D2CCBE`: all text and hairlines on the paper.
-- **Ash** `#686762`: secondary text. On void it is small-text legible only at 14px and up.
-- **Dried blood** `#541817`: the accent. Used for at most one thing per view (a rule, a focus ring, a single word). Never for fills of large areas.
-
-One ground for the whole page. No light sections cut into it, no gradients beyond the paper's own, no glows, no glassmorphism.
+- **Black** `#070605`, never pure. **Char** `#0f0c0a`, the colophon.
+- **Bone** `#d4ccbf`: all type and hairlines. Dimmed bone (56%) for secondary type.
+- **Dried blood** `rgb(122 28 20)`: a colour pass over the film at 32%, moving the grade's hue toward blood. It is the only red in the picture.
+- **Ember** `#b1291f`: the hunt's glow and its focus line. Nowhere else.
 
 ## Type
 
-- **Wordmark:** Valhalica (`public/fonts/Valhalica-Regular.otf`), used for the CVLTSM wordmark only. Set in capitals, tracked, never for body copy or buttons.
-- **Headings:** IM Fell English, the manuscript's face, weight 400. Section titles `clamp(2.75rem, 6vw, 5rem)`; the ritual statement set large in italic. Balanced wrapping.
-- **Interface and body:** Inter Tight. Body 1.125rem to 1.1875rem at 1.55 leading, at most 46ch.
-- No monospace. No letter-spaced uppercase for headings or buttons.
-
-## The manuscript (the one exception)
-
-Behind the whole site lies a page of old text on dark, aged paper. It is the only place that breaks the rules above, and it breaks them on purpose:
-
-- **Paper:** `#14110d` under a grunge texture (`assets/grunge-source.webp`, baked to bone at 3.5% by `scripts/make-grunge.mjs`), stretched over the whole sheet so it never repeats, with a burnt edge and three old stains.
-- **Backdrop:** an old Nordic image, deepest of all, as faint bone lines (`scripts/make-backdrop.mjs` turns a woodcut or engraving into one; set `SET.backdrop`).
-- **Parallax:** three depths on the scroll timeline, run by the compositor: the backdrop slowest, the grunge nearer, the text nearest. Still under reduced motion and in browsers without scroll-driven animation.
-- **Text:** IM Fell English, bone at 7.5% opacity, two justified columns with a drop cap. On the hunt pages the same face is set large and legible.
-- **Hidden words:** set in the same ink as the rest, so they cannot be seen. A cursor or a finger passing near one heats it like an ember: ink, then deep red (`#b1291f`), then a pale orange core with a red halo, wavering slightly. When it moves away the word cools back through red over a few seconds. Read in order, the hidden words are the first riddle.
-- **Drop cap:** `initial-letter: 2`, so the first letter sits on the cap height of line one and the baseline of line two.
-- **Still:** the sheet does not move with the scroll. Its text fades out as the opening scrolls away, so it never runs behind the sections; the paper stays.
-- **Behind the wordmark** a soft halo of paper colour keeps the text from running through the letters. No box.
-
-The ember red appears nowhere else on the site.
+- **Interface:** Inter Tight, weight 500, capitals at 11px with 8% tracking, for the nav, the reel, labels and the colophon. Small and exact, like a slate.
+- **The manuscript and the hunt:** IM Fell English, a 17th-century face. Faint on the home page, large and legible on hunt pages. The first letter sits in a two-line drop with `initial-letter`.
+- No gothic or blackletter: dark does not mean medieval-pastiche.
 
 ## Layout
 
-- A 12-column grid, max width 1600px, gutters `clamp(20px, 3.4vw, 56px)`.
-- Sections have 136px top padding on desktop, 96px on mobile. More space above a heading than below.
-- Each section uses a different composition. Never repeat one.
-- Mobile collapses every multi-column layout to one column, except the contact sheet of renders (two across).
+- **Gutter** `clamp(20px, 3.2vw, 52px)`. Everything aligns to it.
+- **The opening:** the film full bleed. The set's logo low on the left, about 56% of the width, where the eye settles; the manufacturer small at top left; the nav at top right; the reel at the foot on the right, opposite the logo. On phones the logo spans the width and the reel sits under it.
+- **The manuscript:** two justified columns, max 1180px, on dark warm concrete with burned edges, its top torn.
+- **The colophon:** four facts in a row, then the Speak field.
 
-## Sections, in order
+## The film's layers, bottom to top
 
-1. **Opening.** Full viewport. The CVLTSM wordmark on the manuscript. One line of text.
-2. **Kits.** One lead kit at 7/12 with its image, two kits side by side, the deskmat wide.
-3. **Colour.** One continuous strip of the set's colourway, widths in proportion, names only.
-4. **Renders.** An asymmetric grid of plates at different scales. Click opens a plain viewer. Hidden, with its link, until a render exists.
-5. **Ritual.** The statement, then large plates pushed to alternating edges. Plates appear only once their photographs exist.
-6. **Vendors.** Regions as a list, each with a placeholder row.
-7. **Credits.** Roles and names, and the wordmark small at the foot.
-
-## Components
-
-- **Buttons:** one primary per view at most. Square corners, 8px radius at most. Sentence-case label. Solid bone on the paper.
-- **Links:** underlined with the text colour, offset 0.2em. Hover changes colour, not weight.
-- **Plates (image slots):** an empty plate is a hairline frame on the paper, bone at 14%. It draws no fill, no text, no caption, no path. When an image exists it replaces the tile.
-- **Navigation:** the wordmark small at top left, section links at top right. Links are real anchors. The active section link is underlined. No numbered progress indicator.
-- **Viewer:** black, the image, a close control. Escape closes.
+poster frame; clip under; clip dissolving in; film damage (screen, 17%); concrete grime (multiply, 55%); blood (color, 32%); scratches; interference; shade (top and foot darkened for type, edges burned). Grain over the whole site at 8.5%.
 
 ## Motion
 
-- Scroll-linked movement only for the manuscript sheet: its three-depth parallax and the fade of its text at the opening.
-- Entrances: fade only, 800ms, one per section, once. No blur, no bounce, no stagger longer than two items.
-- Easing: `cubic-bezier(0.22, 1, 0.36, 1)`. Never linear for UI, never spring.
-- Reduced motion: no fades, no parallax.
-- Animate `transform` and `opacity` only.
-
-## Copy
-
-- Short, plain sentences. Active voice. No marketing voice.
-- No eyebrow labels above headings. No section numbers. No "chapter" language.
-- No em-dashes or en-dashes in visible copy. Use a full stop, a comma or a colon.
-- No spec ornaments: no coordinates, no figure numbers, no timestamps, no "placeholder" text on the page.
-- Placeholder names (credits, vendors) read `To be confirmed` or `[NAME]` in the data, not on the design.
-
-## Banned
-
-- Eyebrows, section numbers, chapter labels, progress numerals.
-- Spec sheets styled as decoration: keylines, FIG labels, dimension callouts, code lists.
-- Em-dashes and en-dashes in visible copy.
-- Pills, capsules, rounded containers, cards with shadows, double bezels.
-- Monospace, serif display, letter-spaced all-caps body text.
-- Neon, red glows (except the hidden words of the manuscript), gradient text, glassmorphism, blurred backdrops.
-- Decorative runes, skulls, pentagrams, borders made of runes.
-- Dashed borders, corner brackets, HUD framing.
-- A second accent colour.
-- Glitch effects, jump-scares, blood effects.
+- Dissolve 2.4s, `cubic-bezier(0.4, 0, 0.2, 1)`. Interference 0.85s, in hard steps.
+- Grain moves in six hard steps per 0.8s, by transform only. Scratches appear for a frame or two, three times in nine seconds.
+- On scroll (CSS scroll timeline): the film scales to 1.06 and darkens to 45% as the manuscript rises; the logo and reel rise 14vh and fade.
+- The hidden words of the manuscript heat like embers under the cursor and cool over seconds.
+- Reduced motion: no autoplay, no grain or scratch movement, no scroll effects, no dissolves.
