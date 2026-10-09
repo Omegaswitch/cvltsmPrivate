@@ -49,9 +49,7 @@ export default function Privacy() {
 
         <h2>Contact</h2>
         <p>
-          {BRAND.contact
-            ? <>Questions about this policy: <a href={`mailto:${BRAND.contact}`}>{BRAND.contact}</a>.</>
-            : <>Contact details for privacy questions will be published here.</>}
+          For questions about this policy, contact {BRAND.contact}.
         </p>
       </div>
       <div className="grain" aria-hidden="true" />

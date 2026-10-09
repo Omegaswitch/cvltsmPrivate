@@ -12,8 +12,8 @@ export const BRAND = {
   /** the manufacturer: named and placed, but always second to the set */
   /** the line at the very foot of every page */
   credit: 'manu x omegaswitch x stellaidoscope',
-  /** who answers privacy questions; shown in the privacy policy once set */
-  contact: undefined as string | undefined,
+  /** who answers privacy questions, as shown in the privacy policy */
+  contact: 'omegaswitch on Discord',
   manufacturer: {
     name: 'SWG' as string | undefined,
     logo: '/brand/SWGX.png' as string | undefined,
