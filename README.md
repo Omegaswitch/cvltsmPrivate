@@ -28,6 +28,7 @@ components/
   Nav.tsx, Footer.tsx    three links; the colophon
   TornEdge.tsx           the torn edge between sections
   Ooze.tsx               a colour bleeding out of its outline (thin, random, seeded)
+  DripWatch.tsx          starts the dripping once, and pauses it off screen
   Engravings.tsx         the old woodcuts laid over the backgrounds
 data/
   brand.ts               names and logo paths

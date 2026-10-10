@@ -423,8 +423,12 @@ img, video { display: block; }
   border-radius: 0 0 999px 999px;
   transform-origin: top;
 }
-/* a bead near the end of each, which the filter pinches off or joins */
+/* the tip: a bead the filter pinches off or joins */
 .ooze__drip::after { content: ''; position: absolute; left: 50%; bottom: -9px; width: 150%; aspect-ratio: 1; border-radius: 50%; background: var(--c); transform: translateX(-50%); }
+/* a bead sliding down the drip, and a drop forming at its tip and falling:
+   both are the colour itself, and the filter makes them one body with it */
+.ooze__drip::before { content: ''; position: absolute; top: 0; left: 50%; width: 190%; aspect-ratio: 1; border-radius: 50%; background: var(--c); transform: translate(-50%, 0) scale(0); opacity: 0; }
+.ooze__drip b { position: absolute; top: 100%; left: 50%; width: 170%; aspect-ratio: 1; border-radius: 50%; background: var(--c); transform: translate(-50%, 0) scale(0); opacity: 0; }
 .ooze__blob { border-radius: 50%; }
 .strip__name { font-size: 0.9375rem; }
 .strip__hex { font-size: 0.6875rem; letter-spacing: 0.08em; color: var(--bone-dim); font-variant-numeric: tabular-nums; }
@@ -482,10 +486,49 @@ img, video { display: block; }
   @media (prefers-reduced-motion: no-preference) {
     .kit, .render { animation: drift linear both; animation-timeline: view(); }
     .strip li { animation: rise-in linear both; animation-timeline: --kits; animation-range: exit 0% exit 90%; }
-    .ooze__drip { animation: run linear both; animation-timeline: --kits; animation-range: exit calc(14% + var(--n) * 6%) exit 100%; }
   }
 }
-@keyframes run { from { transform: scaleY(0.05); } to { transform: none; } }
+/* The dripping. It begins once, when the colors first come into view
+   (DripWatch marks the section), and is never undone by scrolling: the drips
+   run down, each in its own time, and stay. After that they keep going for as
+   long as they are in view: a bead slides down, the tip swells, a drop falls.
+   Before the mark (and only if the script is there to place it) they are
+   held back; with no script, or with reduced motion, they are just drawn run. */
+.colours[data-armed]:not([data-dripping]) .ooze__drip { transform: scaleY(0.02); opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .colours[data-dripping] .ooze__drip { animation: run var(--dur) cubic-bezier(0.33, 0.1, 0.3, 1) var(--delay) both; }
+  .colours[data-dripping] .ooze__drip::before { animation: slide var(--slide) cubic-bezier(0.45, 0, 0.85, 0.5) calc(var(--delay) + var(--dur) * 0.6) infinite; }
+  .colours[data-dripping] .ooze__drip::after { animation: swell var(--swell) ease-in-out calc(var(--delay) + var(--dur)) infinite; }
+  .colours[data-dripping] .ooze__drip b { animation: fall var(--drop) cubic-bezier(0.5, 0, 0.8, 0.4) calc(var(--delay) + var(--dur) + var(--dd)) infinite; }
+  /* nothing runs while it cannot be seen */
+  .colours:not([data-live]) .ooze__drip, .colours:not([data-live]) .ooze__drip::before, .colours:not([data-live]) .ooze__drip::after, .colours:not([data-live]) .ooze__drip b { animation-play-state: paused; }
+}
+/* a drip: it runs, hesitates, runs on */
+@keyframes run {
+  0% { transform: scaleY(0.02); opacity: 0; }
+  4% { opacity: 1; }
+  34% { transform: scaleY(0.42); }
+  46% { transform: scaleY(0.46); }
+  76% { transform: scaleY(0.84); }
+  86% { transform: scaleY(0.87); }
+  100% { transform: scaleY(1); opacity: 1; }
+}
+/* a bead down the drip's length: it gathers, runs, and is taken up by the tip */
+@keyframes slide {
+  0% { transform: translate(-50%, 0) scale(0.3); opacity: 0; }
+  10% { transform: translate(-50%, 0) scale(0.9); opacity: 1; }
+  90% { transform: translate(-50%, calc(var(--len) * 1px)) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, calc(var(--len) * 1px)) scale(0.6); opacity: 0; }
+}
+/* the tip filling, then easing */
+@keyframes swell { 0%, 100% { transform: translateX(-50%) scale(1); } 55% { transform: translateX(-50%) scale(1.5); } 70% { transform: translateX(-50%) scale(1.15); } }
+/* a drop: it forms at the tip, hangs, lets go and falls, quickening */
+@keyframes fall {
+  0% { transform: translate(-50%, -8px) scale(0.2); opacity: 1; }
+  26% { transform: translate(-50%, 2px) scale(0.95); opacity: 1; }
+  38% { transform: translate(-50%, 14px) scale(0.9); opacity: 1; animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5); }
+  100% { transform: translate(-50%, 360px) scale(0.6); opacity: 1; }
+}
 @keyframes drift {
   from { transform: translate3d(0, var(--drift), 0); }
   to { transform: translate3d(0, calc(var(--drift) * -1), 0); }

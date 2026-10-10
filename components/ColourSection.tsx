@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { DripWatch } from './DripWatch';
 import { Engravings } from './Engravings';
 import { Ooze } from './Ooze';
 import { COLOURS } from '@/data/colours';
@@ -13,6 +14,7 @@ export function ColourSection() {
   return (
     <section id="colors" className="colours" aria-labelledby="colors-title">
       <Engravings section="colors" />
+      <DripWatch />
       <h2 id="colors-title" className="title">Colors</h2>
       <ul className="strip">
         {COLOURS.map((c, i) => (
