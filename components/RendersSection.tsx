@@ -1,6 +1,7 @@
 import { RENDERS } from '@/data/renders';
 import { Engravings } from './Engravings';
 import { TornEdge } from './TornEdge';
+import { Trace } from './Trace';
 
 /** The renders on an uneven grid, each drifting at its own depth like the kits. */
 export function RendersSection() {
@@ -20,6 +21,7 @@ export function RendersSection() {
                   <span className="slot__label" aria-hidden="true">{r.alt}</span>
                 </div>
               )}
+              <Trace />
             </div>
           </figure>
         ))}

@@ -1,6 +1,7 @@
 import { KITS } from '@/data/kits';
 import { Engravings } from './Engravings';
 import { TornEdge } from './TornEdge';
+import { Trace } from './Trace';
 
 /**
  * The kits come up over the film on a torn edge. Each render sits at its own
@@ -23,6 +24,7 @@ export function KitsSection() {
                   <span className="slot__label" aria-hidden="true">{k.name} render</span>
                 </div>
               )}
+              <Trace />
             </div>
             <figcaption className="kit__name">{k.name}</figcaption>
           </figure>
