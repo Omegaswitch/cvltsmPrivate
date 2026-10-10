@@ -3,13 +3,6 @@
    ========================================================================= */
 
 @font-face {
-  font-family: 'Faith Collapsing';
-  src: url('/fonts/FaithCollapsing.woff2') format('woff2'), url('/fonts/FaithCollapsing.ttf') format('truetype');
-  font-weight: 400;
-  font-display: block;
-}
-
-@font-face {
   font-family: 'Valhalica';
   src: url('/fonts/Valhalica-Regular.otf') format('opentype');
   font-weight: 400;
@@ -23,7 +16,7 @@
   --bone-dim: rgb(212 204 191 / 0.56);
   --hair: rgb(212 204 191 / 0.16);
 
-  --faith: 'Faith Collapsing', 'IM Fell English', Georgia, serif;
+  --faith: 'Valhalica', 'IM Fell English', Georgia, serif;
   --ui: 'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
   --gutter: clamp(20px, 3.2vw, 52px);
@@ -623,7 +616,7 @@ img, video { display: block; }
    its length, so it reads as painted, not wiped); drips fall from the foot
    of the smear, quickening as they go, and a gooey filter (BloodDefs) melts
    them into it; then the word is written over the blood, left to right, in
-   Faith Collapsing, glowing, with paint running off its letters.
+   Valhalica, glowing, with paint running off its letters.
    Everything is a transition, not an animation: it reverses smoothly,
    quickly, wherever it has got to if the pointer leaves. */
 .daub { position: relative; display: inline-block; isolation: isolate; }

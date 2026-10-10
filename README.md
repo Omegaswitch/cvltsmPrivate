@@ -40,7 +40,7 @@ public/film/             the graded clips, posters and the damage loop
 public/audio/            the ambient loop (Ogg Opus and MP3)
 public/engravings/       the woodcuts, prepared (about 1 MB for ten; see Replacing things)
 public/textures/         grime, ground and grain
-public/fonts/            Valhalica (the wordmark) and Faith Collapsing (headings and buttons)
+public/fonts/            Valhalica (the wordmark, headings and buttons)
 public/brand/            the logos, when they exist
 assets/                  originals the textures (and, locally, the film) are made from
 scripts/                 encode-film.sh, encode-audio.sh, make-textures.mjs, make-frame.mjs, make-engravings.mjs, make-brand.mjs
@@ -70,7 +70,7 @@ Seven clips, about 70 seconds, looping: a window choked with wire and the masked
 - Over the footage: a pass of real film dust and the brushed concrete as dirt. They do not sit still: they come in a pulse, two beats and a rest, and the dirt jumps on the beat. Every few seconds the picture glitches for a fraction of a second. Hairline scratches appear a few times a minute; the frame's edges are burned.
 - One sheet of grain covers the whole site, moving in hard steps like a projector, so the film's texture carries on below it.
 - The kits come up over the film on a torn edge while the film sinks back and darkens. Each kit render drifts against the scroll at its own pace. The colour section waits pinned beneath the kits, uncovered as they scroll away, its chips rising one after another.
-- **Hover:** a link or button is painted over with blood: a brush scrubs across it, drips fall and merge into the smear, and the word is written over it in Faith Collapsing, glowing. Built as SVG strokes revealed along their length plus a gooey filter, driven by CSS transitions (`components/Daub.tsx`, `.daub` in `globals.css`), so it reverses smoothly if the pointer leaves.
+- **Hover:** a link or button is painted over with blood: a brush scrubs across it, drips fall and merge into the smear, and the word is written over it in Valhalica, glowing. Built as SVG strokes revealed along their length plus a gooey filter, driven by CSS transitions (`components/Daub.tsx`, `.daub` in `globals.css`), so it reverses smoothly if the pointer leaves.
 
 **Loading.** A poster frame is in the page from the start; the clips load one at a time as they are needed, at 360p on phones, 480p on large screens. A visitor downloads one format at one size: the whole loop is about 3.0 MB on a large screen (plus 0.2 MB of film dust) and 1.4 MB on a phone. The damage loop plays on large screens only.
 

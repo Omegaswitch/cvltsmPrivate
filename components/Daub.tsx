@@ -4,7 +4,7 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'reac
  * A link or button that, on hover or focus, is painted over with blood: a
  * brush scrubs back and forth across it, drips fall from the foot of the
  * smear and fuse with it, and the word is written over the blood in
- * Faith Collapsing. The look and the timing are in globals.css; this file is
+ * Valhalica. The look and the timing are in globals.css; this file is
  * the markup. The shapes are strokes drawn along paths (so they can be
  * revealed along their length, which is what makes the stroke look painted
  * rather than wiped) and a gooey filter (BloodDefs, once per page) melts
