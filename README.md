@@ -30,13 +30,16 @@ components/
 data/
   brand.ts               names and logo paths
   film.ts                the clips: order, length, how each arrives
+  Sound.tsx (components) the ambient track and its control
   kits.ts, colours.ts    the kits (and their render paths) and the colors
   renders.ts, vendors.ts the render slots and the vendors by region
 public/film/             the graded clips, posters and the damage loop
-public/textures/         grime, ground and grain
+public/audio/            the ambient loop (Ogg Opus and MP3)
+public/textures/         grime, ground, grain and the blood for the hover
+public/fonts/            Valhalica (the wordmark) and Faith Collapsing (headings and buttons)
 public/brand/            the logos, when they exist
 assets/                  originals the textures (and, locally, the film) are made from
-scripts/                 encode-film.sh, make-textures.mjs
+scripts/                 encode-film.sh, encode-audio.sh, make-textures.mjs
 ```
 
 ## Replacing things
@@ -46,6 +49,7 @@ scripts/                 encode-film.sh, make-textures.mjs
 - **Vendors.** Add names (and links) per region in `data/vendors.ts`; until then each region reads "To be announced".
 - **Logos.** The SWG logo is `public/brand/SWGX.png`. Put the set logo in `public/brand/` and set `BRAND.logo` in `data/brand.ts`; until then CVLTSM is set in Valhalica.
 - **Clips.** The originals go in `assets/film/` (kept out of git; they are large). Each clip's source, cut and grade are a line in `scripts/encode-film.sh`; run it with `FFMPEG=/path/to/ffmpeg scripts/encode-film.sh`. It writes 480p and 360p, WebM and MP4, and a poster frame per clip to `public/film/`. Each clip's line also sets how worn it is: the height it is shrunk to before being blown back up, and how much grain is baked in. The order, lengths and transitions are in `data/film.ts`.
+- **Sound.** The original track is `assets/audio/dark-shamanic-horror.mp3`; `FFMPEG=/path/to/ffmpeg scripts/encode-audio.sh` bakes it into a seamless loop (the last 4 seconds crossfaded into the first) at about 0.7 MB. Swap the file and re-run to change the track.
 - **Textures.** The concrete originals are in `assets/textures/`; `node scripts/make-textures.mjs` remakes the grime, the dark ground and the grain tile.
 - **The red.** The blood in the film is one colour pass, `--film-tint` in `globals.css`. Its alpha is its strength.
 
@@ -57,11 +61,15 @@ Four clips, about 40 seconds, looping: a window choked with wire and the masked 
 - Over the footage: a pass of real film dust and the brushed concrete as dirt. They do not sit still: they come in a pulse, two beats and a rest, and the dirt jumps on the beat. Every few seconds the picture glitches for a fraction of a second. Hairline scratches appear a few times a minute; the frame's edges are burned.
 - One sheet of grain covers the whole site, moving in hard steps like a projector, so the film's texture carries on below it.
 - The kits come up over the film on a torn edge while the film sinks back and darkens. Each kit render drifts against the scroll at its own pace. The colour section waits pinned beneath the kits, uncovered as they scroll away, its chips rising one after another.
-- **Hover:** blood is dragged across a link or button in one smooth stroke, then the word rises out of it in Uncial Antiqua, glowing.
+- **Hover:** blood is dragged across a link or button in one smooth stroke, dripping; then the word rises out of it in Faith Collapsing, glowing, with paint running off its letters.
 
 **Loading.** A poster frame is in the page from the start; the clips load one at a time as they are needed, at 480p on phones. The whole film, both sizes and both formats, is under 5 MB. The damage loop plays on large screens only.
 
 **When it does not play.** With reduced motion, or a data-saving connection, nothing autoplays: the first poster frame stands, and the reel's Play starts the film. It pauses when it is covered or the tab is hidden. Pause is always at hand in the reel.
+
+## Sound
+
+Browsers keep a page silent until the visitor does something, so the ambient track begins on the first click, tap or key press, fading in over three seconds, and stops whenever the tab is hidden. The "Sound on / off" control at the foot of the screen, on the right, turns it off and on; the choice is kept on the visitor's device, and someone who turned it off is not played to again. iPhones ignore volume settings from the page, so there it simply starts at the file's own level.
 
 ## Motion and accessibility
 

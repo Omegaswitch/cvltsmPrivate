@@ -5,6 +5,7 @@ import { ColourSection } from '@/components/ColourSection';
 import { RendersSection } from '@/components/RendersSection';
 import { VendorsSection } from '@/components/VendorsSection';
 import { Footer } from '@/components/Footer';
+import { Sound } from '@/components/Sound';
 
 export default function Page() {
   return (
@@ -21,6 +22,7 @@ export default function Page() {
         </div>
       </main>
       <Footer />
+      <Sound />
       <div className="grain" aria-hidden="true" />
     </>
   );

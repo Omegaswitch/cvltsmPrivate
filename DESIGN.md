@@ -21,7 +21,8 @@ The references set the terms: black, and one red. The red of dried blood, used a
 
 ## Type
 
-- **Interface:** Inter Tight, weight 500, capitals at 11px with 8% tracking, for the nav, the reel, labels and the colophon. Small and exact, like a slate.
+- **Faith Collapsing** (`public/fonts/`, a ruined blackletter) for everything the visitor reads as a heading or a button: the nav, section titles (up to 9rem), kit names, vendor regions, the sound control and the hover. Never for running text.
+- **Interface:** Inter Tight for the small labels of the colophon and the body of the privacy policy. Small and exact, like a slate.
 - No gothic or blackletter: dark does not mean medieval-pastiche.
 
 ## Layout
@@ -44,5 +45,9 @@ poster frame; clip under; clip dissolving in; film damage (screen, 17%); concret
 - Grain moves in six hard steps per 0.8s, by transform only. Scratches appear for a frame or two, three times in nine seconds.
 - On scroll (CSS scroll timeline): the film scales to 1.06 and darkens as the kits rise; the logo and reel rise and fade. Kit renders drift against the scroll by 3 to 12vh. The colour chips rise in as the kits leave.
 - The film's grime and dust pulse (two beats and a rest, 5.2s), and the picture glitches briefly every 7.7s.
-- Hover: blood dragged across in one stroke, fast then slowing (0.7s), then the word in Uncial Antiqua rising out of it, its glow swelling and settling (0.7s, after 0.32s).
+- Hover: blood dragged across in one stroke, fast then slowing (0.7s), running down in drips with beads at their ends; then the word in Faith Collapsing rising out of it, glowing hot, its own paint running down off the letters (1.1s, after 0.32s).
 - Reduced motion: no autoplay, no grain or scratch movement, no scroll effects, no dissolves.
+
+## Sound
+
+One ambient track, a seamless loop, at half level. It starts on the visitor's first click or key, fades in over 3 seconds, and the small control at the foot on the right (daubed on hover like the nav) turns it off. Off is remembered. Never autoplays, never plays in a hidden tab.

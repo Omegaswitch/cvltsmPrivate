@@ -10,10 +10,12 @@ export default function Privacy() {
       <a className="policy__back daub" href="/" data-label="Return"><span>Return</span></a>
       <h1 className="title">Privacy policy</h1>
       <div className="policy__body">
-        <p>Last updated 9 October 2026.</p>
+        <p>Last updated 10 October 2026.</p>
         <p>
           This site presents the {BRAND.name} keycap set. It sells nothing, has no accounts, no forms
-          and no newsletter, and it does not set cookies or use analytics or advertising trackers.
+          and no newsletter, and it does not set cookies or use analytics or advertising trackers. The one thing it
+          remembers is whether you turned the sound off, kept on your own device (local storage) so
+          that it stays off on your next visit. It is never sent anywhere.
         </p>
 
         <h2>What is collected</h2>
