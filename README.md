@@ -63,7 +63,7 @@ Six clips, about a minute, looping: a window choked with wire and the masked fac
 - The kits come up over the film on a torn edge while the film sinks back and darkens. Each kit render drifts against the scroll at its own pace. The colour section waits pinned beneath the kits, uncovered as they scroll away, its chips rising one after another.
 - **Hover:** a link or button is painted over with blood: a brush scrubs across it, drips fall and merge into the smear, and the word is written over it in Faith Collapsing, glowing. Built as SVG strokes revealed along their length plus a gooey filter, driven by CSS transitions (`components/Daub.tsx`, `.daub` in `globals.css`), so it reverses smoothly if the pointer leaves.
 
-**Loading.** A poster frame is in the page from the start; the clips load one at a time as they are needed, at 360p on phones, 480p on large screens. A visitor downloads one format at one size: the whole loop is about 2.9 MB on a large screen (plus 0.2 MB of film dust) and 1.3 MB on a phone. The damage loop plays on large screens only.
+**Loading.** A poster frame is in the page from the start; the clips load one at a time as they are needed, at 360p on phones, 480p on large screens. A visitor downloads one format at one size: the whole loop is about 2.7 MB on a large screen (plus 0.2 MB of film dust) and 1.3 MB on a phone. The damage loop plays on large screens only.
 
 **When it does not play.** With reduced motion, or a data-saving connection, nothing autoplays: the first poster frame stands, and the reel's Play starts the film. It pauses when it is covered or the tab is hidden. Pause is always at hand in the reel.
 

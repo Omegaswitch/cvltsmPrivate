@@ -29,7 +29,7 @@ CLIPS=(
   "window|13313175_1920_1080_25fps.mp4|0|10|1.7|1.12|200|18"
   "hands|okno.mp4|0.3|6|1.0|1.12|300|16"
   "figure|16513463-hd_1920_1080_24fps.mp4|28|10|1.55|1.3|300|18"
-  "creature|the-ritual-creature.mp4|6.5|8.5|1.0|1.12|240|16|844:420:10:30"
+  "creature|the-ritual-creature.mp4|7.0|5.85|1.0|1.12|240|16|844:420:10:30"
   "berserker|northman-berserker.mp4|30|12|1.35|1.15|240|16"
   "cabin|blairwitch_2.mp4|23|17|1.15|1.12|320|14"
 )
