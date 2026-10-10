@@ -519,7 +519,7 @@ img, video { display: block; }
 }
 .strip { display: flex; gap: clamp(28px, 3vw, 56px); margin: 0; padding: 0; list-style: none; }
 .strip li { flex: 1 1 0; min-width: 0; display: grid; gap: 10px; align-content: start; }
-.strip__name, .strip__hex { position: relative; z-index: 1; }
+.strip__name, .strip__hex { position: relative; z-index: 1; text-shadow: 0 0 6px var(--black), 0 0 2px var(--black); }   /* legible where a drip runs past */
 .strip li:has(.ooze) .strip__name { margin-top: clamp(26px, 5vh, 54px); }
 /* a chip: a frame the colour bleeds out of. The fill spills over the frame's
    inner edge, drips run down over its foot, blobs swell out of its sides, and
@@ -529,12 +529,16 @@ img, video { display: block; }
 .ooze { position: absolute; inset: 0; filter: url(#ooze); }
 .ooze i { position: absolute; display: block; background: var(--c); }
 .ooze__body { inset: -9px; border-radius: 3px; }
+/* --k is how far a drip has run (0 to 1): it grows in length, so its round
+   tip leads and is never squashed */
+@property --k { syntax: '<number>'; inherits: false; initial-value: 1; }
 .ooze__drip {
   top: calc(100% - 14px);
-  height: calc(var(--len) * 1px);
+  height: calc(var(--len) * var(--k) * 1px);
   border-radius: 0 0 999px 999px;
-  transform-origin: top;
 }
+/* where it leaves the edge: a sag that the filter turns into a fillet */
+.ooze__drip s { position: absolute; top: 2px; left: 50%; width: 280%; height: 22px; border-radius: 50%; background: var(--c); transform: translate(-50%, -50%); }
 /* the tip: a bead the filter pinches off or joins */
 .ooze__drip::after { content: ''; position: absolute; left: 50%; bottom: -9px; width: 150%; aspect-ratio: 1; border-radius: 50%; background: var(--c); transform: translateX(-50%); }
 /* a bead sliding down the drip, and a drop forming at its tip and falling:
@@ -606,7 +610,7 @@ img, video { display: block; }
    long as they are in view: a bead slides down, the tip swells, a drop falls.
    Before the mark (and only if the script is there to place it) they are
    held back; with no script, or with reduced motion, they are just drawn run. */
-.colours[data-armed]:not([data-dripping]) .ooze__drip { transform: scaleY(0.02); opacity: 0; }
+.colours[data-armed]:not([data-dripping]) .ooze__drip { --k: 0; opacity: 0; }
 @media (prefers-reduced-motion: no-preference) {
   .colours[data-dripping] .ooze__drip { animation: run var(--dur) cubic-bezier(0.33, 0.1, 0.3, 1) var(--delay) both; }
   .colours[data-dripping] .ooze__drip::before { animation: slide var(--slide) cubic-bezier(0.45, 0, 0.85, 0.5) calc(var(--delay) + var(--dur) * 0.6) infinite; }
@@ -617,13 +621,13 @@ img, video { display: block; }
 }
 /* a drip: it runs, hesitates, runs on */
 @keyframes run {
-  0% { transform: scaleY(0.02); opacity: 0; }
-  4% { opacity: 1; }
-  34% { transform: scaleY(0.42); }
-  46% { transform: scaleY(0.46); }
-  76% { transform: scaleY(0.84); }
-  86% { transform: scaleY(0.87); }
-  100% { transform: scaleY(1); opacity: 1; }
+  0% { --k: 0; opacity: 0; }
+  3% { --k: 0.015; opacity: 1; }
+  30% { --k: 0.4; animation-timing-function: ease-out; }
+  44% { --k: 0.45; animation-timing-function: ease-in; }
+  72% { --k: 0.82; animation-timing-function: ease-out; }
+  85% { --k: 0.86; animation-timing-function: ease-in; }
+  100% { --k: 1; opacity: 1; }
 }
 /* a bead down the drip's length: it gathers, runs, and is taken up by the tip */
 @keyframes slide {
@@ -638,8 +642,9 @@ img, video { display: block; }
 @keyframes fall {
   0% { transform: translate(-50%, -8px) scale(0.2); opacity: 1; }
   26% { transform: translate(-50%, 2px) scale(0.95); opacity: 1; }
-  38% { transform: translate(-50%, 14px) scale(0.9); opacity: 1; animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5); }
-  100% { transform: translate(-50%, 360px) scale(0.6); opacity: 1; }
+  34% { transform: translate(-50%, 8px) scale(0.85, 1.15); opacity: 1; animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5); }
+  88% { transform: translate(-50%, 300px) scale(0.55, 0.95); opacity: 1; }
+  100% { transform: translate(-50%, 360px) scale(0.5, 0.9); opacity: 0; }
 }
 @keyframes drift {
   from { transform: translate3d(0, var(--drift), 0); }

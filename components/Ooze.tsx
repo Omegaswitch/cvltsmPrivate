@@ -4,8 +4,9 @@ import type { CSSProperties } from 'react';
  * A colour that has bled out of its outline. The fill spills a little over
  * the edge, blobs swell out of the sides, and thin drips run down and hang
  * below, a bead near the end of each; a gooey filter (`ooze` in BloodDefs:
- * blur, then alpha contrast) fuses them into one wet body. All the pieces are
- * the same colour, so the filter only has to melt shapes.
+ * blur, then alpha contrast) fuses them into one wet body, and lights its
+ * relief so the drips and edges catch a sheen. Each drip leaves the edge
+ * through a sag (the fillet) and grows in length, so its round tip leads.
  *
  * It is alive, not only drawn: each drip runs down in its own time (a long
  * one creeps for seconds), and then goes on for as long as it is looked at,
@@ -75,6 +76,7 @@ export function Ooze({ hex, index }: { hex: string; index: number }) {
             '--dd': `${d.dd.toFixed(2)}s`,
           } as CSSProperties}
         >
+          <s />
           <b />
         </i>
       ))}
