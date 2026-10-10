@@ -24,7 +24,7 @@ const PLACES: Place[] = [
   { section: 'kits', side: 'l', top: 46, w: 31, rot: -22, off: 42, drift: 11, flip: true },
   { section: 'renders', side: 'r', top: 36, w: 37, rot: 19, off: 33, drift: 8 },
   { section: 'colors', side: 'r', top: 52, w: 34, rot: -8, off: 38, drift: 6 },
-  { section: 'vendors', side: 'l', top: 44, w: 30, rot: 24, off: 44, drift: 5, flip: true },
+  { section: 'vendors', side: 'l', top: 68, w: 30, rot: 24, off: 44, drift: 5, flip: true },
   { section: 'kits', side: 'r', top: 80, w: 33, rot: -15, off: 36, drift: 10 },
   { section: 'renders', side: 'l', top: 72, w: 35, rot: 12, off: 39, drift: 9, flip: true },
 ];

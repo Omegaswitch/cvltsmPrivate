@@ -37,7 +37,7 @@ data/
   renders.ts, vendors.ts the render slots and the vendors by region
 public/film/             the graded clips, posters and the damage loop
 public/audio/            the ambient loop (Ogg Opus and MP3)
-public/engravings/       the woodcuts, prepared (see Replacing things)
+public/engravings/       the woodcuts, prepared (about 1 MB for ten; see Replacing things)
 public/textures/         grime, ground and grain
 public/fonts/            Valhalica (the wordmark) and Faith Collapsing (headings and buttons)
 public/brand/            the logos, when they exist
