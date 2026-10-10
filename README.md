@@ -27,7 +27,8 @@ components/
   VendorsSection.tsx     vendors by region
   Nav.tsx, Footer.tsx    three links; the colophon
   TornEdge.tsx           the torn edge between sections
-  Ooze.tsx               a colour bleeding out of its outline
+  Ooze.tsx               a colour bleeding out of its outline (thin, random, seeded)
+  Seep.tsx               the colors coming up again through the Renders' torn edge
   Engravings.tsx         the old woodcuts laid over the backgrounds
 data/
   brand.ts               names and logo paths

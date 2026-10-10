@@ -1,5 +1,6 @@
 import { RENDERS } from '@/data/renders';
 import { Engravings } from './Engravings';
+import { Seep } from './Seep';
 import { TornEdge } from './TornEdge';
 
 /** The renders on an uneven grid, each drifting at its own depth like the kits. */
@@ -8,6 +9,7 @@ export function RendersSection() {
     <section id="renders" className="renders" aria-labelledby="renders-title">
       <TornEdge seed={29} />
       <Engravings section="renders" />
+      <Seep />
       <h2 id="renders-title" className="title">Renders</h2>
       <div className="renders__grid">
         {RENDERS.map((r) => (

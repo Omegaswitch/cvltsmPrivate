@@ -1,47 +1,71 @@
 import type { CSSProperties } from 'react';
 
 /*
- * A colour that has bled out of its frame. The fill spills a little over the
- * frame's inner edge, drips run down over the bottom of it and hang below,
- * and blobs swell out of the sides; a gooey filter (the `ooze` filter in
- * BloodDefs: blur, then alpha contrast) fuses them into one body, so the
- * edges are soft and wet and every drip ends in a bead. All the pieces are
- * the same colour, so the filter only has to melt shapes, not blend hues.
+ * A colour that has bled out. The fill spills a little over its outline, blobs
+ * swell out of the sides, and thin drips run down and hang below, a bead at
+ * the end of each; a gooey filter (`ooze` in BloodDefs: blur, then alpha
+ * contrast) fuses them into one wet body. All the pieces are the same colour,
+ * so the filter only has to melt shapes.
  *
- * Each chip gets its own drips (x across the chip in %, width, length in
- * px), so no two bleed the same way.
+ * Nothing here is typed in by hand: every chip and every seep is drawn from a
+ * seeded random, so each bleeds its own way, and the same way on every visit,
+ * on the server and in the browser alike.
+ *
+ * `chip` is a colour bleeding out of its outline; `seep` is the same colour
+ * coming up through the torn edge of the next section and running down it.
  */
-const DRIPS: { x: number; w: number; len: number }[][] = [
-  [{ x: 14, w: 22, len: 70 }, { x: 52, w: 16, len: 38 }, { x: 80, w: 26, len: 96 }],
-  [{ x: 22, w: 18, len: 54 }, { x: 60, w: 28, len: 104 }, { x: 86, w: 14, len: 34 }],
-  [{ x: 10, w: 26, len: 88 }, { x: 44, w: 16, len: 46 }, { x: 72, w: 20, len: 66 }],
-  [{ x: 30, w: 24, len: 92 }, { x: 64, w: 16, len: 40 }, { x: 88, w: 20, len: 72 }],
-];
-/** Blobs swelling out of the sides: side, y across (%), size in px. */
-const BLOBS: { side: 'l' | 'r'; y: number; s: number }[][] = [
-  [{ side: 'r', y: 30, s: 46 }, { side: 'l', y: 70, s: 34 }],
-  [{ side: 'l', y: 24, s: 40 }, { side: 'r', y: 62, s: 50 }],
-  [{ side: 'r', y: 18, s: 36 }, { side: 'l', y: 58, s: 48 }],
-  [{ side: 'l', y: 40, s: 44 }, { side: 'r', y: 76, s: 38 }],
-];
 
-export function Ooze({ hex, index }: { hex: string; index: number }) {
-  const k = index % DRIPS.length;
+function random(seed: number) {
+  let s = (seed * 2654435761) >>> 0 || 1;
+  return () => {
+    s ^= s << 13; s ^= s >>> 17; s ^= s << 5;
+    return ((s >>> 0) % 100000) / 100000;
+  };
+}
+
+export function Ooze({ hex, index, mode = 'chip' }: { hex: string; index: number; mode?: 'chip' | 'seep' }) {
+  const rand = random(index * 7919 + (mode === 'seep' ? 104729 : 17));
+  const r = (a: number, b: number) => a + rand() * (b - a);
+  const seep = mode === 'seep';
+
+  // thin and uneven: a few short ones, a few long, none alike
+  const count = seep ? 4 + Math.floor(rand() * 3) : 4 + Math.floor(rand() * 4);
+  const drips = Array.from({ length: count }, () => ({
+    x: r(5, 94),
+    w: r(4.5, 12),
+    len: rand() < 0.28 ? r(seep ? 170 : 110, seep ? 300 : 190) : r(22, seep ? 130 : 78),
+  }));
+  // along a seep's edge: uneven lumps, so the pool is a spill and not an oval
+  const lumps = !seep ? [] : Array.from({ length: 5 + Math.floor(rand() * 3) }, () => ({
+    x: r(2, 88),
+    top: r(-9, 8),
+    w: r(14, 46),
+    h: r(10, 26),
+  }));
+  const blobs = seep ? [] : Array.from({ length: 2 + Math.floor(rand() * 3) }, () => ({
+    side: rand() < 0.5 ? 'l' : 'r',
+    y: r(12, 82),
+    s: r(18, 46),
+  }));
+
   return (
-    <span className="ooze" style={{ '--c': hex, '--i': index } as CSSProperties} aria-hidden="true">
+    <span className={`ooze ooze--${mode}`} style={{ '--c': hex } as CSSProperties} aria-hidden="true">
       <i className="ooze__body" />
-      {DRIPS[k].map((d, n) => (
+      {drips.map((d, n) => (
         <i
           key={n}
           className="ooze__drip"
-          style={{ left: `${d.x}%`, width: d.w, '--len': d.len, '--n': n } as CSSProperties}
+          style={{ left: `${d.x}%`, width: d.w, '--len': d.len.toFixed(0), '--n': n } as CSSProperties}
         />
       ))}
-      {BLOBS[k].map((b, n) => (
+      {lumps.map((l, n) => (
+        <i key={`l${n}`} className="ooze__lump" style={{ left: `${l.x}%`, top: l.top, width: l.w, height: l.h } as CSSProperties} />
+      ))}
+      {blobs.map((b, n) => (
         <i
           key={n}
           className="ooze__blob"
-          style={{ [b.side === 'l' ? 'left' : 'right']: -b.s * 0.45, top: `${b.y}%`, width: b.s, height: b.s } as CSSProperties}
+          style={{ [b.side === 'l' ? 'left' : 'right']: -b.s * 0.45, top: `${b.y}%`, width: b.s, height: b.s * r(0.8, 1.2) } as CSSProperties}
         />
       ))}
     </span>

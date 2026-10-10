@@ -55,9 +55,9 @@ export function BloodDefs() {
           <feTurbulence type="fractalNoise" baseFrequency="0.05 0.22" numOctaves="2" seed="8" result="noise" />
           <feDisplacementMap in="goo" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
         </filter>
-        <filter id="ooze" x="-25%" y="-15%" width="150%" height="200%" colorInterpolationFilters="sRGB">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="soft" />
-          <feColorMatrix in="soft" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -11" result="goo" />
+        <filter id="ooze" x="-25%" y="-30%" width="150%" height="400%" colorInterpolationFilters="sRGB">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="3.4" result="soft" />
+          <feColorMatrix in="soft" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -9.5" result="goo" />
           <feTurbulence type="fractalNoise" baseFrequency="0.03 0.05" numOctaves="2" seed="3" result="noise" />
           <feDisplacementMap in="goo" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G" />
         </filter>
