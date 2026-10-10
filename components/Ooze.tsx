@@ -65,7 +65,7 @@ export function Ooze({ hex, index }: { hex: string; index: number }) {
           className={`ooze__drip${n < 2 ? ' ooze__drip--long' : ''}`}
           style={{
             left: `${d.x}%`,
-            width: d.w,
+            '--w': d.w.toFixed(1),
             '--len': d.len.toFixed(0),
             '--n': n,
             '--dur': `${d.dur.toFixed(2)}s`,

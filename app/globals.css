@@ -533,7 +533,9 @@ img, video { display: block; }
    tip leads and is never squashed */
 @property --k { syntax: '<number>'; inherits: false; initial-value: 1; }
 .ooze__drip {
+  --fall: 360px;   /* how far a drop falls */
   top: calc(100% - 14px);
+  width: calc(var(--w) * 1px);
   height: calc(var(--len) * var(--k) * 1px);
   border-radius: 0 0 999px 999px;
 }
@@ -643,8 +645,8 @@ img, video { display: block; }
   0% { transform: translate(-50%, -8px) scale(0.2); opacity: 1; }
   26% { transform: translate(-50%, 2px) scale(0.95); opacity: 1; }
   34% { transform: translate(-50%, 8px) scale(0.85, 1.15); opacity: 1; animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5); }
-  88% { transform: translate(-50%, 300px) scale(0.55, 0.95); opacity: 1; }
-  100% { transform: translate(-50%, 360px) scale(0.5, 0.9); opacity: 0; }
+  88% { transform: translate(-50%, calc(var(--fall) * 0.83)) scale(0.55, 0.95); opacity: 1; }
+  100% { transform: translate(-50%, var(--fall)) scale(0.5, 0.9); opacity: 0; }
 }
 @keyframes drift {
   from { transform: translate3d(0, var(--drift), 0); }
@@ -835,12 +837,18 @@ img, video { display: block; }
   .kit--base, .kit--numpad, .kit--novelties { grid-column: 1 / -1; margin-top: 0; }
   .kit--numpad, .kit--novelties { width: 78%; }
   .kit--numpad { justify-self: end; }
-  .strip { flex-direction: column; gap: 18px; }
+  .strip { flex-direction: column; gap: 30px; }
   .strip li { grid-template-columns: 1fr auto; align-items: center; }
   .strip__chip { grid-column: 1 / -1; height: 96px; --edge: 22px; }
   .frame { --edge: 22px; }
-  /* on a phone the chips are rows, one above the next: keep the drips from crossing their neighbours */
-  .ooze__drip { max-height: 64px; }
+  /* on a phone the chips are low bands: the drips are finer and shorter, still
+     uneven (the long ones stay the longest), and a drop falls only a little way */
+  .ooze__drip {
+    --fall: 40px;
+    width: calc(var(--w) * 0.62px);
+    height: calc(min(var(--len) * 0.55, 30 + var(--len) * 0.045) * var(--k) * 1px);
+  }
+  .strip li:has(.ooze) .strip__name, .strip li:has(.ooze) .strip__hex { margin-top: 30px; }
   .renders__grid { grid-template-columns: minmax(0, 1fr); }
   .render--lead, .render--side, .render--third { grid-column: 1 / -1; margin-top: 0; }
   .render--side, .render--third:nth-child(4) { width: 78%; justify-self: end; margin-top: 0; }
