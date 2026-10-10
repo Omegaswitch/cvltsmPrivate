@@ -1,10 +1,14 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
+const host = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+
 export const metadata: Metadata = {
+  metadataBase: new URL(host ? `https://${host}` : 'http://localhost:3000'),
   title: 'CVLTSM',
-  description: 'CVLTSM, a keycap set.',
-  openGraph: { title: 'CVLTSM', type: 'website' },
+  description: 'CVLTSM, a keycap set by SWG.',
+  openGraph: { title: 'CVLTSM', siteName: 'CVLTSM', description: 'A keycap set by SWG.', type: 'website' },
+  twitter: { card: 'summary_large_image', title: 'CVLTSM', description: 'A keycap set by SWG.' },
 };
 
 export const viewport: Viewport = {
