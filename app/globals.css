@@ -796,12 +796,20 @@ img, video { display: block; }
   .kit--base { width: min(100%, calc(100svh - var(--top) - 4vh - 84px)); }
   .kit--numpad { margin-top: max(22vh, 170px); }
 }
+/* the same for the first render: the title steps to the right, flush with
+   the edge, and the render is held to the height of the screen */
+@media (min-width: 821px) {
+  .renders { --top: clamp(84px, 11vh, 120px); padding-top: var(--top); }
+  .renders > .title:not(.torn):not(.engravings) { position: absolute; top: var(--top); right: var(--gutter); }
+  .renders__grid { margin-top: 0; }
+  .render--lead { width: min(100%, calc(100svh - var(--top) - 4vh - 24px)); }
+  .render--side { margin-top: max(18vh, 170px); }
+}
 
 /* the other titles do not line up under it either: each section sets its
    name somewhere of its own across the width */
 @media (min-width: 821px) {
   .colours .title { margin-left: 22%; }
-  .renders .title { text-align: right; }
   .vendors .title { margin-left: 40%; }
 }
 
