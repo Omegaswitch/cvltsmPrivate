@@ -58,7 +58,7 @@ img, video { display: block; }
 
 /* --------------------------------------------------------------- loader */
 
-/* The blindfolded horse traced in blood while the page loads (Loader.tsx).
+/* An engraving traced in blood while the page loads (Loader.tsx).
    Above everything; the page does not scroll under it (Loader.tsx holds
    it). Without script it
    lifts by itself after a few seconds. */
@@ -74,7 +74,7 @@ img, video { display: block; }
 }
 .loader.is-lifting { opacity: 0; visibility: hidden; }
 @keyframes loader-lift { to { opacity: 0; visibility: hidden; } }
-.loader__art { position: relative; width: min(46vmin, 360px); aspect-ratio: 600 / 630; }
+.loader__art { position: relative; width: min(46vmin, 360px); max-height: 70vh; }
 .loader__art img, .loader__art svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .loader__art img {
   object-fit: contain;
