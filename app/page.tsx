@@ -7,6 +7,7 @@ import { VendorsSection } from '@/components/VendorsSection';
 import { Footer } from '@/components/Footer';
 import { Sound } from '@/components/Sound';
 import { BloodDefs } from '@/components/Daub';
+import { Loader } from '@/components/Loader';
 
 export default function Page() {
   return (
@@ -26,6 +27,7 @@ export default function Page() {
       <Sound />
       <BloodDefs />
       <div className="grain" aria-hidden="true" />
+      <Loader />
     </>
   );
 }
