@@ -611,7 +611,7 @@ img, video { display: block; }
 
 /* ----------------------------------------------------------------- daub */
 
-/* Hover or focus on a link or button, and it is painted over with blood.
+/* Hover or focus on a link, and it is painted over with blood.
    A brush scrubs back and forth along a path (the stroke is revealed along
    its length, so it reads as painted, not wiped); drips fall from the foot
    of the smear, quickening as they go, and a gooey filter (BloodDefs) melts
@@ -702,7 +702,8 @@ img, video { display: block; }
   color: var(--bone);
   text-shadow: 0 1px 10px rgb(0 0 0 / 0.7);
 }
-.sound > span { opacity: 0.85; }
+.sound > span { opacity: 0.85; transition: opacity 0.3s var(--ease); }
+.sound:hover > span, .sound:focus-visible > span { opacity: 1; }   /* no blood here: it is pressed too often */
 @media (min-width: 821px) { .sound { font-size: 1.7rem; } }
 
 /* On a wide screen the base kit and its name fit in one view, from the top of

@@ -1,7 +1,7 @@
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react';
+import type { AnchorHTMLAttributes, ReactNode } from 'react';
 
 /*
- * A link or button that, on hover or focus, is painted over with blood: a
+ * A link that, on hover or focus, is painted over with blood: a
  * brush scrubs back and forth across it, drips fall from the foot of the
  * smear and fuse with it, and the word is written over the blood in
  * Valhalica. The look and the timing are in globals.css; this file is
@@ -79,14 +79,5 @@ export function DaubLink({ label, children, className = '', ...rest }: Common & 
       <span>{children}</span>
       <Blood />
     </a>
-  );
-}
-
-export function DaubButton({ label, children, className = '', ...rest }: Common & ButtonHTMLAttributes<HTMLButtonElement>) {
-  return (
-    <button type="button" className={`daub ${className}`} data-label={label} {...rest}>
-      <span>{children}</span>
-      <Blood />
-    </button>
   );
 }

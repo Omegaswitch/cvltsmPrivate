@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { DaubButton } from './Daub';
 
 /*
  * The ambient track. Sound is on unless the visitor turned it off, and the
@@ -113,7 +112,7 @@ export function Sound() {
         <source src="/audio/ambient.ogg" type="audio/ogg; codecs=opus" />
         <source src="/audio/ambient.mp3" type="audio/mpeg" />
       </audio>
-      <DaubButton className="sound" onClick={toggle} aria-pressed={on} aria-label="Sound" label={label}>{label}</DaubButton>
+      <button type="button" className="sound" onClick={toggle} aria-pressed={on} aria-label="Sound"><span>{label}</span></button>
     </>
   );
 }

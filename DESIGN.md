@@ -21,7 +21,7 @@ The references set the terms: black, and one red. The red of dried blood, used a
 
 ## Type
 
-- **Valhalica** (`public/fonts/`, the face the wordmark is drawn in) for everything the visitor reads as a heading or a button: the nav, section titles (up to 9rem), kit names, vendor regions, the sound control and the hover. Never for running text.
+- **Valhalica** (`public/fonts/`, the face the wordmark is drawn in) for everything the visitor reads as a heading or a button: the nav, section titles (up to 9rem), kit names, vendor regions, the sound control and the hover (the sound control itself has no blood, only brightens). Never for running text.
 - **Interface:** Inter Tight for the small labels of the colophon and the body of the privacy policy. Small and exact, like a slate.
 - No gothic or blackletter: dark does not mean medieval-pastiche.
 
