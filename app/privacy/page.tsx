@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { BRAND } from '@/data/brand';
+import { BloodDefs, DaubLink } from '@/components/Daub';
 
 export const metadata: Metadata = { title: `Privacy policy · ${BRAND.name}` };
 
@@ -7,7 +8,7 @@ export const metadata: Metadata = { title: `Privacy policy · ${BRAND.name}` };
 export default function Privacy() {
   return (
     <main className="policy">
-      <a className="policy__back daub" href="/" data-label="Return"><span>Return</span></a>
+      <DaubLink className="policy__back" href="/" label="Return">Return</DaubLink>
       <h1 className="title">Privacy policy</h1>
       <div className="policy__body">
         <p>Last updated 10 October 2026.</p>
@@ -54,6 +55,7 @@ export default function Privacy() {
           For questions about this policy, contact {BRAND.contact}.
         </p>
       </div>
+      <BloodDefs />
       <div className="grain" aria-hidden="true" />
     </main>
   );

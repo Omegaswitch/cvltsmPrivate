@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { DaubButton } from './Daub';
 
 /*
  * The ambient track. Browsers keep a page silent until the visitor does
@@ -87,9 +88,7 @@ export function Sound() {
         <source src="/audio/ambient.ogg" type="audio/ogg; codecs=opus" />
         <source src="/audio/ambient.mp3" type="audio/mpeg" />
       </audio>
-      <button type="button" className="sound daub" onClick={toggle} aria-pressed={on} aria-label="Sound" data-label={label}>
-        <span>{label}</span>
-      </button>
+      <DaubButton className="sound" onClick={toggle} aria-pressed={on} aria-label="Sound" label={label}>{label}</DaubButton>
     </>
   );
 }

@@ -1,4 +1,5 @@
 import { BRAND } from '@/data/brand';
+import { DaubLink } from './Daub';
 import { TornEdge } from './TornEdge';
 
 /** The colophon: what this is, whose, and when. */
@@ -14,7 +15,7 @@ export function Footer() {
       </dl>
       <div className="foot__base">
         <span>{BRAND.credit}</span>
-        <a className="daub" href="/privacy" data-label="Privacy policy"><span>Privacy policy</span></a>
+        <DaubLink href="/privacy" label="Privacy policy">Privacy policy</DaubLink>
       </div>
     </footer>
   );

@@ -476,6 +476,87 @@ img, video { display: block; }
 .policy__body a { text-decoration: underline; text-underline-offset: 0.2em; }
 .policy__back { margin-bottom: clamp(28px, 5vh, 48px); font-family: var(--faith); font-size: 1.5rem; }
 
+/* ----------------------------------------------------------------- daub */
+
+/* Hover or focus on a link or button, and it is painted over with blood.
+   A brush scrubs back and forth along a path (the stroke is revealed along
+   its length, so it reads as painted, not wiped); drips fall from the foot
+   of the smear, quickening as they go, and a gooey filter (BloodDefs) melts
+   them into it; then the word is written over the blood, left to right, in
+   Faith Collapsing, glowing, with paint running off its letters.
+   Everything is a transition, not an animation: it reverses smoothly,
+   quickly, wherever it has got to if the pointer leaves. */
+.daub { position: relative; display: inline-block; isolation: isolate; }
+.daub > span { transition: opacity 0.3s var(--ease); }
+
+.daub__blood {
+  position: absolute;
+  left: -0.7em;
+  right: -0.7em;
+  top: -0.5em;
+  bottom: -0.55em;
+  width: calc(100% + 1.4em);
+  height: calc(100% + 1.05em);
+  z-index: -1;
+  overflow: visible;
+  pointer-events: none;
+  visibility: hidden;
+  transition: visibility 0s 0.4s;
+}
+.daub__smear, .daub__drip, .daub__shine { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 2; stroke-dashoffset: 1.15; }
+.daub__smear { stroke: url(#blood-fill); stroke-width: 22; transition: stroke-dashoffset 0.35s cubic-bezier(0.5, 0, 0.8, 0.5); }
+.daub__drip { stroke: #8a0b05; transition: stroke-dashoffset 0.3s cubic-bezier(0.5, 0, 0.9, 0.4); }
+.daub__shine { stroke: #f0402e; stroke-width: 2.4; opacity: 0.5; transition: stroke-dashoffset 0.3s ease-in; }
+
+.daub::after {
+  content: attr(data-label);
+  content: attr(data-label) / '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -54%) rotate(-2deg);
+  white-space: nowrap;
+  font-family: var(--faith);
+  font-size: 1.12em;
+  color: #ffe9dc;
+  text-shadow:
+    0 0 3px rgb(255 214 190 / 0.95), 0 0 10px rgb(255 70 45 / 0.9), 0 0 24px rgb(200 0 0 / 0.8),
+    0 0 0 transparent, 0 0 0 transparent, 0 0 0 transparent, 0 0 0 transparent, 0 0 0 transparent;
+  filter: blur(2px) brightness(1.7);
+  opacity: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, #000 0 42%, transparent 58%);
+  mask-image: linear-gradient(90deg, #000 0 42%, transparent 58%);
+  -webkit-mask-size: 280% 100%;
+  mask-size: 280% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0;
+  mask-position: 100% 0;
+  transition: opacity 0.2s, -webkit-mask-position 0.25s, mask-position 0.25s, filter 0.25s, text-shadow 0.25s;
+}
+
+/* painting: the brush scrubs (0 to 0.62s), the drips fall as it finishes,
+   the word is written as the blood settles */
+.daub:hover .daub__blood, .daub:focus-visible .daub__blood { visibility: visible; transition: none; }
+.daub:hover .daub__smear, .daub:focus-visible .daub__smear { stroke-dashoffset: 0; transition: stroke-dashoffset 0.66s cubic-bezier(0.32, 0.1, 0.18, 1); }
+.daub:hover .daub__shine, .daub:focus-visible .daub__shine { stroke-dashoffset: 0; transition: stroke-dashoffset 0.4s cubic-bezier(0.32, 0.1, 0.18, 1) 0.06s; }
+.daub:hover .daub__drip, .daub:focus-visible .daub__drip {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--t, 0.6s) cubic-bezier(0.5, 0, 0.85, 0.55) var(--d, 0.5s);
+}
+.daub:hover > span, .daub:focus-visible > span { opacity: 0; transition: opacity 0.25s var(--ease) 0.12s; }
+.daub:hover::after, .daub:focus-visible::after {
+  opacity: 1;
+  filter: none;
+  -webkit-mask-position: 0% 0;
+  mask-position: 0% 0;
+  text-shadow:
+    0 0 3px rgb(255 214 190 / 0.95), 0 0 10px rgb(255 70 45 / 0.9), 0 0 24px rgb(200 0 0 / 0.8),
+    0 3px 0 #a10a04, 0 6px 1px #8a0803, 0 10px 2px #7a0602, 0 15px 3px rgb(110 6 2 / 0.85), 0 21px 5px rgb(110 6 2 / 0.5);
+  transition: opacity 0.3s ease-out 0.28s, -webkit-mask-position 0.55s cubic-bezier(0.4, 0, 0.2, 1) 0.28s, mask-position 0.55s cubic-bezier(0.4, 0, 0.2, 1) 0.28s, filter 0.5s ease-out 0.28s, text-shadow 0.9s ease-in 0.7s;
+}
+
 /* the sound control: small, fixed at the foot on the right, over everything */
 .sound {
   position: fixed;
@@ -490,63 +571,6 @@ img, video { display: block; }
 }
 .sound > span { opacity: 0.85; }
 @media (min-width: 821px) { .sound { font-size: 1.7rem; } }
-
-/* ----------------------------------------------------------------- daub */
-
-/* Hover on a link or a button: blood is gouged across it in uneven strokes,
-   running down in drips, and the word is written over the blood in the same
-   ruined blackletter, glowing hot, with paint running off its letters. Going
-   away, both are gone at once. */
-.daub { position: relative; display: inline-block; isolation: isolate; }
-.daub::before {
-  content: '';
-  position: absolute;
-  inset: -0.55em -0.75em -1.15em;
-  z-index: -1;
-  background: url('/textures/daub.svg') center / 100% 100% no-repeat;
-  clip-path: inset(0 100% 0 0);
-  pointer-events: none;
-}
-.daub::after {
-  content: attr(data-label);
-  content: attr(data-label) / '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -54%) rotate(-2deg);
-  white-space: nowrap;
-  font-family: var(--faith);
-  font-size: 1.12em;
-  color: #ffe9dc;
-  text-shadow: var(--drip-end);
-  opacity: 0;
-  pointer-events: none;
-  --drip-start:
-    0 0 3px rgb(255 214 190 / 0.95), 0 0 10px rgb(255 70 45 / 0.9), 0 0 24px rgb(200 0 0 / 0.8),
-    0 0 0 transparent, 0 0 0 transparent, 0 0 0 transparent, 0 0 0 transparent, 0 0 0 transparent;
-  --drip-end:
-    0 0 3px rgb(255 214 190 / 0.95), 0 0 10px rgb(255 70 45 / 0.9), 0 0 24px rgb(200 0 0 / 0.8),
-    0 3px 0 #a10a04, 0 6px 1px #8a0803, 0 10px 2px #7a0602, 0 15px 3px rgb(110 6 2 / 0.85), 0 21px 5px rgb(110 6 2 / 0.5);
-}
-.daub:hover::before, .daub:focus-visible::before { animation: gouge 0.7s cubic-bezier(0.3, 0.7, 0.25, 1) forwards; }
-.daub:hover::after, .daub:focus-visible::after { animation: cut-in 1.1s cubic-bezier(0.25, 0.6, 0.3, 1) 0.32s forwards; }
-.daub > span { transition: opacity 0.3s var(--ease); }
-.daub:hover > span, .daub:focus-visible > span { opacity: 0; transition: opacity 0.35s var(--ease) 0.15s; }
-
-/* the gouge: one stroke dragged across, fast then slowing, its edge
-   wavering a little as the brush catches */
-@keyframes gouge {
-  0% { clip-path: inset(8% 100% 10% 0); transform: translate3d(-4px, 1px, 0) rotate(-1.2deg); }
-  35% { clip-path: inset(2% 46% 4% 0); transform: translate3d(-1px, 0, 0) rotate(-0.4deg); }
-  65% { clip-path: inset(0 12% 1% 0); transform: translate3d(1px, 0, 0) rotate(0.3deg); }
-  100% { clip-path: inset(0 0 0 0); transform: none; }
-}
-/* the word: rising out of the blood, then the paint running down off it */
-@keyframes cut-in {
-  0% { opacity: 0; filter: blur(3px) brightness(1.6); transform: translate(-50%, -40%) rotate(-2deg); text-shadow: var(--drip-start); }
-  45% { opacity: 1; filter: blur(0) brightness(1.35); text-shadow: var(--drip-start); }
-  100% { opacity: 1; filter: none; transform: translate(-50%, -54%) rotate(-2deg); text-shadow: var(--drip-end); }
-}
 
 /* --------------------------------------------------------------- narrow */
 
@@ -578,8 +602,6 @@ img, video { display: block; }
 
 @media (prefers-reduced-motion: reduce) {
   .grain::before, .film__scratches, .film__grime, .film__damage, .film__clip { animation: none; }
-  .daub:hover::before, .daub:focus-visible::before { animation: none; clip-path: inset(0 0 0 0); }
-  .daub:hover::after, .daub:focus-visible::after { animation: none; opacity: 1; }
   .film__clip.is-shown { transition: none; }
   *, *::before, *::after { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
 }
