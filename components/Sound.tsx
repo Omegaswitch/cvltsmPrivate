@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { DaubButton } from './Daub';
 
 /*
- * The ambient track. Browsers keep a page silent until the visitor does
- * something, so it begins on the first click, tap or key press, fading in
- * over three seconds, and the control at the foot of the screen turns it off
- * and on. The choice is kept on the visitor's own device; a visitor who
- * turned it off is not played to again. It is silent whenever the tab is
+ * The ambient track. Sound is on unless the visitor turned it off, and the
+ * control says so from the first frame. Browsers keep a page silent until
+ * the visitor does something, so it is heard from the first click, tap or
+ * key press (the control's own included), fading in over three seconds; if
+ * the browser still refuses, the next one tries again. After that the
+ * control turns it off and on. The choice is kept on the visitor's own
+ * device; a visitor who turned it off is not played to again. It is silent whenever the tab is
  * hidden, at once, since a hidden tab runs no animation frames to fade with.
  * Where the browser does not let a page set the volume (iOS), it just starts
  * and stops.
@@ -25,9 +27,11 @@ const store = (v: 'on' | 'off') => { try { localStorage.setItem(KEY, v); } catch
 
 export function Sound() {
   const audio = useRef<HTMLAudioElement>(null);
-  const [on, setOn] = useState(false);
+  const [on, setOn] = useState(true);   // on by default; a stored "off" turns it off after load
   const wanted = useRef(false);        // the visitor wants sound
   const tabShown = useRef(true);
+  const started = useRef(false);       // the browser has let it play
+  const start = useRef(() => {});
   const level = useRef({ from: 0, to: 0, t0: 0, raf: 0, fades: true });
 
   // move the volume toward `to`, easing over `ms` (in proportion to the
@@ -67,20 +71,23 @@ export function Sound() {
     l.fades = a.volume === 0.5;   // iOS ignores it
     a.volume = 0;
 
-    // first gesture: start, unless the visitor turned it off before, or is
-    // pressing the control itself (its own click decides)
-    const begin = (e: Event) => {
-      cleanup();
-      if (stored() === 'off' || (e.target as Element | null)?.closest?.('.sound')) return;
-      wanted.current = true;
-      setOn(true);
-      apply(FADE_IN);
-    };
-    const events = ['pointerdown', 'keydown'] as const;
-    const cleanup = () => events.forEach((e) => window.removeEventListener(e, begin));
-    events.forEach((e) => window.addEventListener(e, begin, { once: true }));
+    wanted.current = stored() !== 'off';
+    setOn(wanted.current);
 
-    const onTab = () => { tabShown.current = !document.hidden; if (wanted.current) apply(); };
+    // the first gesture the browser counts as one (a tap counts on release,
+    // not on touching down, which may be the start of a scroll)
+    const events = ['pointerup', 'touchend', 'keydown'] as const;
+    const cleanup = () => events.forEach((e) => window.removeEventListener(e, begin));
+    const begin = (e: Event) => {
+      if (started.current || !wanted.current) return;
+      if ((e.target as Element | null)?.closest?.('.sound')) return;   // its own click decides
+      start.current();
+    };
+    start.current = () => {
+      a.play().then(() => { started.current = true; cleanup(); apply(FADE_IN); }).catch(() => {});
+    };
+    events.forEach((e) => window.addEventListener(e, begin));
+    const onTab = () => { tabShown.current = !document.hidden; if (started.current) apply(); };
     document.addEventListener('visibilitychange', onTab);
     return () => {
       cleanup();
@@ -91,10 +98,12 @@ export function Sound() {
   }, []);
 
   const toggle = () => {
+    // on, but not yet heard: this press is the gesture that lets it play
+    if (wanted.current && !started.current) { start.current(); return; }
     wanted.current = !on;
     store(wanted.current ? 'on' : 'off');
     setOn(wanted.current);
-    apply();
+    if (started.current || !wanted.current) apply(); else start.current();
   };
 
   const label = on ? 'Sound on' : 'Sound off';
