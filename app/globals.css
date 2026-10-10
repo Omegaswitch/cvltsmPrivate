@@ -117,7 +117,7 @@ img, video { display: block; }
 }
 .nav__home:hover, .nav__home:focus-visible { opacity: 0.8; }
 .nav__home img { height: calc(var(--mark-h) / 0.88); width: auto; }
-.nav .nav__name { font-size: calc(var(--mark-h) / 0.71); line-height: 1; text-shadow: none; white-space: nowrap; opacity: 1; }
+.nav .nav__name { font-size: calc(var(--mark-h) / 0.71); line-height: 1; text-shadow: none; white-space: nowrap; opacity: 1; transform: translateY(0.047em); }   /* Valhalica's capitals sit a hair high in their line box: this puts their middle on the logo's */
 /* the name is there from the start where scroll can't draw it in */
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
