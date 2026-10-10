@@ -102,6 +102,28 @@ img, video { display: block; }
   text-shadow: 0 1px 10px rgb(0 0 0 / 0.6);
 }
 .nav a > span { opacity: 0.85; }
+.nav { left: 0; align-items: center; }
+/* the box round the mark, and the name beside it: both lead home */
+.nav__home {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-right: auto;
+  padding: 8px 14px;
+  border: 1px solid rgb(212 204 191 / 0.28);
+  background: rgb(7 6 5 / 0.35);
+  transition: border-color 0.3s;
+}
+.nav__home:hover, .nav__home:focus-visible { border-color: rgb(212 204 191 / 0.7); }
+.nav__home img { width: clamp(64px, 5.5vw, 92px); }
+.nav .nav__name { font-size: clamp(1.7rem, 2.4vw, 2.4rem); text-shadow: none; white-space: nowrap; }
+/* the name is there from the start where scroll can't draw it in */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .nav__name { animation: join linear both; animation-timeline: scroll(root); animation-range: 55vh 100vh; }
+  }
+}
+@keyframes join { from { max-width: 0; opacity: 0; margin-left: -14px; } to { max-width: 12em; opacity: 1; margin-left: 0; } }
 
 /* ----------------------------------------------------------------- hero */
 
@@ -262,8 +284,6 @@ img, video { display: block; }
   bottom: clamp(64px, 11vh, 120px);
   width: min(56vw, 880px);
 }
-/* the manufacturer, small and high on the left, under the same margin */
-.hero__maker { position: absolute; z-index: 10; top: 24px; left: var(--gutter); width: clamp(84px, 7vw, 112px); }
 
 
 /* Leaving the film: it sinks back and darkens as the colophon comes up,
@@ -690,8 +710,10 @@ img, video { display: block; }
 
 @media (max-width: 820px) {
   .hero__set { width: calc(100% - 2 * var(--gutter)); bottom: 72px; }
-  .nav { padding-top: 24px; font-size: 1.15rem; gap: 14px; }
-  .hero__maker { top: 22px; width: 58px; }
+  .nav { padding: 20px 12px 0; font-size: 1rem; gap: 10px; }
+  .nav__home { gap: 8px; padding: 5px 8px; }
+  .nav__home img { width: 38px; }
+  .nav .nav__name { font-size: 1.05rem; }
   .wordmark { font-size: 21vw; }
   .foot__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .kits__grid { grid-template-columns: minmax(0, 1fr); }

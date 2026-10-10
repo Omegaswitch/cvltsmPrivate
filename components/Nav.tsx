@@ -1,3 +1,5 @@
+import { BRAND } from '@/data/brand';
+import { Home } from './Home';
 import { DaubLink } from './Daub';
 
 const LINKS = [
@@ -7,10 +9,14 @@ const LINKS = [
   { href: '#vendors', label: 'Vendors' },
 ];
 
-/** The sections of the page, and nothing more. Each link is painted over with blood on hover. */
+/** The manufacturer's mark, always on the left; the set's name joins it once the film is passed. Boxed, and home. The sections of the page, and nothing more. Each link is painted over with blood on hover. */
 export function Nav() {
   return (
     <nav className="nav" aria-label="Sections">
+      <Home label={`${BRAND.name}, back to the top`}>
+        <img className="logo" src={BRAND.manufacturer.logo} alt={BRAND.manufacturer.name} />
+        <span className="nav__name wordmark" aria-hidden="true">{BRAND.name}</span>
+      </Home>
       {LINKS.map((l) => (
         <DaubLink key={l.href} href={l.href} label={l.label}>{l.label}</DaubLink>
       ))}
