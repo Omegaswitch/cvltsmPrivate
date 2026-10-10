@@ -534,6 +534,7 @@ img, video { display: block; }
 @property --k { syntax: '<number>'; inherits: false; initial-value: 1; }
 .ooze__drip {
   --fall: 360px;   /* how far a drop falls */
+  --k: 1;          /* run, where @property is unknown (older iPhones) */
   top: calc(100% - 14px);
   width: calc(var(--w) * 1px);
   height: calc(var(--len) * var(--k) * 1px);
