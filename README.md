@@ -27,6 +27,8 @@ components/
   VendorsSection.tsx     vendors by region
   Nav.tsx, Footer.tsx    three links; the colophon
   TornEdge.tsx           the torn edge between sections
+  Ooze.tsx               a colour bleeding out of its outline
+  Engravings.tsx         the old woodcuts laid over the backgrounds
 data/
   brand.ts               names and logo paths
   film.ts                the clips: order, length, how each arrives
@@ -35,11 +37,12 @@ data/
   renders.ts, vendors.ts the render slots and the vendors by region
 public/film/             the graded clips, posters and the damage loop
 public/audio/            the ambient loop (Ogg Opus and MP3)
+public/engravings/       the woodcuts, prepared (see Replacing things)
 public/textures/         grime, ground and grain
 public/fonts/            Valhalica (the wordmark) and Faith Collapsing (headings and buttons)
 public/brand/            the logos, when they exist
 assets/                  originals the textures (and, locally, the film) are made from
-scripts/                 encode-film.sh, encode-audio.sh, make-textures.mjs
+scripts/                 encode-film.sh, encode-audio.sh, make-textures.mjs, make-frame.mjs, make-engravings.mjs
 ```
 
 ## Replacing things
@@ -49,6 +52,8 @@ scripts/                 encode-film.sh, encode-audio.sh, make-textures.mjs
 - **Vendors.** Add names (and links) per region in `data/vendors.ts`; until then each region reads "To be announced".
 - **Logos.** The SWG logo is `public/brand/SWGX.png`. Put the set logo in `public/brand/` and set `BRAND.logo` in `data/brand.ts`; until then CVLTSM is set in Valhalica.
 - **Clips.** The originals go in `assets/film/` (kept out of git; they are large). Each clip's source, cut and grade are a line in `scripts/encode-film.sh`; run it with `FFMPEG=/path/to/ffmpeg scripts/encode-film.sh`. It writes 480p and 360p, WebM and MP4, and a poster frame per clip to `public/film/`. Each clip's line also sets how worn it is (the height it is shrunk to before being blown back up, and how much grain is baked in) and, if the source has letterbox bars, the crop that takes them off. Name clips to encode only those: `scripts/encode-film.sh creature berserker`. The order, lengths and transitions are in `data/film.ts`.
+- **Engravings.** Put the originals (black ink on white or transparent paper, any size) in `assets/engravings/` and run `node scripts/make-engravings.mjs`. Each becomes a faint light outline on a section's background, tilted and half off the edge; the next file takes the next place, and the places (section, side, angle, depth) are listed in `components/Engravings.tsx`.
+- **Outlines.** The scratched outline round the kits, renders and colors is `public/textures/frame.svg`; `node scripts/make-frame.mjs` draws a new one (it is seeded, so it is the same each time).
 - **Sound.** The original track is `assets/audio/dark-shamanic-horror.mp3`; `FFMPEG=/path/to/ffmpeg scripts/encode-audio.sh` bakes it into a seamless loop (the last 4 seconds crossfaded into the first) at about 0.7 MB. Swap the file and re-run to change the track.
 - **Textures.** The concrete originals are in `assets/textures/`; `node scripts/make-textures.mjs` remakes the grime, the dark ground and the grain tile.
 - **The red.** The blood in the film is one colour pass, `--film-tint` in `globals.css`. Its alpha is its strength.

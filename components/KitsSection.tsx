@@ -1,4 +1,5 @@
 import { KITS } from '@/data/kits';
+import { Engravings } from './Engravings';
 import { TornEdge } from './TornEdge';
 
 /**
@@ -9,11 +10,12 @@ export function KitsSection() {
   return (
     <section id="kits" className="kits" aria-labelledby="kits-title">
       <TornEdge />
+      <Engravings section="kits" />
       <h2 id="kits-title" className="title">Kits</h2>
       <div className="kits__grid">
         {KITS.map((k) => (
           <figure key={k.id} className={`kit kit--${k.id}`}>
-            <div className="kit__frame">
+            <div className="kit__frame frame">
               {k.src ? (
                 <img src={k.src} alt={`${k.name} kit`} loading="lazy" decoding="async" style={{ aspectRatio: "1 / 1" }} />
               ) : (

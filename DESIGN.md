@@ -30,7 +30,7 @@ The references set the terms: black, and one red. The red of dried blood, used a
 - **Gutter** `clamp(20px, 3.2vw, 52px)`. Everything aligns to it.
 - **The opening:** the film full bleed. The set's logo low on the left, about 56% of the width, where the eye settles; the manufacturer small at top left; the nav at top right; the reel at the foot on the right, opposite the logo. On phones the logo spans the width and the reel sits under it.
 - **Kits:** on dark concrete, its top torn, coming up over the film. Square renders: the base kit at 7 of 12 columns, the numpad at 4 set low on the right, the novelties at 4 in the middle below. Each kit drifts at its own depth, name and all.
-- **Colors:** pinned beneath the kits on black, uncovered as the kits' torn bottom edge scrolls away; four equal chips (Alphas base #565050, Red #A80800, Dark brown #2A2624, Cyan #B1BEC3), with name and hex.
+- **Colors:** pinned beneath the kits on black, uncovered as the kits' torn bottom edge scrolls away; four equal chips (Alphas base #565050, Red #A80800, Dark brown #2A2624, Cyan #B1BEC3), each bleeding out of its outline: the colour spills over the edge, blobs swell from its sides and drips run down over its foot, all fused by a gooey filter (blur, then alpha contrast); the drips run as the chips come into view. Name and hex below.
 - **Renders:** on concrete, torn over the colors; square renders on an uneven 12-column grid (7 columns, 4 set low beside it, then three of 4), each drifting at its own depth.
 - **Vendors:** on black, torn over the renders; regions in a ruled list.
 - **Colophon:** four facts in a row (set, keycaps, manufacturer SWG, year 2027).
@@ -47,6 +47,12 @@ poster frame; clip under; clip dissolving in; film damage (screen, 17%); concret
 - The film's grime and dust pulse (two beats and a rest, 5.2s), and the picture glitches briefly every 7.7s.
 - Hover (components/Daub.tsx): a brush scrubs back and forth along a path, revealed along its length (0.9s); five drips fall from the foot of the smear, quickening as they go (0.6 to 1.2s, from 0.65s); a gooey filter (blur, then alpha contrast, then a little displacement) melts drips and smear into one body; the word is written over it left to right in Faith Collapsing (0.8s, from 0.4s), glowing, its paint running off its letters (from 1s). All transitions, not animations, so it reverses smoothly from wherever it has got to (0.25s) when the pointer leaves.
 - Reduced motion: no autoplay, no grain or scratch movement, no scroll effects, no dissolves.
+
+## Outlines and engravings
+
+Kits, renders and colors are not framed; they are outlined. Two uneven lines, scratched by hand, broken in places and overshooting at the corners, bone at 62% and 32%, so the slot reads as drawn round, not as a frame hung on a wall.
+
+Old woodcuts and engravings lie over the section backgrounds: black ink inverted to light lines, 17% bone, screen-blended so the paper vanishes, tilted 8 to 24 degrees, half off the edge and faded toward the inside. They sit under the content, in the section's own background, and never behind text a visitor has to read closely.
 
 ## Phones
 

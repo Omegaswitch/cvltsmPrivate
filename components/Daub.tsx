@@ -44,7 +44,7 @@ function Blood() {
   );
 }
 
-/** The gooey filter the blood uses. Render once, anywhere in the body. */
+/** The gooey filters the blood and the colours use. Render once, anywhere in the body. */
 export function BloodDefs() {
   return (
     <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true" focusable="false">
@@ -54,6 +54,12 @@ export function BloodDefs() {
           <feColorMatrix in="soft" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9" result="goo" />
           <feTurbulence type="fractalNoise" baseFrequency="0.05 0.22" numOctaves="2" seed="8" result="noise" />
           <feDisplacementMap in="goo" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        <filter id="ooze" x="-25%" y="-15%" width="150%" height="200%" colorInterpolationFilters="sRGB">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="soft" />
+          <feColorMatrix in="soft" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -11" result="goo" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.03 0.05" numOctaves="2" seed="3" result="noise" />
+          <feDisplacementMap in="goo" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G" />
         </filter>
         <linearGradient id="blood-fill" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="110">
           <stop offset="0" stopColor="#bd1008" />
