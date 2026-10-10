@@ -78,7 +78,7 @@ Seven clips, about 70 seconds, looping: a window choked with wire and the masked
 
 ## Sound
 
-Browsers keep a page silent until the visitor does something, so the ambient track begins on the first click, tap or key press, fading in over three seconds, and stops whenever the tab is hidden. The "Sound on / off" control at the foot of the screen, on the right, turns it off and on; the choice is kept on the visitor's device, and someone who turned it off is not played to again. iPhones ignore volume settings from the page, so there it simply starts at the file's own level.
+Browsers keep a page silent until the visitor does something, so the ambient track begins on the first click, tap or key press, fading in over three seconds, and stops at once whenever the tab is hidden (a hidden tab runs no animation frames to fade with). Turning it on or off by the control fades over about a second. The "Sound on / off" control at the foot of the screen, on the right, turns it off and on; the choice is kept on the visitor's device, and someone who turned it off is not played to again. iPhones ignore volume settings from the page, so there it simply starts at the file's own level.
 
 ## Motion and accessibility
 
