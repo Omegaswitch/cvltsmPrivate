@@ -418,7 +418,7 @@ img, video { display: block; }
 .kit--numpad { grid-column: 9 / span 4; margin-top: 22vh; --drift: 12vh; }
 .kit--novelties { grid-column: 5 / span 4; margin-top: -8vh; --drift: 8vh; }
 .kit__frame img { width: 100%; height: auto; object-fit: cover; }
-.kit__name { margin-top: 12px; font-family: var(--faith); font-size: 1.5rem; line-height: 1.1; }
+.kit__name { margin-top: 14px; font-family: var(--faith); font-size: clamp(2rem, 2.8vw, 2.75rem); line-height: 1.1; }
 
 /* colour: pinned to the foot of the screen beneath the kits, uncovered as
    they scroll away; its chips rise one after another as the kits leave */
