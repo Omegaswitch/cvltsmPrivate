@@ -9,7 +9,7 @@ const LINKS = [
   { href: '#vendors', label: 'Vendors' },
 ];
 
-/** The manufacturer's mark, always on the left; the set's name joins it once the film is passed. Boxed, and home. The sections of the page, and nothing more. Each link is painted over with blood on hover. */
+/** The manufacturer's mark, always on the left; the set's name joins it once the film is passed. One link home. The sections of the page, and nothing more. Each link is painted over with blood on hover. */
 export function Nav() {
   return (
     <nav className="nav" aria-label="Sections">
