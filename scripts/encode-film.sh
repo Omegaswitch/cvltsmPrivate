@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Cuts and grades the hero footage into web clips in public/film/.
 #
-#   FFMPEG=/path/to/ffmpeg SRC=/path/to/originals scripts/encode-film.sh
+#   FFMPEG=/path/to/ffmpeg SRC=/path/to/originals scripts/encode-film.sh [clip ...]
+#
+# With clip names (window hands figure creature berserker cabin) only those
+# are encoded and the damage loop is left alone; with none, everything is.
 #
 # Each clip is cut from an original, graded to one look (near-monochrome,
 # crushed blacks, a dirty dried-blood cast), worn down (below), and encoded
@@ -16,7 +19,8 @@ FF="${FFMPEG:-ffmpeg}"
 SRC="${SRC:-assets/film}"
 OUT=public/film
 
-# name | source file | start (s) | length (s) | gamma | contrast | worn height | grain
+# name | source file | start (s) | length (s) | gamma | contrast | worn height | grain | crop
+# crop (optional, w:h:x:y) takes off letterbox bars baked into the source.
 # Every clip is worn down before it is encoded: shrunk to its worn height and
 # blown back up (soft, blocky), grain baked in, 18 frames a second (old film
 # stutters). The lower the worn height and the higher the grain, the more
@@ -25,6 +29,8 @@ CLIPS=(
   "window|13313175_1920_1080_25fps.mp4|0|10|1.7|1.12|200|18"
   "hands|okno.mp4|0.3|6|1.0|1.12|300|16"
   "figure|16513463-hd_1920_1080_24fps.mp4|28|10|1.55|1.3|300|18"
+  "creature|the-ritual-creature.mp4|6.5|8.5|1.0|1.12|240|16|844:420:10:30"
+  "berserker|northman-berserker.mp4|30|12|1.35|1.15|240|16"
   "cabin|blairwitch_2.mp4|23|17|1.15|1.12|320|14"
 )
 
@@ -35,9 +41,12 @@ wear() { # worn height, grain, final height
   echo "scale=-2:$1:flags=area,noise=alls=$2:allf=t,scale=-2:$3:flags=bilinear,fps=18"
 }
 
+ONLY=" $* "
 for row in "${CLIPS[@]}"; do
-  IFS='|' read -r name file start len gamma contrast worn grain <<< "$row"
+  IFS='|' read -r name file start len gamma contrast worn grain crop <<< "$row"
+  [ "$ONLY" != "  " ] && [[ "$ONLY" != *" $name "* ]] && continue
   g=$(grade "$gamma" "$contrast")
+  [ -n "${crop:-}" ] && g="crop=$crop,$g"
   for size in lg:480:30 sm:360:31; do
     IFS=: read -r tag h crf <<< "$size"
     "$FF" -v error -y -ss "$start" -t "$len" -i "$SRC/$file" -an \
@@ -55,6 +64,8 @@ for row in "${CLIPS[@]}"; do
 done
 
 # film damage: a looping pass of dust and grime, laid over the footage
+# (only when encoding everything)
+if [ "$ONLY" = "  " ]; then
 "$FF" -v error -y -i "$SRC/3611029-hd_1920_1080_24fps.mp4" -an \
   -vf "scale=-2:540:flags=lanczos,format=gray,eq=contrast=1.6:brightness=-0.05,fps=24,format=yuv420p" \
   -c:v libx264 -profile:v high -preset slow -crf 30 -g 48 -movflags +faststart "$OUT/damage.mp4"
@@ -62,3 +73,4 @@ done
   -vf "scale=-2:540:flags=lanczos,format=gray,eq=contrast=1.6:brightness=-0.05,fps=24,format=yuv420p" \
   -c:v libvpx-vp9 -b:v 0 -crf 40 -row-mt 1 -deadline good -cpu-used 2 -g 48 "$OUT/damage.webm"
 echo damage
+fi

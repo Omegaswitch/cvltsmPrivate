@@ -50,7 +50,7 @@ poster frame; clip under; clip dissolving in; film damage (screen, 17%); concret
 
 ## Phones
 
-The film is 16:9 and a phone shows a tall slice of it, so each clip carries a `focus` (how far across its subject sits, in `data/film.ts`) and is panned to keep that point in view: the masked face at 57%, the figure at 74%.
+The film is 16:9 and a phone shows a tall slice of it, so each clip carries a `focus` (how far across its subject sits, in `data/film.ts`) and is panned to keep that point in view: the masked face at 57%, the figure at 74%. Each clip also carries its own aspect (the two newest are wider than 16:9), so the pan is right for all of them.
 
 ## Sound
 

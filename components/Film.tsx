@@ -42,17 +42,17 @@ export function Film() {
 
     const later = (fn: () => void, ms: number) => { timers.push(window.setTimeout(fn, ms)); };
 
-    // where to put a 16:9 picture in a taller frame so the subject stays in
+    // where to put a wide picture in a taller frame so the subject stays in
     // view: the x% of object-position that centres `focus` (0 to 1)
-    const position = (focus: number) => {
+    const position = (focus: number, aspect: number) => {
       const c = el.clientWidth;
-      const w = el.clientHeight * (16 / 9);
+      const w = el.clientHeight * aspect;
       if (w <= c) return '50%';
       return `${Math.min(100, Math.max(0, ((focus * w - c / 2) / (w - c)) * 100)).toFixed(1)}%`;
     };
 
     const load = (v: HTMLVideoElement, clip: number) => {
-      v.style.objectPosition = `${position(FILM[clip].focus)} 50%`;
+      v.style.objectPosition = `${position(FILM[clip].focus, FILM[clip].aspect)} 50%`;
       v.src = clipSrc(FILM[clip].id, size, format);
       v.load();
     };
