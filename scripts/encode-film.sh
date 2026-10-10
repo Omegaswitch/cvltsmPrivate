@@ -3,7 +3,7 @@
 #
 #   FFMPEG=/path/to/ffmpeg SRC=/path/to/originals scripts/encode-film.sh [clip ...]
 #
-# With clip names (window hands figure creature berserker cabin) only those
+# With clip names (window hands figure creature berserker werwulf cabin) only those
 # are encoded and the damage loop is left alone; with none, everything is.
 #
 # Each clip is cut from an original, graded to one look (near-monochrome,
@@ -31,6 +31,7 @@ CLIPS=(
   "figure|16513463-hd_1920_1080_24fps.mp4|28|10|1.55|1.3|300|18"
   "creature|the-ritual-creature.mp4|7.0|5.85|1.0|1.12|240|16|844:420:10:30"
   "berserker|northman-berserker.mp4|30|12|1.35|1.15|240|16"
+  "werwulf|werwulf-trailer.mp4|101|7|1.3|1.15|240|16|492:360:74:0"
   "cabin|blairwitch_2.mp4|23|17|1.15|1.12|320|14"
 )
 

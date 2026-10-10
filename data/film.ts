@@ -26,6 +26,7 @@ export const FILM: Clip[] = [
   { id: 'figure', into: 'dissolve', focus: 0.74, aspect: WIDE },
   { id: 'creature', into: 'interference', focus: 0.5, aspect: 844 / 420 },
   { id: 'berserker', into: 'dissolve', focus: 0.5, aspect: 2 },
+  { id: 'werwulf', into: 'dissolve', focus: 0.5, aspect: 492 / 360 },
   { id: 'cabin', into: 'interference', focus: 0.5, aspect: WIDE },
 ];
 
