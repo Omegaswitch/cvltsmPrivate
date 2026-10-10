@@ -640,6 +640,7 @@ img, video { display: block; }
   100% { transform: translate(-50%, calc(var(--len) * 1px)) scale(0.6); opacity: 0; }
 }
 /* the tip filling, then easing */
+@keyframes swell-small { 0%, 100% { transform: translateX(-50%) scale(1); } 60% { transform: translateX(-50%) scale(1.18); } }
 @keyframes swell { 0%, 100% { transform: translateX(-50%) scale(1); } 55% { transform: translateX(-50%) scale(1.5); } 70% { transform: translateX(-50%) scale(1.15); } }
 /* a drop: it forms at the tip, hangs, lets go and falls, quickening */
 @keyframes fall {
@@ -846,9 +847,31 @@ img, video { display: block; }
      uneven (the long ones stay the longest), and a drop falls only a little way */
   .ooze__drip {
     --fall: 40px;
-    width: calc(var(--w) * 0.62px);
+    width: calc(var(--w) * 0.8px);
     height: calc(min(var(--len) * 0.55, 30 + var(--len) * 0.045) * var(--k) * 1px);
   }
+  /* No goo filter on a phone: Safari draws it its own way, the drips melting
+     to nothing and leaving their tips as loose circles. Here every piece is a
+     plain shape that reads the same in any browser: a clean band, drips that
+     leave its lower edge, round tips, beads and drops, each with its own
+     shading for the wet look. The sags and side blobs need the filter, so
+     they go. */
+  .ooze { filter: none; }
+  .ooze__body { inset: -4px; border-radius: 4px; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14), inset 0 -3px 6px rgb(0 0 0 / 0.25); }
+  .ooze .ooze__blob, .ooze__drip s, .ooze__drip::before { display: none; }   /* a bead on a bare drip reads as a ball on a stick */
+  .ooze__drip {
+    top: calc(100% - 4px);
+    background: linear-gradient(90deg,
+      color-mix(in srgb, var(--c), #000 30%) 0%, var(--c) 30%,
+      color-mix(in srgb, var(--c), #fff 30%) 45%, var(--c) 62%,
+      color-mix(in srgb, var(--c), #000 35%) 100%);
+  }
+  .ooze__drip::after, .ooze__drip::before, .ooze__drip b {
+    background: radial-gradient(circle at 36% 32%, color-mix(in srgb, var(--c), #fff 32%), var(--c) 42%, color-mix(in srgb, var(--c), #000 30%) 100%);
+  }
+  .ooze__drip::after { width: 125%; aspect-ratio: 1 / 1.3; bottom: -4px; border-radius: 50% 50% 50% 50% / 38% 38% 62% 62%; }   /* a teardrop, not a pin */
+  .colours[data-dripping] .ooze__drip::after { animation-name: swell-small; }
+  .ooze__drip b { width: 110%; }
   .strip li:has(.ooze) .strip__name, .strip li:has(.ooze) .strip__hex { margin-top: 30px; }
   .renders__grid { grid-template-columns: minmax(0, 1fr); }
   .render--lead, .render--side, .render--third { grid-column: 1 / -1; margin-top: 0; }
