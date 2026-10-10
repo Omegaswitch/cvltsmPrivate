@@ -3,16 +3,15 @@
 //   node scripts/make-brand.mjs
 //
 // From the CVLTSM outlines in assets/brand/ (cut from Valhalica, so nothing
-// depends on a font being installed), the SWG logo and one graded film frame:
+// depends on a font being installed), the SWG logo and two of the engravings:
 //   app/favicon.ico, app/icon.svg, app/apple-icon.png    (browser tabs, phones)
 //   app/opengraph-image.png, app/twitter-image.png       (links shared anywhere)
-// Next serves them by their names, with no code. Change the frame below to
-// change the embed.
+// Next serves them by their names, with no code. Change the two engravings
+// below to change the embed.
 import { readFileSync, writeFileSync } from 'node:fs';
 import sharp from 'sharp';
 
 const BONE = '#d4ccbf';
-const FRAME = 'public/film/berserker.webp';
 const pathOf = (file) => readFileSync(file, 'utf8').match(/ d="([^"]+)"/)[1];
 const boxOf = (file) => readFileSync(file, 'utf8').match(/viewBox="([^"]+)"/)[1].split(/\s+/).map(Number);
 
@@ -46,22 +45,41 @@ sizes.forEach((n, i) => {
 });
 writeFileSync('app/favicon.ico', Buffer.concat([head, ...pngs]));
 
-// ---- the share image: the film's frame, darkened, the wordmark low on the
-// left and the manufacturer small at the top, as on the page
+// ---- the share image: the name alone, large, over two faint engravings
+// (light ink on the dark, tilted and half off the edge, as on the page), the
+// manufacturer small at the top left
 const W = 1200, H = 630;
 const [wx, wy, ww, wh] = WORD.box;
-const wordW = 640, ws = wordW / ww;
-const wordSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
-<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#070605" stop-opacity="0.55"/><stop offset="0.45" stop-color="#070605" stop-opacity="0"/><stop offset="1" stop-color="#070605" stop-opacity="0.8"/></linearGradient>
-<radialGradient id="v" cx="0.5" cy="0.45" r="0.8"><stop offset="0.5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.75"/></radialGradient></defs>
-<rect width="${W}" height="${H}" fill="url(#g)"/><rect width="${W}" height="${H}" fill="url(#v)"/>
-<path transform="translate(64 ${H - 64 - wh * ws}) scale(${ws.toFixed(5)}) translate(${-wx} ${-wy})" fill="${BONE}" d="${WORD.d}"/></svg>`;
+const wordW = 800, ws = wordW / ww;
+const wordH = wh * ws;
+
+// an engraving (black ink on white) turned into light ink on nothing: the
+// darkness of the ink becomes the opacity of a bone-coloured layer
+async function inkLayer(file, height, opacity) {
+  const grey = await sharp(file).flatten({ background: '#ffffff' }).resize({ height }).greyscale().raw().toBuffer({ resolveWithObject: true });
+  const { width, height: h, channels } = grey.info;
+  const rgba = Buffer.alloc(width * h * 4);
+  for (let i = 0; i < width * h; i++) {
+    rgba[i * 4] = 0xd4; rgba[i * 4 + 1] = 0xcc; rgba[i * 4 + 2] = 0xbf;
+    rgba[i * 4 + 3] = Math.round((255 - grey.data[i * channels]) * opacity);
+  }
+  const png = await sharp(rgba, { raw: { width, height: h, channels: 4 } }).png().toBuffer();
+  return { href: `data:image/png;base64,${png.toString('base64')}`, w: width, h };
+}
+const dragon = await inkLayer('public/engravings/1-01.webp', 560, 0.26);
+const web = await inkLayer('public/engravings/1-36.webp', 620, 0.22);
+
 const swg = await sharp('public/brand/SWGX.png').resize({ height: 44 }).png().toBuffer();
-await sharp(FRAME).resize(W, H, { fit: 'cover', position: 'attention' }).modulate({ brightness: 1.1 }).composite([
-  { input: Buffer.from(wordSvg) },
-  { input: swg, left: 64, top: 52 },
-]).png({ compressionLevel: 9, palette: false }).toFile('app/opengraph-image.png');
+const wordX = (W - wordW) / 2, wordY = (H - wordH) / 2 + 6;
+const shareSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
+<defs><radialGradient id="v" cx="0.5" cy="0.5" r="0.75"><stop offset="0.35" stop-color="#14110d"/><stop offset="1" stop-color="#050404"/></radialGradient></defs>
+<rect width="${W}" height="${H}" fill="url(#v)"/>
+<image href="${dragon.href}" width="${dragon.w}" height="${dragon.h}" transform="translate(-110 250) rotate(-14 ${dragon.w / 2} ${dragon.h / 2})"/>
+<image href="${web.href}" width="${web.w}" height="${web.h}" transform="translate(860 -150) rotate(9 ${web.w / 2} ${web.h / 2})"/>
+<path transform="translate(${wordX} ${wordY}) scale(${ws.toFixed(5)}) translate(${-wx} ${-wy})" fill="${BONE}" d="${WORD.d}"/></svg>`;
+await sharp(Buffer.from(shareSvg)).composite([{ input: swg, left: 56, top: 48 }]).png({ compressionLevel: 9 }).toFile('app/opengraph-image.png');
 await sharp('app/opengraph-image.png').toFile('app/twitter-image.png');
-writeFileSync('app/opengraph-image.alt.txt', 'CVLTSM, in Valhalica letters, over a dark film frame of a horned figure before a fire. SWG.\n');
-writeFileSync('app/twitter-image.alt.txt', 'CVLTSM, in Valhalica letters, over a dark film frame of a horned figure before a fire. SWG.\n');
+const alt = 'CVLTSM, in Valhalica letters, over two faint engravings on black: a coiled winged dragon and a spider web. SWG at the top left.\n';
+writeFileSync('app/opengraph-image.alt.txt', alt);
+writeFileSync('app/twitter-image.alt.txt', alt);
 console.log('favicon.ico, icon.svg, apple-icon.png, opengraph-image.png, twitter-image.png');
