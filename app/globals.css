@@ -521,34 +521,19 @@ img, video { display: block; }
 .strip li { flex: 1 1 0; min-width: 0; display: grid; gap: 10px; align-content: start; }
 .strip__name, .strip__hex { position: relative; z-index: 1; text-shadow: 0 0 6px var(--black), 0 0 2px var(--black); }   /* legible where a drip runs past */
 .strip li:has(.ooze) .strip__name { margin-top: clamp(26px, 5vh, 54px); }
-/* a chip: a frame the colour bleeds out of. The fill spills over the frame's
-   inner edge, drips run down over its foot, blobs swell out of its sides, and
-   a gooey filter (BloodDefs) fuses them. The drips run as the chips come into
-   view; without scroll-driven animation they are simply drawn run. */
+/* a chip: a frame the colour bleeds out of (components/Ooze.tsx, an SVG
+   with its own gooey filter, drawn the same in every browser). */
 .strip__chip { display: block; height: clamp(190px, 36vh, 380px); }
-.ooze { position: absolute; inset: 0; filter: url(#ooze); }
-.ooze i { position: absolute; display: block; background: var(--c); }
-.ooze__body { inset: -9px; border-radius: 3px; }
-/* --k is how far a drip has run (0 to 1): it grows in length, so its round
-   tip leads and is never squashed */
-@property --k { syntax: '<number>'; inherits: false; initial-value: 1; }
-.ooze__drip {
-  --fall: 360px;   /* how far a drop falls */
-  --k: 1;          /* run, where @property is unknown (older iPhones) */
-  top: calc(100% - 14px);
-  width: calc(var(--w) * 1px);
-  height: calc(var(--len) * var(--k) * 1px);
-  border-radius: 0 0 999px 999px;
-}
-/* where it leaves the edge: a sag that the filter turns into a fillet */
-.ooze__drip s { position: absolute; top: 2px; left: 50%; width: 280%; height: 22px; border-radius: 50%; background: var(--c); transform: translate(-50%, -50%); }
-/* the tip: a bead the filter pinches off or joins */
-.ooze__drip::after { content: ''; position: absolute; left: 50%; bottom: -9px; width: 150%; aspect-ratio: 1; border-radius: 50%; background: var(--c); transform: translateX(-50%); }
-/* a bead sliding down the drip, and a drop forming at its tip and falling:
-   both are the colour itself, and the filter makes them one body with it */
-.ooze__drip::before { content: ''; position: absolute; top: 0; left: 50%; width: 190%; aspect-ratio: 1; border-radius: 50%; background: var(--c); transform: translate(-50%, 0) scale(0); opacity: 0; }
-.ooze__drip b { position: absolute; top: 100%; left: 50%; width: 170%; aspect-ratio: 1; border-radius: 50%; background: var(--c); transform: translate(-50%, 0) scale(0); opacity: 0; }
-.ooze__blob { border-radius: 50%; }
+.ooze { position: absolute; inset: 0; }
+.ooze__svg { position: absolute; overflow: visible; pointer-events: none; }
+/* --k is how far a drip has run (0 to 1): the line grows to it and the tip
+   (and the drop that will fall from it) rides its end, never squashed */
+@property --k { syntax: '<number>'; inherits: true; initial-value: 1; }
+.drip { --k: 1; }
+.drip__line { transform: scaleY(var(--k)); transform-box: fill-box; transform-origin: top; }
+.drip__end { transform: translateY(calc(var(--len) * var(--k) * 1px)); }
+.drip__tip, .drip__bead, .drip__drop { transform-box: fill-box; transform-origin: center; }
+.drip__bead, .drip__drop { opacity: 0; }
 .strip__name { font-size: 0.9375rem; }
 .strip__hex { font-size: 0.6875rem; letter-spacing: 0.08em; color: var(--bone-dim); font-variant-numeric: tabular-nums; }
 
@@ -613,14 +598,14 @@ img, video { display: block; }
    long as they are in view: a bead slides down, the tip swells, a drop falls.
    Before the mark (and only if the script is there to place it) they are
    held back; with no script, or with reduced motion, they are just drawn run. */
-.colours[data-armed]:not([data-dripping]) .ooze__drip { --k: 0; opacity: 0; }
+.colours[data-armed]:not([data-dripping]) .drip { --k: 0; opacity: 0; }
 @media (prefers-reduced-motion: no-preference) {
-  .colours[data-dripping] .ooze__drip { animation: run var(--dur) cubic-bezier(0.33, 0.1, 0.3, 1) var(--delay) both; }
-  .colours[data-dripping] .ooze__drip::before { animation: slide var(--slide) cubic-bezier(0.45, 0, 0.85, 0.5) calc(var(--delay) + var(--dur) * 0.6) infinite; }
-  .colours[data-dripping] .ooze__drip::after { animation: swell var(--swell) ease-in-out calc(var(--delay) + var(--dur)) infinite; }
-  .colours[data-dripping] .ooze__drip b { animation: fall var(--drop) cubic-bezier(0.5, 0, 0.8, 0.4) calc(var(--delay) + var(--dur) + var(--dd)) infinite; }
+  .colours[data-dripping] .drip { animation: run var(--dur) cubic-bezier(0.33, 0.1, 0.3, 1) var(--delay) both; }
+  .colours[data-dripping] .drip__bead { animation: slide var(--slide) cubic-bezier(0.45, 0, 0.85, 0.5) calc(var(--delay) + var(--dur) * 0.6) infinite; }
+  .colours[data-dripping] .drip__tip { animation: swell var(--swell) ease-in-out calc(var(--delay) + var(--dur)) infinite; }
+  .colours[data-dripping] .drip__drop { animation: fall var(--drop) cubic-bezier(0.5, 0, 0.8, 0.4) calc(var(--delay) + var(--dur) + var(--dd)) infinite; }
   /* nothing runs while it cannot be seen */
-  .colours:not([data-live]) .ooze__drip, .colours:not([data-live]) .ooze__drip::before, .colours:not([data-live]) .ooze__drip::after, .colours:not([data-live]) .ooze__drip b { animation-play-state: paused; }
+  .colours:not([data-live]) :is(.drip, .drip__bead, .drip__tip, .drip__drop) { animation-play-state: paused; }
 }
 /* a drip: it runs, hesitates, runs on */
 @keyframes run {
@@ -634,21 +619,20 @@ img, video { display: block; }
 }
 /* a bead down the drip's length: it gathers, runs, and is taken up by the tip */
 @keyframes slide {
-  0% { transform: translate(-50%, 0) scale(0.3); opacity: 0; }
-  10% { transform: translate(-50%, 0) scale(0.9); opacity: 1; }
-  90% { transform: translate(-50%, calc(var(--len) * 1px)) scale(1); opacity: 1; }
-  100% { transform: translate(-50%, calc(var(--len) * 1px)) scale(0.6); opacity: 0; }
+  0% { transform: translateY(0) scale(0.3); opacity: 0; }
+  10% { transform: translateY(0) scale(0.9); opacity: 1; }
+  90% { transform: translateY(calc(var(--len) * 1px)) scale(1); opacity: 1; }
+  100% { transform: translateY(calc(var(--len) * 1px)) scale(0.6); opacity: 0; }
 }
 /* the tip filling, then easing */
-@keyframes swell-small { 0%, 100% { transform: translateX(-50%) scale(1); } 60% { transform: translateX(-50%) scale(1.18); } }
-@keyframes swell { 0%, 100% { transform: translateX(-50%) scale(1); } 55% { transform: translateX(-50%) scale(1.5); } 70% { transform: translateX(-50%) scale(1.15); } }
+@keyframes swell { 0%, 100% { transform: scale(1); } 55% { transform: scale(1.5); } 70% { transform: scale(1.15); } }
 /* a drop: it forms at the tip, hangs, lets go and falls, quickening */
 @keyframes fall {
-  0% { transform: translate(-50%, -8px) scale(0.2); opacity: 1; }
-  26% { transform: translate(-50%, 2px) scale(0.95); opacity: 1; }
-  34% { transform: translate(-50%, 8px) scale(0.85, 1.15); opacity: 1; animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5); }
-  88% { transform: translate(-50%, calc(var(--fall) * 0.83)) scale(0.55, 0.95); opacity: 1; }
-  100% { transform: translate(-50%, var(--fall)) scale(0.5, 0.9); opacity: 0; }
+  0% { transform: translateY(-8px) scale(0.2); opacity: 1; }
+  26% { transform: translateY(2px) scale(0.95); opacity: 1; }
+  34% { transform: translateY(8px) scale(0.85, 1.15); opacity: 1; animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5); }
+  88% { transform: translateY(calc(var(--fall) * 0.83)) scale(0.55, 0.95); opacity: 1; }
+  100% { transform: translateY(var(--fall)) scale(0.5, 0.9); opacity: 0; }
 }
 @keyframes drift {
   from { transform: translate3d(0, var(--drift), 0); }
@@ -843,35 +827,6 @@ img, video { display: block; }
   .strip li { grid-template-columns: 1fr auto; align-items: center; }
   .strip__chip { grid-column: 1 / -1; height: 96px; --edge: 22px; }
   .frame { --edge: 22px; }
-  /* on a phone the chips are low bands: the drips are finer and shorter, still
-     uneven (the long ones stay the longest), and a drop falls only a little way */
-  .ooze__drip {
-    --fall: 40px;
-    width: calc(var(--w) * 0.8px);
-    height: calc(min(var(--len) * 0.55, 30 + var(--len) * 0.045) * var(--k) * 1px);
-  }
-  /* No goo filter on a phone: Safari draws it its own way, the drips melting
-     to nothing and leaving their tips as loose circles. Here every piece is a
-     plain shape that reads the same in any browser: a clean band, drips that
-     leave its lower edge, round tips, beads and drops, each with its own
-     shading for the wet look. The sags and side blobs need the filter, so
-     they go. */
-  .ooze { filter: none; }
-  .ooze__body { inset: -4px; border-radius: 4px; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14), inset 0 -3px 6px rgb(0 0 0 / 0.25); }
-  .ooze .ooze__blob, .ooze__drip s, .ooze__drip::before { display: none; }   /* a bead on a bare drip reads as a ball on a stick */
-  .ooze__drip {
-    top: calc(100% - 4px);
-    background: linear-gradient(90deg,
-      color-mix(in srgb, var(--c), #000 30%) 0%, var(--c) 30%,
-      color-mix(in srgb, var(--c), #fff 30%) 45%, var(--c) 62%,
-      color-mix(in srgb, var(--c), #000 35%) 100%);
-  }
-  .ooze__drip::after, .ooze__drip::before, .ooze__drip b {
-    background: radial-gradient(circle at 36% 32%, color-mix(in srgb, var(--c), #fff 32%), var(--c) 42%, color-mix(in srgb, var(--c), #000 30%) 100%);
-  }
-  .ooze__drip::after { width: 125%; aspect-ratio: 1 / 1.3; bottom: -4px; border-radius: 50% 50% 50% 50% / 38% 38% 62% 62%; }   /* a teardrop, not a pin */
-  .colours[data-dripping] .ooze__drip::after { animation-name: swell-small; }
-  .ooze__drip b { width: 110%; }
   .strip li:has(.ooze) .strip__name, .strip li:has(.ooze) .strip__hex { margin-top: 30px; }
   .renders__grid { grid-template-columns: minmax(0, 1fr); }
   .render--lead, .render--side, .render--third { grid-column: 1 / -1; margin-top: 0; }

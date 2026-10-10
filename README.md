@@ -27,7 +27,7 @@ components/
   VendorsSection.tsx     vendors by region
   Nav.tsx, Footer.tsx    three links; the colophon
   TornEdge.tsx           the torn edge between sections
-  Ooze.tsx               a colour bleeding out of its outline (thin, random, seeded)
+  Ooze.tsx               a colour bleeding out of its outline (thin, random, seeded); an SVG with its own goo filter, so Safari draws it right
   DripWatch.tsx          starts the dripping once, and pauses it off screen
   Engravings.tsx         the old woodcuts laid over the backgrounds
 data/

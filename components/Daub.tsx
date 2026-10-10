@@ -55,20 +55,6 @@ export function BloodDefs() {
           <feTurbulence type="fractalNoise" baseFrequency="0.05 0.22" numOctaves="2" seed="8" result="noise" />
           <feDisplacementMap in="goo" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
         </filter>
-        <filter id="ooze" x="-25%" y="-30%" width="150%" height="300%" colorInterpolationFilters="sRGB">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="3.4" result="soft" />
-          <feColorMatrix in="soft" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -9.5" result="goo" />
-          {/* a sheen: light from the upper left on the relief of the blurred
-              shape, kept inside the goo, so drips and edges catch it and the
-              flat colour does not */}
-          <feSpecularLighting in="soft" surfaceScale="9" specularConstant="0.9" specularExponent="28" lightingColor="#ffffff" result="shine">
-            <feDistantLight azimuth="235" elevation="42" />
-          </feSpecularLighting>
-          <feComposite in="shine" in2="goo" operator="in" result="sheen" />
-          <feComposite in="goo" in2="sheen" operator="arithmetic" k1="0" k2="1" k3="0.42" k4="0" result="wet" />
-          <feTurbulence type="fractalNoise" baseFrequency="0.03 0.05" numOctaves="2" seed="3" result="noise" />
-          <feDisplacementMap in="wet" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
         <linearGradient id="blood-fill" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="110">
           <stop offset="0" stopColor="#bd1008" />
           <stop offset="0.45" stopColor="#8a0a04" />
