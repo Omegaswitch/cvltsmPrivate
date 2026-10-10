@@ -45,8 +45,12 @@ poster frame; clip under; clip dissolving in; film damage (screen, 17%); concret
 - Grain moves in six hard steps per 0.8s, by transform only. Scratches appear for a frame or two, three times in nine seconds.
 - On scroll (CSS scroll timeline): the film scales to 1.06 and darkens as the kits rise; the logo and reel rise and fade. Kit renders drift against the scroll by 3 to 12vh. The colour chips rise in as the kits leave.
 - The film's grime and dust pulse (two beats and a rest, 5.2s), and the picture glitches briefly every 7.7s.
-- Hover (components/Daub.tsx): a brush scrubs back and forth along a path, revealed along its length (0.66s); five drips fall from the foot of the smear, quickening as they go (0.3 to 0.8s, from 0.46s); a gooey filter (blur, then alpha contrast, then a little displacement) melts drips and smear into one body; the word is written over it left to right in Faith Collapsing (0.55s, from 0.28s), glowing, its paint running off its letters (from 0.7s). All transitions, not animations, so it reverses smoothly from wherever it has got to (0.25s) when the pointer leaves.
+- Hover (components/Daub.tsx): a brush scrubs back and forth along a path, revealed along its length (0.9s); five drips fall from the foot of the smear, quickening as they go (0.6 to 1.2s, from 0.65s); a gooey filter (blur, then alpha contrast, then a little displacement) melts drips and smear into one body; the word is written over it left to right in Faith Collapsing (0.8s, from 0.4s), glowing, its paint running off its letters (from 1s). All transitions, not animations, so it reverses smoothly from wherever it has got to (0.25s) when the pointer leaves.
 - Reduced motion: no autoplay, no grain or scratch movement, no scroll effects, no dissolves.
+
+## Phones
+
+The film is 16:9 and a phone shows a tall slice of it, so each clip carries a `focus` (how far across its subject sits, in `data/film.ts`) and is panned to keep that point in view: the masked face at 57%, the figure at 74%.
 
 ## Sound
 

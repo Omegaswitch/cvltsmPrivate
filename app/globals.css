@@ -132,6 +132,10 @@ img, video { display: block; }
 .film__clip.is-under { opacity: 1; z-index: 1; }
 .film__clip.is-shown { opacity: 1; z-index: 2; transition: opacity 2.4s var(--slow); }
 
+/* on a tall screen the first frame is panned to its subject too (the clips
+   are panned by script as they load; this is the same pan for the poster) */
+@media (max-aspect-ratio: 1/1) { .film__poster { object-position: 59% 50%; } }
+
 /* dust and grime moving over the picture: light only, never darkening */
 .film__damage { z-index: 3; mix-blend-mode: screen; opacity: 0.12; animation: damage-pulse 5.2s infinite; }
 /* the concrete multiplied in: its marks become dirt on the film */
@@ -536,16 +540,16 @@ img, video { display: block; }
   transition: opacity 0.2s, -webkit-mask-position 0.25s, mask-position 0.25s, filter 0.25s, text-shadow 0.25s;
 }
 
-/* painting: the brush scrubs (0 to 0.62s), the drips fall as it finishes,
+/* painting: the brush scrubs (0 to 0.9s), the drips fall as it finishes,
    the word is written as the blood settles */
 .daub:hover .daub__blood, .daub:focus-visible .daub__blood { visibility: visible; transition: none; }
-.daub:hover .daub__smear, .daub:focus-visible .daub__smear { stroke-dashoffset: 0; transition: stroke-dashoffset 0.66s cubic-bezier(0.32, 0.1, 0.18, 1); }
-.daub:hover .daub__shine, .daub:focus-visible .daub__shine { stroke-dashoffset: 0; transition: stroke-dashoffset 0.4s cubic-bezier(0.32, 0.1, 0.18, 1) 0.06s; }
+.daub:hover .daub__smear, .daub:focus-visible .daub__smear { stroke-dashoffset: 0; transition: stroke-dashoffset 0.9s cubic-bezier(0.32, 0.1, 0.18, 1); }
+.daub:hover .daub__shine, .daub:focus-visible .daub__shine { stroke-dashoffset: 0; transition: stroke-dashoffset 0.55s cubic-bezier(0.32, 0.1, 0.18, 1) 0.08s; }
 .daub:hover .daub__drip, .daub:focus-visible .daub__drip {
   stroke-dashoffset: 0;
-  transition: stroke-dashoffset var(--t, 0.6s) cubic-bezier(0.5, 0, 0.85, 0.55) var(--d, 0.5s);
+  transition: stroke-dashoffset calc(var(--t, 0.6s) * 1.4) cubic-bezier(0.5, 0, 0.85, 0.55) calc(var(--d, 0.5s) * 1.4);
 }
-.daub:hover > span, .daub:focus-visible > span { opacity: 0; transition: opacity 0.25s var(--ease) 0.12s; }
+.daub:hover > span, .daub:focus-visible > span { opacity: 0; transition: opacity 0.3s var(--ease) 0.16s; }
 .daub:hover::after, .daub:focus-visible::after {
   opacity: 1;
   filter: none;
@@ -554,7 +558,7 @@ img, video { display: block; }
   text-shadow:
     0 0 3px rgb(255 214 190 / 0.95), 0 0 10px rgb(255 70 45 / 0.9), 0 0 24px rgb(200 0 0 / 0.8),
     0 3px 0 #a10a04, 0 6px 1px #8a0803, 0 10px 2px #7a0602, 0 15px 3px rgb(110 6 2 / 0.85), 0 21px 5px rgb(110 6 2 / 0.5);
-  transition: opacity 0.3s ease-out 0.28s, -webkit-mask-position 0.55s cubic-bezier(0.4, 0, 0.2, 1) 0.28s, mask-position 0.55s cubic-bezier(0.4, 0, 0.2, 1) 0.28s, filter 0.5s ease-out 0.28s, text-shadow 0.9s ease-in 0.7s;
+  transition: opacity 0.4s ease-out 0.4s, -webkit-mask-position 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s, mask-position 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s, filter 0.7s ease-out 0.4s, text-shadow 1.2s ease-in 1s;
 }
 
 /* the sound control: small, fixed at the foot on the right, over everything */
