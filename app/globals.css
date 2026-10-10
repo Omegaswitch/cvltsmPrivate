@@ -102,6 +102,16 @@ img, video { display: block; }
   text-shadow: 0 1px 10px rgb(0 0 0 / 0.6);
 }
 .nav a > span { opacity: 0.85; }
+/* a soft dark wash behind the bar, fading out below it, so the menu reads over any part of the page */
+.nav::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: calc(100% + 44px);
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgb(7 6 5 / 0.82) 0%, rgb(7 6 5 / 0.6) 55%, rgb(7 6 5 / 0));
+}
 .nav { left: 0; align-items: center; }
 /* the mark and the name beside it, both one link home. The box is only the space that takes the click: no frame.
    Both are the same height (--mark-h): the logo's picture has a little clear margin, Valhalica's capitals stand 0.71 of the em. */
