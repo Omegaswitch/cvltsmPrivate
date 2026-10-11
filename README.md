@@ -1,6 +1,6 @@
 # CVLTSM
 
-The site for CVLTSM, a keycap set. Not a shop: a way into its world. It opens on a film, a ritual found on damaged footage, with the set's logo over it; then the kits scroll up over the film and uncover the colors waiting beneath; then renders, vendors and a short colophon, each section torn over the one before.
+The site for CVLTSM, a keycap set. Not a shop: a way into its world. It opens on a film, a ritual found on damaged footage, with the set's logo over it; then the kits scroll up over the film and uncover the colors waiting beneath; then renders, vendors and a colophon of one line (coming in 2027, in Valhalica), each section torn over the one before.
 
 ```
 npm install

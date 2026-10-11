@@ -9,7 +9,7 @@ The references set the terms: black, and one red. The red of dried blood, used a
 ## Rules
 
 - **Composition over effects.** A strong grid, wide negative space, few elements, each placed on purpose. Degradation sits over a clean structure, never instead of one.
-- **No invented copy.** No taglines, eyebrows or marketing sentences. The identity comes from the logos, the footage and the composition. Text that appears states facts (set, keycaps, manufacturer, year).
+- **No invented copy.** No taglines, eyebrows or marketing sentences. The identity comes from the logos, the footage and the composition. Text that appears states facts. The colophon is one line, "Coming in 2027", in Valhalica, over the credit and the privacy link.
 - **No stand-in logos.** Until the artwork exists, its place is a dashed slot of the right proportions. Nothing is drawn or set in a font in its place.
 - **Restraint in motion.** Slow dissolves; interference rarely and briefly; nothing flashing. Motion serves the film.
 
@@ -22,7 +22,7 @@ The references set the terms: black, and one red. The red of dried blood, used a
 ## Type
 
 - **Valhalica** (`public/fonts/`, the face the wordmark is drawn in) for everything the visitor reads as a heading or a button: the nav, section titles (up to 9rem), kit names, vendor regions, the sound control and the hover (the sound control itself has no blood, only brightens). Never for running text.
-- **Interface:** Inter Tight for the small labels of the colophon and the body of the privacy policy. Small and exact, like a slate.
+- **Interface:** Inter Tight for the small labels and the body of the privacy policy. Small and exact, like a slate.
 - No gothic or blackletter: dark does not mean medieval-pastiche.
 
 ## Layout

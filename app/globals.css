@@ -47,7 +47,7 @@ img, video { display: block; }
 
 /* the small type: navigation, labels, the colophon. Set like the margins
    of a film slate: capitals, a touch of air, never large. */
-.foot dt, .slot__label {
+.slot__label {
   font-family: var(--ui);
   font-weight: 500;
   font-size: 0.6875rem;
@@ -652,9 +652,14 @@ img, video { display: block; }
   padding: clamp(72px, 12vh, 120px) var(--gutter) clamp(56px, 9vh, 88px);
   background: var(--ground);
 }
-.foot__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px var(--gutter); }
-.foot dt { color: var(--bone-dim); margin-bottom: 8px; }
-.foot dd { font-size: 0.9375rem; }
+/* when it comes, in Valhalica, large */
+.foot__soon {
+  margin: 0;
+  font-family: var(--faith);
+  font-size: clamp(2.9rem, 9vw, 8rem);
+  line-height: 1;
+  color: var(--bone);
+}
 /* the very foot: the credit and the privacy link, tiny */
 .foot__base {
   display: flex;
@@ -818,7 +823,7 @@ img, video { display: block; }
   .nav { padding: 20px 12px 0; font-size: 1rem; gap: 10px; }
   .nav__home { --mark-h: 18px; padding: 6px 8px; margin-left: -8px; }
   .wordmark { font-size: 21vw; }
-  .foot__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .foot__soon { font-size: 13vw; }
   .kits__grid { grid-template-columns: minmax(0, 1fr); }
   .kit--base, .kit--numpad, .kit--novelties { grid-column: 1 / -1; margin-top: 0; }
   .kit--numpad, .kit--novelties { width: 78%; }
