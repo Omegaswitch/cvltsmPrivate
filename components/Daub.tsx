@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { AnchorHTMLAttributes, ReactNode } from 'react';
 
 /*
@@ -67,11 +68,14 @@ export function BloodDefs() {
 
 type Common = { label: string; children: ReactNode };
 
-export function DaubLink({ label, children, className = '', ...rest }: Common & AnchorHTMLAttributes<HTMLAnchorElement>) {
+export function DaubLink({ label, children, className = '', href = '', ...rest }: Common & AnchorHTMLAttributes<HTMLAnchorElement>) {
+  // a link to another page of the site is followed without reloading, so the
+  // music goes on; an anchor in the page is an ordinary link
+  const Tag = href.startsWith('/') ? Link : 'a';
   return (
-    <a className={`daub ${className}`} data-label={label} {...rest}>
+    <Tag className={`daub ${className}`} data-label={label} href={href} {...rest}>
       <span>{children}</span>
       <Blood />
-    </a>
+    </Tag>
   );
 }
