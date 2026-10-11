@@ -75,7 +75,7 @@ export function Sound() {
 
     // the first gesture the browser counts as one (a tap counts on release,
     // not on touching down, which may be the start of a scroll)
-    const events = ['pointerup', 'touchend', 'keydown'] as const;
+    const events = ['pointerup', 'touchend', 'click', 'keydown'] as const;
     const cleanup = () => events.forEach((e) => window.removeEventListener(e, begin));
     const begin = (e: Event) => {
       if (started.current || !wanted.current) return;
@@ -86,6 +86,8 @@ export function Sound() {
       a.play().then(() => { started.current = true; cleanup(); apply(FADE_IN); }).catch(() => {});
     };
     events.forEach((e) => window.addEventListener(e, begin));
+    // some browsers let a site they know the visitor likes play at once
+    if (wanted.current) start.current();
     const onTab = () => { tabShown.current = !document.hidden; if (started.current) apply(); };
     document.addEventListener('visibilitychange', onTab);
     return () => {
