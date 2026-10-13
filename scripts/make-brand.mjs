@@ -79,7 +79,4 @@ const shareSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="$
 <path transform="translate(${wordX} ${wordY}) scale(${ws.toFixed(5)}) translate(${-wx} ${-wy})" fill="${BONE}" d="${WORD.d}"/></svg>`;
 await sharp(Buffer.from(shareSvg)).composite([{ input: swg, left: 56, top: 48 }]).png({ compressionLevel: 9 }).toFile('app/opengraph-image.png');
 await sharp('app/opengraph-image.png').toFile('app/twitter-image.png');
-const alt = 'CVLTSM, in Valhalica letters, over two faint engravings on black: a coiled winged dragon and a spider web. SWG at the top left.\n';
-writeFileSync('app/opengraph-image.alt.txt', alt);
-writeFileSync('app/twitter-image.alt.txt', alt);
 console.log('favicon.ico, icon.svg, apple-icon.png, opengraph-image.png, twitter-image.png');
