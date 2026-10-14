@@ -699,6 +699,8 @@ img, video { display: block; }
    quickly, wherever it has got to if the pointer leaves. */
 .daub { position: relative; display: inline-block; isolation: isolate; }
 .daub > span { transition: opacity 0.3s var(--ease); }
+/* a little more to tap than the word itself (at least 24px tall), unseen */
+.daub::before { content: ''; position: absolute; inset: -5px -4px; }
 
 .daub__blood {
   position: absolute;
@@ -772,7 +774,8 @@ img, video { display: block; }
 .sound {
   position: fixed;
   right: var(--gutter);
-  bottom: 22px;
+  bottom: 18px;
+  padding: 4px 0;   /* a taller target; the word stays where it was */
   z-index: 50;
   font-family: var(--faith);
   font-size: 1.1rem;
