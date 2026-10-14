@@ -2,9 +2,12 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Loader } from '@/components/Loader';
 import { Sound } from '@/components/Sound';
+import { BRAND } from '@/data/brand';
 
+// each page sets its own canonical address (and og:url): one set here would
+// be inherited by every page, and the privacy policy would claim to be the home page
 export const metadata: Metadata = {
-  metadataBase: new URL('https://cvltsm.cat'),
+  metadataBase: new URL(BRAND.url),
   title: 'CVLTSM',
   description: 'CVLTSM, a keycap set by SWG.',
   openGraph: { title: 'CVLTSM', siteName: 'CVLTSM', description: 'A keycap set by SWG.', type: 'website' },

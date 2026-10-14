@@ -2,7 +2,19 @@ import type { Metadata } from 'next';
 import { BRAND } from '@/data/brand';
 import { BloodDefs, DaubLink } from '@/components/Daub';
 
-export const metadata: Metadata = { title: `Privacy policy · ${BRAND.name}` };
+const title = `Privacy policy · ${BRAND.name}`;
+const description = `What the ${BRAND.name} site does with a visitor's data.`;
+// the share images in app/ are not inherited once this page sets its own
+// openGraph and twitter, so they are named again
+const image = (url: string) => [{ url, width: 1200, height: 630, type: 'image/png' }];
+
+export const metadata: Metadata = {
+  title,
+  description,
+  alternates: { canonical: '/privacy' },
+  openGraph: { title, description, siteName: BRAND.name, type: 'website', url: '/privacy', images: image('/opengraph-image.png') },
+  twitter: { card: 'summary_large_image', title, description, images: image('/twitter-image.png') },
+};
 
 /** What this site does with a visitor's data: very little, said plainly. */
 export default function Privacy() {
