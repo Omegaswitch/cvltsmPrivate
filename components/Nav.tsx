@@ -1,6 +1,7 @@
 import { BRAND } from '@/data/brand';
 import { Home } from './Home';
 import { DaubLink } from './Daub';
+import { Glide } from './Glide';
 
 const LINKS = [
   { href: '#kits', label: 'Kits' },
@@ -20,6 +21,7 @@ export function Nav() {
       {LINKS.map((l) => (
         <DaubLink key={l.href} href={l.href} label={l.label}>{l.label}</DaubLink>
       ))}
+      <Glide />
     </nav>
   );
 }
