@@ -1,6 +1,8 @@
 /** The names and marks the site is built around. Logos live in public/brand/. */
 export const BRAND = {
   name: 'CVLTSM',
+  /** the production address: canonical links, share images, the sitemap */
+  url: 'https://cvltsm.cat',
   year: '2027',
   /** the set's logo, e.g. '/brand/cvltsm.svg'; until set, the name stands in Valhalica */
   logo: undefined as string | undefined,
