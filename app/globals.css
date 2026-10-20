@@ -807,14 +807,16 @@ img, video { display: block; }
 .sound:hover > span, .sound:focus-visible > span { opacity: 1; }   /* no blood here: it is pressed too often */
 @media (min-width: 821px) { .sound { font-size: 1.7rem; } }
 
-/* On a wide screen the base kit and its name fit in one view, from the top of
-   the section: the title steps over to the right-hand column to give the
-   height back, and the render is held to what is left of the screen. */
+/* On a wide screen the base kit is held to the height of the screen (a little
+   over, so it reads large; its name may sit just below the fold), from the top
+   of the section: the title steps over to the right-hand column to give the
+   height back. It takes eight columns and stands at their right, in toward
+   the middle, a gutter short of the numpad. */
 @media (min-width: 821px) {
   .kits { --top: clamp(84px, 11vh, 120px); padding-top: var(--top); }
   .kits > .title:not(.torn):not(.engravings) { position: absolute; top: var(--top); left: 66.7%; }
   .kits__grid { margin-top: 0; }
-  .kit--base { width: min(100%, calc(100svh - var(--top) - 4vh - 84px)); }
+  .kit--base { grid-column: 1 / span 8; justify-self: end; width: min(100%, calc((100svh - var(--top) - 4vh - 84px) * 1.12)); }
   .kit--numpad { margin-top: max(22vh, 170px); }
 }
 /* the same for the first render: the title steps to the right, flush with
