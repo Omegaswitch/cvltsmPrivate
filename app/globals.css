@@ -496,7 +496,7 @@ img, video { display: block; }
 .kit { margin: 0; }
 .kit--base { grid-column: 1 / span 7; --drift: 4vh; }
 .kit--numpad { grid-column: 9 / span 4; margin-top: 22vh; --drift: 12vh; }
-.kit--novelties { grid-column: 5 / span 4; margin-top: -8vh; --drift: 8vh; }
+.kit--novelties { grid-column: 5 / span 4; margin-top: calc(-8vh - 56px); --drift: 6vh; }   /* tucked up under the base's frame, beside its name; drifting nearer the base's pace, so the gap stays small */
 .kit__frame img { width: 100%; height: auto; object-fit: cover; }
 .kit__name { margin-top: 14px; font-family: var(--faith); font-size: clamp(2rem, 2.8vw, 2.75rem); line-height: 1.1; }
 
@@ -553,7 +553,7 @@ img, video { display: block; }
   align-items: start;
 }
 .render { margin: 0; }
-.render--lead { grid-column: 1 / span 7; --drift: 4vh; }
+.render--lead { grid-column: 2 / span 7; --drift: 4vh; }   /* one column in from the edge, nearer the middle */
 .render--side { grid-column: 9 / span 4; margin-top: 18vh; --drift: 11vh; }
 .render--third { grid-column: span 4; --drift: 6vh; }
 .render--third:nth-child(4) { margin-top: 10vh; --drift: 10vh; }
