@@ -495,8 +495,8 @@ img, video { display: block; }
 }
 .kit { margin: 0; }
 .kit--base { grid-column: 1 / span 7; --drift: 4vh; }
-.kit--numpad { grid-column: 9 / span 4; margin-top: 22vh; --drift: 12vh; }
-.kit--novelties { grid-column: 5 / span 4; margin-top: calc(-8vh - 56px); --drift: 6vh; }   /* tucked up under the base's frame, beside its name; drifting nearer the base's pace, so the gap stays small */
+.kit--novelties { grid-column: 9 / span 4; margin-top: 22vh; --drift: 12vh; }
+.kit--numpad { grid-column: 5 / span 4; margin-top: calc(-8vh - 56px); --drift: 6vh; }   /* tucked up under the base's frame, beside its name; drifting nearer the base's pace, so the gap stays small */
 .kit__frame img { width: 100%; height: auto; object-fit: cover; }
 .kit__name { margin-top: 14px; font-family: var(--faith); font-size: clamp(2rem, 2.8vw, 2.75rem); line-height: 1.1; }
 
@@ -811,13 +811,13 @@ img, video { display: block; }
    over, so it reads large; its name may sit just below the fold), from the top
    of the section: the title steps over to the right-hand column to give the
    height back. It takes eight columns and stands at their right, in toward
-   the middle, a gutter short of the numpad. */
+   the middle, a gutter short of the novelties. */
 @media (min-width: 821px) {
   .kits { --top: clamp(84px, 11vh, 120px); padding-top: var(--top); }
   .kits > .title:not(.torn):not(.engravings) { position: absolute; top: var(--top); left: 66.7%; }
   .kits__grid { margin-top: 0; }
   .kit--base { grid-column: 1 / span 8; justify-self: end; width: min(100%, calc((100svh - var(--top) - 4vh - 84px) * 1.12)); }
-  .kit--numpad { margin-top: max(22vh, 170px); }
+  .kit--novelties { margin-top: max(22vh, 170px); }
 }
 /* the same for the first render: the title steps to the right, flush with
    the edge, and the render is held to the height of the screen */
@@ -854,7 +854,7 @@ img, video { display: block; }
   .kits__grid { grid-template-columns: minmax(0, 1fr); }
   .kit--base, .kit--numpad, .kit--novelties { grid-column: 1 / -1; margin-top: 0; }
   .kit--numpad, .kit--novelties { width: 78%; }
-  .kit--numpad { justify-self: end; }
+  .kit--novelties { justify-self: end; }
   .strip { flex-direction: column; gap: 30px; }
   .strip li { grid-template-columns: 1fr auto; align-items: center; }
   .strip__chip { grid-column: 1 / -1; height: 96px; --edge: 22px; }
