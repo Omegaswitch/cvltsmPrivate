@@ -11,6 +11,6 @@ export interface Kit {
 
 export const KITS: Kit[] = [
   { id: 'base', name: 'Base' },
-  { id: 'numpad', name: 'Numpad' },
   { id: 'novelties', name: 'Novelties' },
+  { id: 'numpad', name: 'Numpad' },
 ];
