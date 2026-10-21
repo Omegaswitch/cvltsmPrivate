@@ -7,6 +7,7 @@ import { RendersSection } from '@/components/RendersSection';
 import { VendorsSection } from '@/components/VendorsSection';
 import { Footer } from '@/components/Footer';
 import { BloodDefs } from '@/components/Daub';
+import { Lightbox } from '@/components/Lightbox';
 import { BRAND } from '@/data/brand';
 
 export const metadata: Metadata = {
@@ -42,6 +43,7 @@ export default function Page() {
       </main>
       <Footer />
       <BloodDefs />
+      <Lightbox />
       <div className="grain" aria-hidden="true" />
     </>
   );

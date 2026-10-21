@@ -21,6 +21,7 @@ export function RendersSection() {
                   <span className="slot__label" aria-hidden="true">{r.alt}</span>
                 </div>
               )}
+              {r.src && <button type="button" className="zoom" aria-label={`View larger: ${r.alt}`} />}
               <Trace />
             </div>
           </figure>

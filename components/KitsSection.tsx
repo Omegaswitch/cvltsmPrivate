@@ -33,6 +33,7 @@ export function KitsSection() {
                   <span className="slot__label" aria-hidden="true">{k.name} render</span>
                 </div>
               )}
+              {k.src && <button type="button" className="zoom" aria-label={`View larger: ${k.name} kit`} />}
               <Trace />
             </div>
             <figcaption className="kit__name">{k.name}</figcaption>
