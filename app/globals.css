@@ -493,7 +493,10 @@ img, video { display: block; }
   margin-top: clamp(56px, 9vh, 104px);
   align-items: start;
 }
-.kit { margin: 0; }
+.kit { margin: 0; scroll-margin-top: 96px; }
+.kits__nav { display: flex; flex-wrap: wrap; gap: 8px clamp(18px, 2vw, 32px); margin-top: 14px; font-family: var(--faith); font-size: 1.35rem; line-height: 1.2; color: var(--bone-dim); }
+.kits__nav a:hover, .kits__nav a:focus-visible { color: var(--bone); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 .kit--base { grid-column: 1 / span 7; --drift: 4vh; }
 .kit--novelties { grid-column: 9 / span 4; margin-top: 22vh; --drift: 12vh; }
 .kit--numpad { grid-column: 5 / span 4; margin-top: calc(-8vh - 56px); --drift: 6vh; }   /* tucked up under the base's frame, beside its name; drifting nearer the base's pace, so the gap stays small */
@@ -814,10 +817,10 @@ img, video { display: block; }
    the middle, a gutter short of the novelties. */
 @media (min-width: 821px) {
   .kits { --top: clamp(84px, 11vh, 120px); padding-top: var(--top); }
-  .kits > .title:not(.torn):not(.engravings) { position: absolute; top: var(--top); left: 66.7%; }
+  .kits > .kits__head:not(.torn):not(.engravings) { position: absolute; z-index: 2; top: var(--top); left: 66.7%; }
   .kits__grid { margin-top: 0; }
   .kit--base { grid-column: 1 / span 8; justify-self: end; width: min(100%, calc((100svh - var(--top) - 4vh - 84px) * 1.12)); }
-  .kit--novelties { margin-top: max(22vh, 170px); }
+  .kit--novelties { margin-top: max(22vh, 230px); }
 }
 /* the same for the first render: the title steps to the right, flush with
    the edge, and the render is held to the height of the screen */
