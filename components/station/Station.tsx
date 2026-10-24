@@ -156,25 +156,36 @@ const SEIS = Array.from({ length: 7 }, (_, i) => wave(0, [1, 0.9 + i * 0.07, i],
 
 function SeismicChart() {
   const path = useRef<SVGPathElement>(null);
+  const svg = useRef<SVGSVGElement>(null);
+  const clock = useRef(0);
   const [now, setNow] = useState('');
-  const W = 360, H = 150, L = 34, T = 8, B = 22;
+  const [hover, setHover] = useState<{ x: number; s: number } | null>(null);
+  const W = 360, H = 150, L = 34, T = 8, B = 22, SPAN = 60, STEP = 0.5;
   const y = (v: number) => T + (1 - (v + 1.5) / 3) * (H - T - B);
+  const x = (age: number) => W - (age / SPAN) * (W - L);   // age in seconds before now
+  const mean = (s: number) => SEIS.reduce((a, f) => a + f(s), 0) / 7;
   useFrames((t) => {
+    clock.current = t;
     if (!path.current) return;
-    const n = 120, pts: string[] = [];
-    for (let k = 0; k <= n; k++) {
-      const s = t - 60 + (k / n) * 60;
-      pts.push(`${(L + (k / n) * (W - L)).toFixed(1)} ${y(SEIS.reduce((a, f) => a + f(s), 0) / 7).toFixed(1)}`);
-    }
+    // samples sit on a fixed grid of moments, so the trace slides left as one piece instead of reshaping
+    const last = Math.floor(t / STEP) * STEP, pts: string[] = [];
+    for (let s = last - SPAN; s <= last; s += STEP) pts.push(`${Math.max(L, x(t - s)).toFixed(1)} ${y(mean(s)).toFixed(1)}`);
+    pts.push(`${W} ${y(mean(t)).toFixed(1)}`);
     path.current.setAttribute('d', `M${pts.join('L')}`);
   }, (t) => {
-    const v = SEIS.reduce((a, f) => a + f(t), 0) / 7;
+    const v = mean(t);
     setNow(`${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(2)}`);
   }, 0.5);
+  const fmt = (v: number) => `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(2)} mm/s`;
+  const onMove = (e: React.PointerEvent) => {
+    const r = svg.current!.getBoundingClientRect();
+    const px = Math.min(W, Math.max(L, ((e.clientX - r.left) / r.width) * W));
+    setHover({ x: px, s: clock.current - ((W - px) / (W - L)) * SPAN });
+  };
   return (
     <section className="st-card st-chart" aria-labelledby="st-seis-h">
       <header className="st-card__head"><h2 id="st-seis-h">Seismic array</h2><span className="st-meta">mean of 7 · now {now} mm/s</span></header>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Seismic trace over the last minute">
+      <svg ref={svg} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Seismic trace over the last minute, now ${now} mm/s`} onPointerMove={onMove} onPointerLeave={() => setHover(null)}>
         {[1.5, 0, -1.5].map((v) => (
           <g key={v}>
             <line x1={L} x2={W} y1={y(v)} y2={y(v)} className="st-grid" />
@@ -182,6 +193,15 @@ function SeismicChart() {
           </g>
         ))}
         <path ref={path} className="st-line" />
+        {hover ? (
+          <g className="st-hover">
+            <line x1={hover.x} x2={hover.x} y1={T} y2={H - B} />
+            <circle cx={hover.x} cy={y(mean(hover.s))} r={4} />
+            <text x={hover.x > W - 90 ? hover.x - 8 : hover.x + 8} y={T + 12} textAnchor={hover.x > W - 90 ? 'end' : 'start'}>
+              {fmt(mean(hover.s))} · −{Math.round(clock.current - hover.s)} s
+            </text>
+          </g>
+        ) : null}
         <text x={L} y={H - 6} className="st-tick">−60 s</text>
         <text x={W} y={H - 6} textAnchor="end" className="st-tick">now</text>
       </svg>
