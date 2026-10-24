@@ -50,3 +50,10 @@ export async function logAsk(id: number, question: string, answer: string, block
   if (!sql) return;
   await sql`INSERT INTO asks (player_id, question, answer, blocked) VALUES (${id}, ${question}, ${answer}, ${blocked})`;
 }
+
+/** when each seal was opened, by seal */
+export async function solvesOf(id: number): Promise<Record<string, string>> {
+  if (!sql) return {};
+  const rows = (await sql`SELECT seal, solved_at FROM solves WHERE player_id = ${id}`) as { seal: string; solved_at: string }[];
+  return Object.fromEntries(rows.map((r) => [r.seal, new Date(r.solved_at).toISOString()]));
+}

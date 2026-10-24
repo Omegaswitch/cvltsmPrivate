@@ -105,11 +105,11 @@ export function Tune({ onClose, onSolved }: { onClose: () => void; onSolved: (r:
       const w = (c.width = c.clientWidth * devicePixelRatio);
       const h = (c.height = c.clientHeight * devicePixelRatio);
       g.clearRect(0, 0, w, h);
-      g.strokeStyle = 'rgb(255 36 20 / 0.18)';
+      g.strokeStyle = '#211b19';
       g.lineWidth = 1;
       for (let x = 0; x <= 10; x++) { g.beginPath(); g.moveTo((x * w) / 10, 0); g.lineTo((x * w) / 10, h); g.stroke(); }
       for (let y = 0; y <= 4; y++) { g.beginPath(); g.moveTo(0, (y * h) / 4); g.lineTo(w, (y * h) / 4); g.stroke(); }
-      g.strokeStyle = '#ff2414';
+      g.strokeStyle = '#ff2b1c';
       g.lineWidth = 2 * devicePixelRatio;
       g.beginPath();
       for (let x = 0; x <= w; x += 2) {

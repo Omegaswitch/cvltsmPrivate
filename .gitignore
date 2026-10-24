@@ -8,3 +8,4 @@ next-env.d.ts
 
 # original footage for scripts/encode-film.sh; too large for the repository
 assets/film/
+.taste-skill/

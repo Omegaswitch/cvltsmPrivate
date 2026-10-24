@@ -1,6 +1,6 @@
 import { ASKS_PER_HOUR, MAX_QUESTION, askArchive, leaks } from '@/lib/station/archive';
 import { FILES, HINTS, LOCKS, type Lock } from '@/lib/station/content';
-import { asksLastHour, enter, logAsk, player, solve, sql } from '@/lib/station/db';
+import { asksLastHour, enter, logAsk, player, solve, solvesOf, sql } from '@/lib/station/db';
 import { ACCESS, hash, normalise, playerOf, sessionFor } from '@/lib/station/pass';
 
 /*
@@ -10,7 +10,7 @@ import { ACCESS, hash, normalise, playerOf, sessionFor } from '@/lib/station/pas
  * leaves the server.
  *
  *   { op: 'login', name, code }            a session for that name
- *   { op: 'me', session }                  name and level
+ *   { op: 'me', session }                  name, level, and when each seal was opened
  *   { op: 'ls', session }                  the files they can see
  *   { op: 'cat', session, name }           one file, if they may read it
  *   { op: 'unlock', session, lock, answer } try a key; recorded if it fits
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     await slow(400);
     if (hash(normalise(body.code)) !== ACCESS) return json({ error: 'access denied' }, 403);
     const p = await enter(name);
-    return json({ session: sessionFor(p.id), name: p.name, level: p.level });
+    return json({ session: sessionFor(p.id), name: p.name, level: p.level, solves: await solvesOf(p.id) });
   }
 
   const id = playerOf(body.session);
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
 
   switch (body.op) {
     case 'me':
-      return json({ name: me.name, level });
+      return json({ name: me.name, level, solves: await solvesOf(me.id) });
 
     case 'ls':
       return json({ level, files: listing(level) });
