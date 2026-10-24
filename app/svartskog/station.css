@@ -4,6 +4,12 @@
    all in one red. Scoped under .st; nothing here touches the main site. */
 
 @font-face {
+  font-family: 'Astor';
+  src: url('/fonts/Astor.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'City Light';
   src: url('/fonts/city-light.woff2') format('woff2');
   font-display: swap;
@@ -17,7 +23,7 @@
   --r-low: rgb(255 36 20 / 0.16);
   --r-faint: rgb(255 36 20 / 0.08);
   --panel: linear-gradient(180deg, #140302, #090100);
-  --sans: 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;
+  --sans: 'Astor', 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;   /* Astor has no ° µ · −: those fall back to Inter Tight */
   --mono: 'City Light', ui-monospace, 'SFMono-Regular', Menlo, monospace;
   --runic: 'Noto Sans Runic', 'Segoe UI Historic', serif;
   position: relative;
@@ -26,8 +32,9 @@
   background: #000;
   color: var(--r);
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: 12.5px;
   line-height: 1.3;
+  letter-spacing: 0.02em;
   overflow-x: hidden;
 }
 .st ::selection { background: var(--r); color: #000; }
@@ -226,7 +233,7 @@
 .st-status dl div { display: flex; justify-content: space-between; gap: 10px; }
 .st-status dt { color: var(--r-mid); }
 .st-status dd { margin: 0; font-weight: 500; }
-.st-split > div { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; margin-bottom: 8px; font-size: 12px; }
+.st-split > div { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; margin-bottom: 8px; font-size: 10.5px; }
 .st-split > div b { font-weight: 500; }
 .st-split > div span { color: var(--r-mid); }
 .st-toggles { display: grid; grid-template-columns: 1fr 1fr; padding: 0; }

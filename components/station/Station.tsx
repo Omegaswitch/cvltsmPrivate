@@ -183,7 +183,7 @@ function Wall() {
           <div className="st-col st-col--wide">
             <Survey level={level} />
             <section className="st-panel st-termp">
-              <header><span>Terminal</span><span>{level >= 4 ? 'asgeir' : 'guest'}@stn7 · {CLEARANCE[level]}</span></header>
+              <header><span>Terminal</span><span>{level >= 4 ? 'asgeir' : 'guest'} / stn7 / {CLEARANCE[level]}</span></header>
               <Terminal level={level} bind={bind} onLevel={setLevel} onOpen={setGame} />
             </section>
           </div>

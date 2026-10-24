@@ -99,7 +99,7 @@ Earlier designs are kept whole under `archive/`.
 
 ## The hidden station (/svartskog)
 
-A scavenger hunt behind the site. At the foot of the home page a faint line of runes spells SVARTSKOG; the console says where to look. `/svartskog` is Field Station 7: a red phosphor instrument wall (the layout of a car's track-mode screen; the CRT of the SWS Nostromo terminal, in red) with a terminal, the files of Dr. Ingrid Halvorsen, who observed the cult in the forest in 1987, and two instruments: a rune board (give the 24 runes their letters, stone 7 reads itself) and a receiver dial.
+A scavenger hunt behind the site. At the foot of the home page a faint line of runes spells SVARTSKOG; the console says where to look. `/svartskog` is Field Station 7: a red phosphor instrument wall set in Astor (`public/fonts/Astor.otf`; the terminal keeps the Nostromo City Light), (the layout of a car's track-mode screen; the CRT of the SWS Nostromo terminal, in red) with a terminal, the files of Dr. Ingrid Halvorsen, who observed the cult in the forest in 1987, and two instruments: a rune board (give the 24 runes their letters, stone 7 reads itself) and a receiver dial.
 
 Four seals, each opened by something found in the files: the word on stone 7 (runes), a date (counted from the 1987 winter solstice), a frequency (a sum in the anomaly log), and the director's account (a name read down the transcript, a word in runes). The last level opens the encounters, the magical anomalies and her last entry. The chain and its answers are written at the top of `lib/station/content.ts`.
 
