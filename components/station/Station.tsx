@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { CLEARANCE } from './api';
+import { CLEARANCE, getSession, setSession, station } from './api';
 import { Runes, Tune } from './Games';
 import { Terminal, type TerminalHandle } from './Terminal';
 import { Topo } from './Topo';
@@ -153,16 +153,54 @@ const RING_T = wave(-31, [1.4, 0.11, 2], [0.5, 0.7, 0]);
 const CARRIER = wave(14, [7, 0.23, 0], [4, 0.9, 1], [2, 2.7, 2]);
 const LOCKED = wave(97, [0.8, 0.5, 0]);
 
+type Me = { name: string; level: number };
+
 export function Station() {
-  // the instruments read the clock and drift at random: they start on screen,
-  // not on the server, so the two never disagree
-  const [on, setOn] = useState(false);
-  useEffect(() => setOn(true), []);
-  return on ? <Wall /> : <main className="st" />;
+  // the instruments read the clock and drift: they start on screen, not on the
+  // server. First the register is asked who this is; no session, the gate.
+  const [me, setMe] = useState<Me | null | 'checking'>('checking');
+  useEffect(() => {
+    if (!getSession()) { setMe(null); return; }
+    station<Me>('me').then((r) => setMe(r.error ? null : r));
+  }, []);
+  if (me === 'checking') return <main className="st" />;
+  if (!me) return <Gate onIn={setMe} />;
+  return <Wall me={me} onLogout={() => { setSession(''); setMe(null); }} />;
 }
 
-function Wall() {
-  const [level, setLevel] = useState(0);
+/**
+ * The way in: any name, and the station's access code, which is hidden on
+ * the main site. The name is how the register knows them.
+ */
+function Gate({ onIn }: { onIn: (me: Me) => void }) {
+  const [name, setName] = useState('');
+  const [code, setCode] = useState('');
+  const [state, setState] = useState<'idle' | 'busy' | string>('idle');
+  const go = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setState('busy');
+    const r = await station<Me & { session: string }>('login', { name, code });
+    if (r.error) return setState(r.error);
+    setSession(r.session);
+    onIn({ name: r.name, level: r.level });
+  };
+  return (
+    <main className="st st-gatep">
+      <form className="st-gate" onSubmit={go}>
+        <p className="st-gate__head">FIELD STATION 7 / SVARTSKOG</p>
+        <p className="st-gate__note">Restricted terminal. Sign the register to enter.</p>
+        <label>Name<input value={name} onChange={(e) => setName(e.target.value)} maxLength={32} autoComplete="nickname" autoFocus required /></label>
+        <label>Access code<input value={code} onChange={(e) => setCode(e.target.value)} type="password" autoComplete="off" required /></label>
+        <button type="submit" disabled={state === 'busy'}>{state === 'busy' ? 'Checking…' : 'Enter'}</button>
+        <p className="st-gate__status" role="status">{state !== 'idle' && state !== 'busy' ? state : ''}</p>
+        <Link href="/" className="st-gate__leave">Leave</Link>
+      </form>
+    </main>
+  );
+}
+
+function Wall({ me, onLogout }: { me: Me; onLogout: () => void }) {
+  const [level, setLevel] = useState(me.level);
   const [game, setGame] = useState<null | 'runes' | 'tune'>(null);
   const term = useRef<TerminalHandle | null>(null);
   const clock = useClock();
@@ -198,8 +236,8 @@ function Wall() {
           <div className="st-col st-col--wide">
             <Survey level={level} />
             <section className="st-panel st-termp">
-              <header><span>Terminal</span><span>{level >= 4 ? 'asgeir' : 'guest'} / stn7 / {CLEARANCE[level]}</span></header>
-              <Terminal level={level} bind={bind} onLevel={setLevel} onOpen={setGame} />
+              <header><span>Terminal</span><span>{me.name} / {CLEARANCE[level]}</span></header>
+              <Terminal level={level} name={me.name} bind={bind} onLevel={setLevel} onOpen={setGame} onLogout={onLogout} />
             </section>
           </div>
           <div className="st-col">

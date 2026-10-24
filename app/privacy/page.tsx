@@ -23,12 +23,13 @@ export default function Privacy() {
       <DaubLink className="policy__back" href="/" label="Return">Return</DaubLink>
       <h1 className="title">Privacy policy</h1>
       <div className="policy__body">
-        <p>Last updated 10 October 2026.</p>
+        <p>Last updated 24 October 2026.</p>
         <p>
-          This site presents the {BRAND.name} keycap set. It sells nothing, has no accounts, no forms
-          and no newsletter, and it does not set cookies or use analytics or advertising trackers. The one thing it
-          remembers is whether you turned the sound off, kept on your own device (local storage) so
-          that it stays off on your next visit. It is never sent anywhere.
+          This site presents the {BRAND.name} keycap set. It sells nothing, has no forms and no
+          newsletter, and it does not set cookies or use analytics or advertising trackers. On your
+          own device (local storage) it remembers whether you turned the sound off and, if you enter
+          the field station below, your sign-in to it. Nothing else is kept about you, except the
+          field station register described below.
         </p>
 
         <h2>What is collected</h2>
@@ -55,6 +56,17 @@ export default function Privacy() {
           </li>
         </ul>
 
+        <h2>The field station</h2>
+        <p>
+          The site has a hidden puzzle page. To enter it you choose a name; that name, how far you
+          get and when, and any questions you put to its archive are stored in a database hosted by
+          Neon (in Frankfurt) so the organisers can see who solved it. Use a nickname, not your
+          real name. Questions to the archive are answered by Google&rsquo;s Gemini service, which
+          receives the question text. See the <a href="https://neon.com/privacy-policy">Neon</a> and{' '}
+          <a href="https://policies.google.com/privacy">Google</a> privacy policies. To have your
+          entry removed, contact {BRAND.contact} with the name you used.
+        </p>
+
         <h2>Your rights</h2>
         <p>
           Where data protection law such as the GDPR applies, you may ask what data about you is held,
@@ -66,6 +78,8 @@ export default function Privacy() {
         <p>
           For questions about this policy, contact {BRAND.contact}.
         </p>
+        {/* the field station's access code, for whoever reads runes this far down: SKOGSRA */}
+        <p className="policy__runes" aria-hidden="true">ᛊᚲᛟᚷᛊᚱᚨ</p>
       </div>
       <BloodDefs />
       <div className="grain" aria-hidden="true" />

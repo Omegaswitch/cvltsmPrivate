@@ -919,3 +919,5 @@ img, video { display: block; }
 
 /* the way in to the hidden station: the station's forest, in runes, barely there */
 .foot__runes { font-family: 'Noto Sans Runic', serif; font-size: 0.75rem; letter-spacing: 0.35em; text-transform: none; color: var(--bone-dim); opacity: 0.45; user-select: text; }
+/* the field station's access code, at the very foot of the privacy policy */
+.policy__runes { margin-top: 64px; font-family: 'Noto Sans Runic', serif; font-size: 0.8rem; letter-spacing: 0.4em; color: var(--bone-dim); opacity: 0.4; }

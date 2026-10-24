@@ -1,15 +1,14 @@
 'use client';
 
-/** The visitor's pass to the station's machine, kept on their device. */
-const KEY = 'svartskog-pass';
+/** The visitor's session with the station's machine, kept on their device. Their progress is in the register. */
+const KEY = 'svartskog-session';
 
-export const getPass = () => {
+export const getSession = () => {
   try { return localStorage.getItem(KEY) ?? ''; } catch { return ''; }
 };
-export const setPass = (p: string) => {
-  try { if (p) localStorage.setItem(KEY, p); else localStorage.removeItem(KEY); } catch { /* the pass lasts the visit */ }
+export const setSession = (s: string) => {
+  try { if (s) localStorage.setItem(KEY, s); else localStorage.removeItem(KEY); } catch { /* the session lasts the visit */ }
 };
-export const levelOfPass = (p: string) => Number(p.split('.')[0]) || 0;
 
 export type Listing = { name: string; locked: boolean }[];
 
@@ -18,7 +17,7 @@ export async function station<T = Record<string, unknown>>(op: string, args: Rec
     const res = await fetch('/api/station', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ op, pass: getPass(), ...args }),
+      body: JSON.stringify({ op, session: getSession(), ...args }),
     });
     return await res.json();
   } catch {

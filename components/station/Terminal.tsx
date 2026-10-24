@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { CLEARANCE, SEALED, getPass, levelOfPass, setPass, station, type Listing } from './api';
+import { CLEARANCE, SEALED, station, type Listing } from './api';
 
 /*
  * The station's terminal. Everything a visitor reads comes from the server
@@ -24,17 +24,22 @@ const HELP = `commands
   hint                   a nudge
   whoami                 your clearance
   clear                  clear the screen
-  logout                 back to guest (forgets your progress)`;
+  ask <question>         ask the archive (it holds no keys)
+  logout                 sign out (your progress stays in the register)`;
 
 export type TerminalHandle = { say: (text: string, kind?: Block['kind']) => void };
 
 export function Terminal({
   level,
+  name,
   onOpen,
   onLevel,
+  onLogout,
   bind,
 }: {
   level: number;
+  name: string;
+  onLogout: () => void;
   onOpen: (game: 'runes' | 'tune') => void;
   onLevel: (level: number) => void;
   bind: (h: TerminalHandle) => void;
@@ -58,10 +63,10 @@ export function Terminal({
   useEffect(() => { bind({ say }); }, [bind, say]);
 
   useEffect(() => {
-    const l = levelOfPass(getPass());
-    setLevel(l);
-    say(`FIELD STATION 7 / SVARTSKOG\nconnection open. clearance: ${CLEARANCE[l]}.\ntype help, or start with: cat readme.txt`);
-  }, [say, setLevel]);
+    say(`FIELD STATION 7 / SVARTSKOG\nsigned in: ${name}. clearance: ${CLEARANCE[level]}.\ntype help, or start with: cat readme.txt`);
+    // once, on arrival
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     screen.current?.scrollTo({ top: screen.current.scrollHeight });
@@ -69,8 +74,7 @@ export function Terminal({
 
   const prompt = asking ? 'password:' : `${level >= 4 ? 'asgeir' : 'guest'}@stn7:~$`;
 
-  const unlocked = useCallback((r: { ok?: boolean; level?: number; pass?: string }) => {
-    if (r.pass) setPass(r.pass);
+  const unlocked = useCallback((r: { ok?: boolean; level?: number }) => {
     if (typeof r.level === 'number') setLevel(r.level);
   }, [setLevel]);
 
@@ -106,7 +110,7 @@ export function Terminal({
         if (!file || !key.length) return say('usage: decrypt <file> <key>', 'err');
         if (!lock) return say(`${file}: not sealed`, 'err');
         say('decrypting...');
-        const r = await station<{ ok: boolean; level: number; pass: string }>('unlock', { lock, answer: key.join(' ') });
+        const r = await station<{ ok: boolean; level: number }>('unlock', { lock, answer: key.join(' ') });
         if (r.error === 'not yet') return say(`${file}: a key from an earlier seal is missing.`, 'err');
         if (!r.ok) return say('key rejected.', 'err');
         unlocked(r);
@@ -132,14 +136,30 @@ export function Terminal({
         const r = await station<{ hint: string }>('hint');
         return say(r.hint ?? r.error ?? '');
       }
+      case 'ask': {
+        const question = args.join(' ');
+        if (!question) return say('usage: ask <question>', 'err');
+        say('archive: searching...');
+        const r = await station<{ reply: string }>('ask', { question });
+        return r.error ? say(`archive: ${r.error}`, 'err') : say(`ARCHIVE > ${r.reply}`);
+      }
       case 'logout':
-        setPass('');
-        setLevel(0);
-        return say('pass cleared. clearance: GUEST.');
+        say('signing out.');
+        return onLogout();
       default:
         return say(`${c}: not understood. type help`, 'err');
     }
-  }, [level, onOpen, say, unlocked, setLevel]);
+  }, [level, onOpen, onLogout, say, unlocked]);
+
+  // the buttons under the screen: a command, as if typed (ask only fills the line)
+  const quick = async (cmd: string) => {
+    if (busy || asking) return;
+    if (cmd === 'ask ') { setInput('ask '); field.current?.focus(); return; }
+    say(`${prompt} ${cmd}`, 'in');
+    setBusy(true);
+    await run(cmd);
+    setBusy(false);
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,7 +169,7 @@ export function Terminal({
     if (asking) {
       say(`${prompt} ${'*'.repeat(line.length)}`, 'in');
       setBusy(true);
-      const r = await station<{ ok: boolean; level: number; pass: string }>('unlock', { lock: 'admin', user: asking.user, answer: line });
+      const r = await station<{ ok: boolean; level: number }>('unlock', { lock: 'admin', user: asking.user, answer: line });
       setAsking(null);
       setBusy(false);
       if (!r.ok) return say('login incorrect.', 'err');
@@ -184,6 +204,11 @@ export function Terminal({
           <pre key={b.id} className={`st-term__block st-term__block--${b.kind}`}>
             {b.text}
           </pre>
+        ))}
+      </div>
+      <div className="st-term__keys">
+        {[['Help', 'help'], ['Files', 'ls'], ['Hint', 'hint'], ['Runes', 'runes'], ['Receiver', 'tune'], ['Ask the archive', 'ask ']].map(([label, cmd]) => (
+          <button key={cmd} type="button" onClick={(e) => { e.stopPropagation(); quick(cmd); }} disabled={busy}>{label}</button>
         ))}
       </div>
       <form className="st-term__line" onSubmit={submit}>

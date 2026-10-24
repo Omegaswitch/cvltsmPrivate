@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { setPass, station } from './api';
+import { station } from './api';
 
 /*
  * The two instruments the terminal opens.
@@ -20,7 +20,7 @@ export const FUTHARK = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒ�
 const STONE_7 = 'ᚢᛚᚠᚺᛖᛞᚾᚨᚱ'.split('');
 const MAP_KEY = 'svartskog-runes';
 
-type Result = { ok: boolean; level?: number; pass?: string; error?: string };
+type Result = { ok: boolean; level?: number; error?: string };
 
 export function Runes({ onClose, onSolved }: { onClose: () => void; onSolved: (r: Result) => void }) {
   const [map, setMap] = useState<Record<string, string>>({});
@@ -41,7 +41,7 @@ export function Runes({ onClose, onSolved }: { onClose: () => void; onSolved: (r
   const tryIt = async () => {
     setState('trying');
     const r = await station<Result>('unlock', { lock: 'stone', answer: reading.join('') });
-    if (r.ok) { if (r.pass) setPass(r.pass); setState('yes'); onSolved(r); } else setState('no');
+    if (r.ok) { setState('yes'); onSolved(r); } else setState('no');
   };
 
   return (
@@ -129,7 +129,7 @@ export function Tune({ onClose, onSolved }: { onClose: () => void; onSolved: (r:
   const lock = async () => {
     setState('trying');
     const r = await station<Result>('unlock', { lock: 'carrier', answer: String(f) });
-    if (r.ok) { if (r.pass) setPass(r.pass); setState('yes'); onSolved(r); } else setState('no');
+    if (r.ok) { setState('yes'); onSolved(r); } else setState('no');
   };
   const nudge = (d: number) => { setF((v) => Math.min(400, Math.max(100, v + d))); setState('idle'); };
 
