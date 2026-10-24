@@ -86,8 +86,9 @@ export async function POST(req: Request) {
       if (!question) return json({ error: 'ask <question>' }, 400);
       if (question.length > MAX_QUESTION) return json({ error: `the archive takes ${MAX_QUESTION} characters at most` }, 400);
       if ((await asksLastHour(me.id)) >= ASKS_PER_HOUR) return json({ error: 'the archive is resting. try again within the hour.' }, 429);
-      let reply = await askArchive(question, level).catch(() => null);
-      if (reply === null) return json({ error: 'archive offline' }, 503);
+      let why = '';
+      let reply = await askArchive(question, level).catch((e: Error) => ((why = e.message), null));
+      if (reply === null) return json({ error: `archive offline (${why})` }, 503);
       const held = leaks(reply, level);
       if (held) reply = 'THE ARCHIVE DOES NOT HOLD KEYS. READ THE FILES.';
       await logAsk(me.id, question, reply, held);

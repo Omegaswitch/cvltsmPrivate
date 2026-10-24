@@ -57,7 +57,7 @@ function context(level: number) {
 /** asks the model; returns its reply as plain text, or null when the archive is offline */
 export async function askArchive(question: string, level: number): Promise<string | null> {
   const key = process.env.GEMINI_API_KEY ?? process.env.API_key;   // saved on Vercel as API_key
-  if (!key) { console.error('archive: no key'); return null; }
+  if (!key) throw new Error('no key');
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
@@ -68,7 +68,7 @@ export async function askArchive(question: string, level: number): Promise<strin
     }),
     signal: AbortSignal.timeout(15000),
   });
-  if (!res.ok) { console.error('archive:', res.status, (await res.text()).slice(0, 300)); return null; }
+  if (!res.ok) throw new Error(`gemini ${res.status}`);
   const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
   const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
   // plain text only, one short paragraph
