@@ -56,7 +56,7 @@ function context(level: number) {
 
 /** asks the model; returns its reply as plain text, or null when the archive is offline */
 export async function askArchive(question: string, level: number): Promise<string | null> {
-  const key = process.env.GEMINI_API_KEY;
+  const key = process.env.GEMINI_API_KEY ?? process.env.API_key;   // saved on Vercel as API_key
   if (!key) return null;
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
     method: 'POST',
