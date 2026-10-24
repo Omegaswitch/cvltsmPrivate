@@ -1,13 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import BeamText from './BeamText';
 import { CLEARANCE, SEALED, getPass, levelOfPass, setPass, station, type Listing } from './api';
 
 /*
  * The station's terminal. Everything a visitor reads comes from the server
- * (app/api/station): this side only prints it, a block at a time, written by
- * the beam the way the Nostromo terminal writes. Older blocks stand still.
+ * (app/api/station): this side only prints it, a block at a time, each one
+ * coming in with a short fade.
  *
  * It can open the two instruments (onOpen: 'runes' or 'tune') and hears back
  * from them through `say`, so a key found in a game is answered here.
@@ -178,13 +177,12 @@ export function Terminal({
     }
   };
 
-  const last = blocks.at(-1)?.id;
   return (
     <div className="st-term" onClick={() => field.current?.focus({ preventScroll: true })}>
       <div className="st-term__screen" ref={screen} aria-live="polite">
         {blocks.map((b) => (
           <pre key={b.id} className={`st-term__block st-term__block--${b.kind}`}>
-            {b.id === last && b.kind !== 'in' ? <BeamText text={b.text} rate={Math.max(90, b.text.length * 1.4)} /> : b.text}
+            {b.text}
           </pre>
         ))}
       </div>

@@ -111,8 +111,6 @@ export function Tune({ onClose, onSolved }: { onClose: () => void; onSolved: (r:
       for (let y = 0; y <= 4; y++) { g.beginPath(); g.moveTo(0, (y * h) / 4); g.lineTo(w, (y * h) / 4); g.stroke(); }
       g.strokeStyle = '#ff2414';
       g.lineWidth = 2 * devicePixelRatio;
-      g.shadowColor = '#ff2414';
-      g.shadowBlur = 12 * devicePixelRatio;
       g.beginPath();
       for (let x = 0; x <= w; x += 2) {
         const p = x / w;

@@ -9,17 +9,15 @@ import { Topo } from './Topo';
 
 /*
  * Field Station 7: the instrument wall of Dr. Halvorsen's station, laid out
- * like a car's track-mode screen, in one red phosphor. The instruments idle
+ * like a car's track-mode screen, in one red. The instruments idle
  * and drift; the terminal is where the hunt is played; the two instruments
  * at the foot (the rune board, the receiver) open over it.
  *
- * The tube is the SWS Nostromo one, in red, kept clean for reading: the
- * glow, a flare now and then, the vertical hold slipping, and a cold power-on.
+ * Drawn sharp and flat, like a car's own screen: thin rules, solid red, no
+ * glow, no boot, no flare. The type is the Nostromo terminal's (City Light).
  * The instruments move on smooth waves, every frame; their numbers change a
  * few times a second, so they can be read.
  */
-
-const r = (a: number, b: number) => a + Math.random() * (b - a);
 
 function useClock() {
   // the station clock is stuck in its last winter, and runs 41 minutes slow
@@ -110,13 +108,12 @@ function Compass() {
   );
 }
 
-/** the seven sensors in the ring, pulsing together on a 1.06 s period, each at its own strength */
+/** the seven sensors in the ring, each drifting on its own slow trace */
 function Seismic() {
   const bars = useRef<(HTMLElement | null)[]>([]);
   useFrames((t) => bars.current.forEach((b, i) => {
     if (!b) return;
-    const pulse = Math.pow(Math.max(0, Math.sin((t / 1.06) * Math.PI * 2 + i * 0.12)), 3);
-    b.style.height = `${18 + 50 * pulse * (0.6 + 0.4 * Math.sin(t * 0.3 + i)) + 10 * Math.sin(t * 0.9 + i * 2)}%`;
+    b.style.height = `${42 + 22 * Math.sin(t * (0.19 + i * 0.03) + i * 1.7) + 9 * Math.sin(t * 0.53 + i)}%`;
   }));
   return (
     <section className="st-panel st-seis">
@@ -167,7 +164,6 @@ export function Station() {
 function Wall() {
   const [level, setLevel] = useState(0);
   const [game, setGame] = useState<null | 'runes' | 'tune'>(null);
-  const [flare, setFlare] = useState(false);
   const term = useRef<TerminalHandle | null>(null);
   const clock = useClock();
 
@@ -177,20 +173,9 @@ function Wall() {
     term.current?.say(what, 'ok');
   }, []);
 
-  // now and then the phosphor surges
-  useEffect(() => {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    let t = 0;
-    const next = () => { t = window.setTimeout(() => { setFlare(true); t = window.setTimeout(() => { setFlare(false); next(); }, 460); }, r(3500, 11000)); };
-    next();
-    return () => clearTimeout(t);
-  }, []);
-
   return (
-    <main className="st crt-glow">
-      <div aria-hidden className="st-crt" />
-      <div aria-hidden className="st-power" />
-      <div className={`st-hold${flare ? ' st-flare' : ''}`}>
+    <main className="st">
+      <div>
         <header className="st-top">
           <span>STN 7 · <span className="st-batt" aria-label="generator 86%">▮▮▮▮▮▮▮▮▯▯</span> 86%</span>
           <span>OBS 212 / 365 · RING 7 · {CLEARANCE[level]}</span>

@@ -1,7 +1,7 @@
 /* Field Station 7 (/svartskog). A red phosphor instrument wall: the layout of
    a car's track-mode screen, the tube of the SWS Nostromo terminal (glow,
-   flare, vertical hold, cold power-on), all in one red, kept clean enough to
-   read: no scanlines, no rolling band, no flicker. Scoped under .st. */
+   sharpened: no glow, no boot, no flare, no scanlines: thin rules and flat
+   red, like a car's own screen. Scoped under .st. */
 
 @font-face {
   font-family: 'City Light';
@@ -34,73 +34,6 @@
 .st ::selection { background: var(--r); color: #000; }
 .st button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 
-/* phosphor: a pale core and a soft halo, enough to glow, not so much that
-   the letters blur into each other */
-.st.crt-glow {
-  text-shadow:
-    0 0 1px rgb(255 214 204 / 0.5),
-    0 0 6px rgb(255 36 20 / 0.45),
-    0 0 18px rgb(255 36 20 / 0.18);
-}
-
-/* ------------------------------------------------------------------ tube */
-
-/* the tube's dark curved edge */
-.st-crt {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-  pointer-events: none;
-  background: radial-gradient(ellipse 120% 100% at center, transparent 62%, rgb(0 0 0 / 0.6) 100%);
-}
-/* the vertical hold slipping, about every half minute */
-.st-hold { position: relative; animation: st-hold 27s linear infinite; }
-.st-flare { animation: st-hold 27s linear infinite, st-flare 460ms ease-out; }
-
-/* cold power-on: a dot, a line, the face opening overbright, then the picture */
-.st-power {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  pointer-events: none;
-  background: #000;
-  animation: st-power-bg 900ms linear forwards;
-}
-.st-power::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(180deg, #ff5a40, #fff0ea 45%, #fff0ea 55%, #ff5a40);
-  box-shadow: 0 0 10px 3px #ff6a50, 0 0 40px 10px rgb(255 36 20 / 0.55);
-  transform: scaleX(0);
-  animation: st-beam 900ms cubic-bezier(0.25, 0.8, 0.3, 1) forwards;
-}
-
-@keyframes st-beam {
-  0% { transform: scaleX(0.015) scaleY(1); opacity: 1; }
-  13% { transform: scaleX(1) scaleY(1); opacity: 1; }
-  19% { transform: scaleX(1) scaleY(2.5); opacity: 1; }
-  30% { transform: scaleX(1.02) scaleY(1200); opacity: 0.9; }
-  40% { transform: scaleX(1) scaleY(1200); opacity: 0.25; }
-  100% { transform: scaleX(1) scaleY(1200); opacity: 0; }
-}
-@keyframes st-power-bg {
-  0%, 26% { opacity: 1; }
-  60% { opacity: 0; visibility: visible; }
-  100% { opacity: 0; visibility: hidden; }
-}
-@keyframes st-hold {
-  0%, 96%, 100% { top: 0; }
-  96.3% { top: -12px; } 96.6% { top: 6px; } 96.9% { top: -2px; }
-}
-@keyframes st-flare {
-  0% { filter: brightness(1); }
-  30% { filter: brightness(1.45) saturate(1.15); }
-  100% { filter: brightness(1); }
-}
 
 /* ---------------------------------------------------------------- layout */
 
@@ -127,9 +60,8 @@
 .st-panel {
   position: relative;
   padding: 14px 16px;
-  background: var(--panel);
-  border: 1px solid var(--r-faint);
-  box-shadow: inset 0 0 40px rgb(255 36 20 / 0.03);
+  background: #0a0101;
+  border: 1px solid rgb(255 36 20 / 0.14);
 }
 .st-panel > header { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 12px; color: var(--r-mid); }
 .st-panel > header b { color: var(--r); font-weight: 500; }
@@ -144,8 +76,7 @@
 .st-bar__track i {
   position: absolute;
   inset: 0 auto 0 0;
-  background: linear-gradient(90deg, rgb(255 36 20 / 0.25), var(--r));
-  box-shadow: 0 0 10px rgb(255 36 20 / 0.6), 0 0 22px rgb(255 36 20 / 0.25);
+  background: var(--r);
 }
 
 /* the stones, as a ring of readings */
@@ -170,15 +101,14 @@
   height: 54px;
   margin: -54px 0 0 -1px;
   transform-origin: 50% 100%;
-  background: linear-gradient(var(--r-hot), var(--r));
-  box-shadow: 0 0 8px var(--r), 0 0 18px rgb(255 36 20 / 0.5);
+  background: var(--r);
   will-change: transform;
 }
 .st-compass__note { margin: 0; font-size: 14px; color: var(--r-dim); text-align: center; }
 
 .st-seis ol { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; height: 120px; margin: 0; padding: 0; list-style: none; }
 .st-seis li { position: relative; display: flex; flex-direction: column-reverse; align-items: center; gap: 4px; font-size: 11px; color: var(--r-dim); }
-.st-seis li i { width: 100%; max-width: 14px; background: var(--r); box-shadow: 0 0 8px rgb(255 36 20 / 0.6); }
+.st-seis li i { width: 100%; max-width: 14px; background: var(--r); }
 
 /* the survey map: a glowing trail to the ring */
 .st-survey { display: flex; flex-direction: column; }
@@ -189,15 +119,15 @@
 .st-map__index { fill: none; stroke: rgb(255 50 30 / 0.62); stroke-width: 1.3; }
 .st-map__height { fill: var(--r-mid); font: 13px var(--sans); letter-spacing: 0.08em; paint-order: stroke; stroke: #0b0201; stroke-width: 4px; }
 .st-map__stream { fill: none; stroke: rgb(255 110 90 / 0.55); stroke-width: 1.4; stroke-dasharray: 7 4 2 4; }
-.st-map__ghost { fill: none; stroke: rgb(255 36 20 / 0.28); stroke-width: 14; filter: blur(6px); }
-.st-map__trail { fill: none; stroke: var(--r); stroke-width: 3.5; stroke-linecap: round; filter: drop-shadow(0 0 5px var(--r)) drop-shadow(0 0 12px rgb(255 36 20 / 0.5)); }
+.st-map__ghost { display: none; }
+.st-map__trail { fill: none; stroke: var(--r); stroke-width: 3; stroke-linecap: round; }
 .st-map__ring { fill: rgb(255 36 20 / 0.06); stroke: var(--r-dim); stroke-width: 1.2; stroke-dasharray: 3 4; }
-.st-map__stone { fill: var(--r); filter: drop-shadow(0 0 4px var(--r)); }
+.st-map__stone { fill: var(--r); }
 .st-map__stone.is-seven { fill: var(--r-hot); }
 .st-map__cabin { fill: #0b0201; stroke: var(--r); stroke-width: 2; }
 .st-map__label { fill: var(--r); font: 14px var(--sans); letter-spacing: 0.08em; paint-order: stroke; stroke: #0b0201; stroke-width: 5px; }
 .st-map__label--dim { fill: var(--r-dim); font-size: 12px; letter-spacing: 0.3em; }
-.st-map__you { fill: #fff2ee; filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 9px var(--r)); }
+.st-map__you { fill: #fff; }
 .st-map__furniture { fill: var(--r-mid); stroke: var(--r-mid); font: 13px var(--sans); }
 .st-map__furniture text { stroke: none; }
 .st-map__furniture line { stroke-width: 1.2; }
@@ -222,13 +152,13 @@
 .st-termp { flex: 1; display: flex; flex-direction: column; min-height: 330px; }
 .st-term { flex: 1; display: flex; flex-direction: column; min-height: 0; font-family: var(--mono); font-size: 16px; line-height: 1.5; cursor: text; }
 .st-term__screen { flex: 1; min-height: 220px; max-height: 46svh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--r-low) transparent; }
-.st-term__block { margin: 0 0 10px; font: inherit; white-space: pre-wrap; word-break: break-word; }
+.st-term__block { margin: 0 0 10px; font: inherit; white-space: pre-wrap; word-break: break-word; animation: st-in 160ms ease-out; }
 .st-term__block--in { color: var(--r-mid); }
 .st-term__block--err { color: #ff8a70; }
 .st-term__block--ok { color: var(--r-hot); }
 .st-term__line { display: flex; gap: 10px; align-items: center; padding-top: 8px; border-top: 1px solid var(--r-faint); }
 .st-term__prompt { color: var(--r-mid); white-space: nowrap; }
-.st-term__input { flex: 1; min-width: 0; background: none; border: 0; outline: none; color: var(--r); font: inherit; caret-color: var(--r); text-shadow: inherit; }
+.st-term__input { flex: 1; min-width: 0; background: none; border: 0; outline: none; color: var(--r); font: inherit; caret-color: var(--r); }
 
 /* ----------------------------------------------------------------- foot */
 
@@ -250,7 +180,7 @@
   gap: 16px;
   padding: 18px 26px !important;
   background: linear-gradient(0deg, rgb(255 36 20 / 0.62), rgb(255 36 20 / 0.2) 55%, rgb(255 36 20 / 0.04));
-  box-shadow: inset 0 -2px 0 var(--r), 0 0 30px rgb(255 36 20 / 0.25);
+  box-shadow: inset 0 -2px 0 var(--r);
 }
 
 /* ----------------------------------------------------------------- games */
@@ -263,14 +193,9 @@
   padding: 18px 20px;
   background: var(--panel);
   border: 1px solid var(--r-low);
-  box-shadow: 0 0 60px rgb(255 36 20 / 0.12);
-  animation: st-in 640ms ease-out;
+  animation: st-in 220ms ease-out;
 }
-@keyframes st-in {
-  0% { opacity: 0; filter: brightness(0.45); transform: translateY(-3px); }
-  45% { opacity: 1; filter: brightness(1.22); transform: none; }
-  100% { filter: brightness(1); }
-}
+@keyframes st-in { from { opacity: 0; transform: translateY(4px); } }
 .st-game__head { display: flex; justify-content: space-between; color: var(--r-mid); margin-bottom: 8px; }
 .st-game__head button:hover { color: var(--r-hot); }
 .st-game__note { margin: 0 0 16px; color: var(--r-dim); font-size: 13px; }
@@ -297,7 +222,6 @@
   color: var(--r-hot);
   font: 500 15px var(--mono);
   text-transform: uppercase;
-  text-shadow: inherit;
   outline: none;
 }
 .st-runes__cell input:focus { background: rgb(255 36 20 / 0.16); }
@@ -334,6 +258,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .st-hold, .st-flare, .st-game { animation: none; }
-  .st-power { display: none; }
+  .st-game { animation: none; }
 }
