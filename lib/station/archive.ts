@@ -16,7 +16,7 @@ import { FILES } from './content';
  * GEMINI_API_KEY is set on Vercel; GEMINI_MODEL picks the model.
  */
 
-const MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 export const ASKS_PER_HOUR = 12;
 export const MAX_QUESTION = 280;
 
@@ -58,16 +58,18 @@ function context(level: number) {
 export async function askArchive(question: string, level: number): Promise<string | null> {
   const key = process.env.GEMINI_API_KEY ?? process.env.API_key;   // saved on Vercel as API_key
   if (!key) throw new Error('no key');
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
+  const call = () => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: SYSTEM(level) + context(level) }] },
       contents: [{ role: 'user', parts: [{ text: question }] }],
-      generationConfig: { maxOutputTokens: 220 },
+      generationConfig: { maxOutputTokens: 220, thinkingConfig: { thinkingBudget: 0 } },
     }),
     signal: AbortSignal.timeout(15000),
   });
+  let res = await call();
+  if (res.status === 503) res = await call();   // overloaded: one retry
   if (!res.ok) throw new Error(`gemini ${res.status}`);
   const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
   const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
