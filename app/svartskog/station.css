@@ -71,7 +71,7 @@
 .st-figure { font-size: 30px; line-height: 1.2; }
 .st-figure small { margin-left: 4px; font-size: 16px; color: var(--faint); }
 .st-meter { position: relative; height: 2px; background: var(--border); }
-.st-meter i { position: absolute; inset: 0 auto 0 0; width: 100%; background: var(--muted); transform-origin: left; will-change: transform; }
+.st-meter i { position: absolute; inset: 0 auto 0 0; width: 100%; background: var(--muted); transform: scaleX(0); transform-origin: left; will-change: transform; }
 
 /* ------------------------------------------------------------------- grid */
 
@@ -105,7 +105,7 @@ div.st-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); 
 /* ------------------------------------------------------------------ seals */
 
 .st-seals ol { margin: 0; padding: 0; list-style: none; }
-.st-seals li { display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 14px; padding: 16px 0; border-top: 1px solid var(--rule); }
+.st-seals li { padding: 16px 0; border-top: 1px solid var(--rule); }
 .st-seals__mark { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--control); }
 .st-seals li.is-open .st-seals__mark { background: var(--muted); border-color: var(--muted); }
 .st-seals li.is-next .st-seals__mark { background: var(--accent); border-color: var(--accent); }
@@ -125,24 +125,68 @@ svg .st-grid { stroke: var(--rule); stroke-width: 1; }
 .st-ref { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; }
 .st-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* the survey map: grey ground, the trail in red */
-.st-map { width: 100%; height: auto; cursor: crosshair; }
-.st-map__grid line { stroke: var(--rule); stroke-width: 1; }
-.st-map__contour { fill: none; stroke: #2e2624; stroke-width: 0.8; }
-.st-map__index { fill: none; stroke: #4a3f3c; stroke-width: 1.2; }
+/* the survey map: grey ground, the trail in red. Lines keep their width as
+   the map zooms (non-scaling strokes); marks and names are counter-scaled by
+   the script (.st-map__pin), so they stay one size too. */
+.st-mapp { display: grid; gap: 10px; }
+.st-map { width: 100%; height: auto; cursor: crosshair; touch-action: pan-y; outline-offset: 4px; }
+.st-map.is-measuring { cursor: cell; }
+.st-map__grid line { stroke: var(--rule); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.st-map__contour { fill: none; stroke: #2e2624; stroke-width: 0.8; vector-effect: non-scaling-stroke; }
+.st-map__index { fill: none; stroke: #4a3f3c; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
 .st-map__height { fill: var(--faint); font: 14px var(--face); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; }
-.st-map__stream { fill: none; stroke: var(--faint); stroke-width: 1.2; stroke-dasharray: 6 4; }
-.st-map__ghost { display: none; }
-.st-map__trail { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
+.st-map__stream { fill: none; stroke: var(--faint); stroke-width: 1.2; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; }
+.st-map__trail { fill: none; stroke: rgb(255 43 28 / 0.45); stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .st-map__ring { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 4; }
 .st-map__stone { fill: var(--muted); }
 .st-map__stone.is-seven { fill: var(--accent); }
 .st-map__cabin { fill: var(--surface); stroke: var(--text); stroke-width: 1.5; }
-.st-map__label { fill: var(--text); font: 16px var(--face); paint-order: stroke; stroke: var(--surface); stroke-width: 5px; }
+.st-map__label { fill: var(--text); font: 16px var(--face); paint-order: stroke; stroke: var(--surface); stroke-width: 5px; pointer-events: none; }
 .st-map__label--dim { fill: var(--muted); font-size: 14px; letter-spacing: 0.2em; }
 .st-map__you { fill: var(--text); }
-.st-map__furniture { fill: var(--muted); stroke: var(--muted); font: 14px var(--face); }
-.st-map__furniture text { stroke: none; }
+.st-map:focus { outline: none; }
+.st-map:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+.st-map__north { margin-left: 10px; color: var(--faint); font-size: 14px; white-space: nowrap; }
+.st-map__scale { display: inline-flex; align-items: center; gap: 8px; color: var(--faint); font-size: 14px; white-space: nowrap; }
+.st-map__scale i { display: block; height: 7px; border: 1px solid var(--muted); border-top: 0; box-sizing: border-box; }
+
+/* the places: a mark each, a wide invisible target round it, a halo when chosen */
+.st-map__place { cursor: pointer; }
+.st-map__hit { fill: transparent; stroke: none; }
+.st-map__halo { fill: none; stroke: var(--accent); stroke-width: 1; stroke-dasharray: 2 3; }
+.st-map__place:hover .st-map__label, .st-map__place.is-selected .st-map__label { fill: var(--accent-ink); }
+.st-map__mast { fill: none; stroke: var(--text); stroke-width: 1.5; stroke-linecap: round; }
+.st-map__dot { fill: var(--faint); }
+.st-map__ridge { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-linecap: round; }
+.st-map__clearing { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 2; }
+.st-map__fire { fill: var(--accent); opacity: 0.85; }
+.st-map__camera { fill: none; stroke: var(--text); stroke-width: 1.2; stroke-linejoin: round; }
+.st-map__hut { fill: var(--surface); stroke: var(--text); stroke-width: 1.2; stroke-linejoin: round; }
+/* the ways the later files add */
+.st-map__road { fill: none; stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 8 5; vector-effect: non-scaling-stroke; }
+.st-map__carrier { stroke: var(--accent-ink); stroke-width: 1; stroke-dasharray: 1 5; stroke-linecap: round; opacity: 0.8; vector-effect: non-scaling-stroke; animation: st-carrier 1.2s linear infinite; }
+@keyframes st-carrier { to { stroke-dashoffset: -6; } }
+.st-map__ghost { fill: none; stroke: var(--text); stroke-width: 1; stroke-dasharray: 3 9; stroke-linecap: round; opacity: 0.55; vector-effect: non-scaling-stroke; animation: st-ghost 6s linear infinite; }
+@keyframes st-ghost { to { stroke-dashoffset: -24; } }
+/* the measure: two points and the tape between them */
+.st-map__tape { stroke: var(--text); stroke-width: 1; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
+.st-map__pt { fill: var(--text); stroke: var(--surface); stroke-width: 1.5; }
+.st-map__pt-label { fill: var(--text); font: 14px var(--face); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; }
+.st-map__pt-label--figures { fill: var(--accent-ink); }
+
+/* under the map: the controls, the pointer's reading, and the chosen place's lines */
+.st-map__bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.st-map__tools { display: flex; align-items: center; gap: 6px; }
+.st-map__tools button { min-width: 36px; height: 32px; padding: 0 12px; border: 1px solid var(--control); border-radius: var(--radius); font-size: 15px; color: var(--muted); }
+.st-map__tools button:hover:not(:disabled) { background: var(--raised); color: var(--text); }
+.st-map__tools button:disabled { opacity: 0.4; cursor: not-allowed; }
+.st-map__tools button.is-on { border-color: var(--accent); color: var(--accent-ink); }
+.st-map__zoom { min-width: 4ch; text-align: center; color: var(--faint); font-size: 14px; }
+.st-map__readout { color: var(--muted); font-size: 14px; min-height: 1.4em; }
+.st-map__note { min-height: 3.2em; }
+.st-map__note p { margin: 0; }
+.st-map__line { color: var(--text); font-size: 15px; }
+.st-map__hint { color: var(--faint); font-size: 14px; }
 
 /* ------------------------------------------------------------------ games */
 
@@ -223,12 +267,48 @@ svg .st-grid { stroke: var(--rule); stroke-width: 1; }
 .st-hover text { fill: var(--text); font: 14px var(--face); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; }
 
 /* the map, alive: walkers on the trail, mist in the valley, a probe under the pointer */
-.st-map__trail { stroke: rgb(255 43 28 / 0.45); }
-.st-map__walk { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 2 18; animation: st-walk 2.4s linear infinite; }
+.st-map__walk { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 2 18; vector-effect: non-scaling-stroke; animation: st-walk 2.4s linear infinite; }
 @keyframes st-walk { to { stroke-dashoffset: -20; } }
 .st-map__mist { fill: var(--text); opacity: 0.05; filter: blur(14px); animation: st-mist 26s ease-in-out infinite alternate; }
 .st-map__mist--late { animation-duration: 34s; animation-delay: -12s; }
 @keyframes st-mist { from { transform: translate(-40px, 6px); } to { transform: translate(60px, -8px); } }
-.st-map__probe line { stroke: var(--muted); stroke-width: 0.8; stroke-dasharray: 3 4; }
+.st-map__probe { pointer-events: none; }
+.st-map__probe line { stroke: var(--muted); stroke-width: 0.8; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
 .st-map__probe text { fill: var(--text); font: 15px var(--face); paint-order: stroke; stroke: var(--surface); stroke-width: 5px; }
-@media (prefers-reduced-motion: reduce) { .st-map__walk, .st-map__mist { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .st-map__walk, .st-map__mist, .st-map__carrier, .st-map__ghost { animation: none; } }
+
+/* the map expanded: the whole screen's width; on a phone it fills the height
+   too and is panned (the svg slices its box rather than letterboxing it) */
+.st-game--map { width: min(1200px, 100%); }
+.st-game--map .st-map { max-height: calc(100svh - 190px); }
+@media (max-width: 640px) { .st-game--map .st-map { height: calc(100svh - 230px); max-height: none; } }
+
+/* ----------------------------------------------------------- what moves */
+
+/* the wall and the panels come in with a short fade; a block of terminal text too */
+.st-wall { animation: st-in 220ms ease-out both; }
+.st-overlay { animation: st-in 140ms ease-out both; }
+.st-overlay > .st-game { animation: st-rise 180ms ease-out both; }
+.st-term__block { animation: st-in 160ms ease-out both; }
+@keyframes st-in { from { opacity: 0; } }
+@keyframes st-rise { from { opacity: 0; transform: translateY(8px); } }
+.st-seals__mark { transition: background-color 200ms, border-color 200ms; }
+@media (prefers-reduced-motion: reduce) { .st-wall, .st-overlay, .st-overlay > .st-game, .st-term__block { animation: none; } }
+
+/* a file in a listing reads itself when clicked */
+.st-term__file { display: block; }
+.st-term__file button { font: inherit; color: var(--text); text-decoration: underline; text-decoration-color: var(--control); text-underline-offset: 3px; }
+.st-term__file button:hover { color: var(--accent-ink); text-decoration-color: currentColor; }
+
+/* a seal on the track is a button: the clue, or the file it opened */
+.st-seals li > button { display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 14px; width: 100%; text-align: left; }
+.st-seals li > button:hover:not(:disabled) .st-seals__name { color: var(--accent-ink); }
+.st-seals li > button:disabled { cursor: default; }
+
+.st-card__tools { display: flex; align-items: center; gap: 12px; }
+.st .st-btn--small { height: 28px; padding: 0 10px; font-size: 14px; color: var(--muted); }
+
+/* the rune board: the nine signs stone 7 asks for are marked; a sign given is quieter */
+.st-runes__cell.is-asked { border-color: var(--control); }
+.st-runes__cell.is-asked .st-rune { color: var(--accent-ink); }
+.st-runes__cell.is-given { background: var(--raised); }

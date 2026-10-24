@@ -19,12 +19,16 @@ import { Topo } from './Topo';
  * read for it? The terminal, where it is answered, is the biggest block; the
  * title row names the next seal; the seal track beside it is the one element
  * only this product has.
+ *
+ * What moves, moves every frame and outside React: the bars by a transform,
+ * the charts by attributes on their own nodes, the map by a transform on its
+ * view. React is asked to render only when something is said or opened.
  */
 
 // ------------------------------------------------------------------ data
 
 /** The four seals, in order, and what each one opens. */
-const SEALS = [
+export const SEALS = [
   { id: 'stone', name: 'Stone', opens: 'journal_04.enc', clue: 'Read stone_07.txt and journal_02.txt, then the rune board.' },
   { id: 'date', name: 'Date', opens: 'anomaly_01.log', clue: 'journal_04.enc is open. Count the nights.' },
   { id: 'carrier', name: 'Carrier', opens: 'transcript.txt', clue: 'anomaly_01.log is open. Then the receiver.' },
@@ -33,15 +37,15 @@ const SEALS = [
 
 type Me = { name: string; level: number; solves?: Record<string, string> };
 
-/** the station clock: stuck in its last winter, 41 minutes slow */
-function useClock() {
+/** the station clock: stuck in its last winter, 41 minutes slow. Its own element, so the second hand moves nothing else. */
+function Clock() {
   const [t, setT] = useState(() => Date.now());
   useEffect(() => {
     const id = setInterval(() => setT(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
   const d = new Date(t);
-  return `19 Dec 1987 02:${String(14 + (d.getMinutes() % 40)).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+  return <>19 Dec 1987 02:{String(14 + (d.getMinutes() % 40)).padStart(2, '0')}:{String(d.getSeconds()).padStart(2, '0')}</>;
 }
 
 type Wave = (t: number) => number;
@@ -81,12 +85,12 @@ const LOCKED = wave(97, [0.8, 0.5, 0]);
 
 // ---------------------------------------------------------------- blocks
 
-/** one reading: label, figure with its unit, and a 2px bar at the true ratio */
+/** one reading: label, figure with its unit, and a 2px bar at the true ratio (moved by a transform: no layout) */
 function Reading({ label, unit, min, max, digits, fn }: { label: string; unit: string; min: number; max: number; digits: number; fn: Wave }) {
   const fill = useRef<HTMLElement>(null);
   const [shown, setShown] = useState('');
   useFrames(
-    (t) => { if (fill.current) fill.current.style.width = `${Math.max(0, Math.min(100, ((fn(t) - min) / (max - min)) * 100))}%`; },
+    (t) => { if (fill.current) fill.current.style.transform = `scaleX(${Math.max(0, Math.min(1, (fn(t) - min) / (max - min))).toFixed(4)})`; },
     (t) => setShown(fn(t).toFixed(digits)),
   );
   return (
@@ -98,8 +102,8 @@ function Reading({ label, unit, min, max, digits, fn }: { label: string; unit: s
   );
 }
 
-/** the four seals as a track: opened ones with their time, the next one marked */
-function SealTrack({ level, solves }: { level: number; solves: Record<string, string> }) {
+/** the four seals as a track: opened ones with their time, the next one marked. Each row is a button: the clue, or the file it opened, in the terminal. */
+function SealTrack({ level, solves, onPick }: { level: number; solves: Record<string, string>; onPick: (i: number) => void }) {
   return (
     <section className="st-card st-seals" aria-labelledby="st-seals-h">
       <header className="st-card__head"><h2 id="st-seals-h">Seals</h2><span className="st-meta">{level} of 4 open</span></header>
@@ -109,9 +113,11 @@ function SealTrack({ level, solves }: { level: number; solves: Record<string, st
           const at = solves[s.id];
           return (
             <li key={s.id} className={open ? 'is-open' : next ? 'is-next' : ''}>
-              <span className="st-seals__mark" aria-hidden="true" />
-              <span className="st-seals__name">{s.name}<small>opens {s.opens}</small></span>
-              <span className="st-seals__state">{open ? (at ? new Date(at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Open') : next ? 'Next' : '—'}</span>
+              <button type="button" onClick={() => onPick(i)} title={open ? `read ${s.opens}` : next ? 'the clue, in the terminal' : 'sealed'} disabled={!open && !next}>
+                <span className="st-seals__mark" aria-hidden="true" />
+                <span className="st-seals__name">{s.name}<small>opens {s.opens}</small></span>
+                <span className="st-seals__state">{open ? (at ? new Date(at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Open') : next ? 'Next' : '—'}</span>
+              </button>
             </li>
           );
         })}
@@ -124,24 +130,29 @@ function SealTrack({ level, solves }: { level: number; solves: Record<string, st
 const STONES = [-27, -29, -33, -30, -28, -32, -35].map((b, i) => wave(b, [1.2, 0.17 + i * 0.03, i], [0.4, 0.8, i * 2]));
 
 function StonesChart() {
-  const [temps, setTemps] = useState<number[]>(() => STONES.map((f) => f(40)));
-  useFrames(() => {}, (t) => setTemps(STONES.map((f) => f(t))), 0.5);
+  const bars = useRef<(SVGRectElement | null)[]>([]);
+  const [label, setLabel] = useState('');
   // scale: 0 to -40 °C, ticks every 10, zero at the top (the bars hang down: colder is longer)
   const W = 360, H = 150, L = 34, T = 8, B = 22, y = (v: number) => T + (-v / 40) * (H - T - B);
   const bw = (W - L) / 7;
+  useFrames(
+    (t) => STONES.forEach((f, i) => bars.current[i]?.setAttribute('height', String(Math.max(0, y(f(t)) - y(0))))),
+    (t) => setLabel(STONES.map((f) => f(t).toFixed(0)).join(', ')),
+    1,
+  );
   return (
     <section className="st-card st-chart" aria-labelledby="st-stones-h">
       <header className="st-card__head"><h2 id="st-stones-h">Ring stones</h2><span className="st-meta">surface, °C · dashed: forest −9</span></header>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Stone temperatures: ${temps.map((t) => t.toFixed(0)).join(', ')} °C`}>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Stone temperatures: ${label} °C`}>
         {[0, -10, -20, -30, -40].map((v) => (
           <g key={v}>
             <line x1={L} x2={W} y1={y(v)} y2={y(v)} className="st-grid" />
             <text x={L - 6} y={y(v) + 4} textAnchor="end" className="st-tick">{v === 0 ? 0 : `−${-v}`}</text>
           </g>
         ))}
-        {temps.map((t, i) => (
+        {STONES.map((_, i) => (
           <g key={i}>
-            <rect x={L + i * bw + bw * 0.28} y={y(0)} width={bw * 0.44} height={y(t) - y(0)} className={i === 6 ? 'st-col is-hue' : 'st-col'} />
+            <rect ref={(el) => { bars.current[i] = el; }} x={L + i * bw + bw * 0.28} y={y(0)} width={bw * 0.44} height={0} className={i === 6 ? 'st-col is-hue' : 'st-col'} />
             <text x={L + i * bw + bw / 2} y={H - 6} textAnchor="middle" className="st-tick">{i + 1}</text>
           </g>
         ))}
@@ -209,11 +220,17 @@ function SeismicChart() {
   );
 }
 
-function Survey({ level }: { level: number }) {
+function Survey({ level, onNote, onExpand }: { level: number; onNote: (t: string) => void; onExpand: () => void }) {
   return (
     <section className="st-card st-survey" aria-labelledby="st-survey-h">
-      <header className="st-card__head"><h2 id="st-survey-h">Survey</h2><span className="st-meta">1:12 500 · contours 10 m</span></header>
-      <Topo level={level} />
+      <header className="st-card__head">
+        <h2 id="st-survey-h">Survey</h2>
+        <span className="st-card__tools">
+          <span className="st-meta">1:12 500 · contours 10 m</span>
+          <button type="button" className="st-btn st-btn--small" onClick={onExpand}>Expand</button>
+        </span>
+      </header>
+      <Topo level={level} onNote={onNote} />
     </section>
   );
 }
@@ -233,17 +250,21 @@ export function Station() {
   return <Wall me={me} onLogout={() => { setSession(''); setMe(null); }} />;
 }
 
+const NAME_KEY = 'svartskog-name';
+
 /** The way in: any name, and the access code hidden on the main site. */
 function Gate({ onIn }: { onIn: (me: Me) => void }) {
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [state, setState] = useState<'idle' | 'busy' | string>('idle');
+  useEffect(() => { try { setName(localStorage.getItem(NAME_KEY) ?? ''); } catch { /* a fresh register */ } }, []);
   const go = async (e: React.FormEvent) => {
     e.preventDefault();
     setState('busy');
     const r = await station<Me & { session: string }>('login', { name, code });
     if (r.error) return setState(r.error);
     setSession(r.session);
+    try { localStorage.setItem(NAME_KEY, r.name); } catch { /* fine */ }
     onIn({ name: r.name, level: r.level, solves: r.solves });
   };
   return (
@@ -262,12 +283,15 @@ function Gate({ onIn }: { onIn: (me: Me) => void }) {
   );
 }
 
+type Panel = null | 'runes' | 'tune' | 'map';
+
 function Wall({ me, onLogout }: { me: Me; onLogout: () => void }) {
   const [level, setLevel] = useState(me.level);
   const [solves, setSolves] = useState<Record<string, string>>(me.solves ?? {});
-  const [game, setGame] = useState<null | 'runes' | 'tune'>(null);
+  const [panel, setPanel] = useState<Panel>(null);
   const term = useRef<TerminalHandle | null>(null);
-  const clock = useClock();
+  const overlay = useRef<HTMLDivElement>(null);
+  const opener = useRef<HTMLElement | null>(null);
 
   // a seal opened anywhere (the terminal, a game): its level, and its time on the track
   const onLevel = useCallback((l: number) => {
@@ -277,16 +301,42 @@ function Wall({ me, onLogout }: { me: Me; onLogout: () => void }) {
     });
   }, []);
   const bind = useCallback((h: TerminalHandle) => { term.current = h; }, []);
+  const say = useCallback((t: string) => term.current?.say(t), []);
   const solved = useCallback((what: string) => (res: { level?: number }) => {
     if (typeof res.level === 'number') onLevel(res.level);
     term.current?.say(what, 'ok');
   }, [onLevel]);
 
+  // a panel: opened from a button (focus comes back to it after), closed by Escape or the backdrop
+  const open = useCallback((p: Exclude<Panel, null>) => {
+    opener.current = document.activeElement as HTMLElement | null;
+    setPanel(p);
+  }, []);
+  const close = useCallback(() => {
+    setPanel(null);
+    opener.current?.focus?.({ preventScroll: true });
+  }, []);
+  useEffect(() => {
+    if (!panel) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !e.defaultPrevented) close(); };
+    document.addEventListener('keydown', onKey);
+    // the first field in the panel takes the keyboard (the map itself, in its case), before any button
+    const o = overlay.current;
+    (o?.querySelector<HTMLElement>('input') ?? o?.querySelector<HTMLElement>('[tabindex="0"]') ?? o?.querySelector<HTMLElement>('button'))?.focus({ preventScroll: true });
+    return () => document.removeEventListener('keydown', onKey);
+  }, [panel, close]);
+
+  const pickSeal = useCallback((i: number) => {
+    const s = SEALS[i];
+    if (level > i) term.current?.run(s.id === 'admin' ? 'ls' : `cat ${s.opens}`);
+    else term.current?.say(`${s.name}: ${s.clue}`);
+  }, [level]);
+
   const next = SEALS[level];
   return (
-    <main className="st">
+    <main className="st st-wall">
       <header className="st-top">
-        <p className="st-brand"><span className="st-brand__mark" aria-hidden="true">7</span>Field Station 7<span className="st-meta">Svartskog · station clock {clock}</span></p>
+        <p className="st-brand"><span className="st-brand__mark" aria-hidden="true">7</span>Field Station 7<span className="st-meta">Svartskog · station clock <Clock /></span></p>
         <p className="st-top__right"><span>{me.name}</span><span className="st-meta">{CLEARANCE[level]}</span><Link href="/" className="st-link">Leave</Link></p>
       </header>
 
@@ -296,11 +346,11 @@ function Wall({ me, onLogout }: { me: Me; onLogout: () => void }) {
           <p className="st-sub">{next ? next.clue : 'Read the director’s files: ls'}</p>
         </div>
         <div className="st-title__actions">
-          <button type="button" className="st-btn" onClick={() => setGame('runes')}>Rune board</button>
+          <button type="button" className="st-btn" onClick={() => open('runes')}>Rune board</button>
           <button
             type="button"
             className="st-btn"
-            onClick={() => setGame('tune')}
+            onClick={() => open('tune')}
             disabled={level < 2}
             title={level < 2 ? 'Sealed until the date is found' : undefined}
           >
@@ -317,21 +367,29 @@ function Wall({ me, onLogout }: { me: Me; onLogout: () => void }) {
       <div className="st-grid">
         <section className="st-card st-termp" aria-labelledby="st-term-h">
           <header className="st-card__head"><h2 id="st-term-h">Terminal</h2><span className="st-meta">{me.name} · {CLEARANCE[level]}</span></header>
-          <Terminal level={level} name={me.name} bind={bind} onLevel={onLevel} onOpen={setGame} onLogout={onLogout} />
+          <Terminal level={level} name={me.name} bind={bind} onLevel={onLevel} onOpen={open} onLogout={onLogout} />
         </section>
-        <SealTrack level={level} solves={solves} />
-        <Survey level={level} />
+        <SealTrack level={level} solves={solves} onPick={pickSeal} />
+        <Survey level={level} onNote={say} onExpand={() => open('map')} />
         <div className="st-side">
           <StonesChart />
           <SeismicChart />
         </div>
       </div>
 
-      {game ? (
-        <div className="st-overlay" onClick={(e) => { if (e.target === e.currentTarget) setGame(null); }}>
-          {game === 'runes'
-            ? <Runes onClose={() => setGame(null)} onSolved={solved('the stone answers: journal_04.enc is open. cat journal_04.enc')} />
-            : <Tune onClose={() => setGame(null)} onSolved={solved('carrier locked. voices on the band. cat transcript.txt')} />}
+      {panel ? (
+        <div ref={overlay} className="st-overlay" onClick={(e) => { if (e.target === e.currentTarget) close(); }}>
+          {panel === 'runes' ? <Runes onClose={close} onSolved={solved('the stone answers: journal_04.enc is open. cat journal_04.enc')} />
+            : panel === 'tune' ? <Tune onClose={close} onSolved={solved('carrier locked. voices on the band. cat transcript.txt')} />
+            : (
+              <div className="st-game st-game--map" role="dialog" aria-label="Survey">
+                <div className="st-game__head">
+                  <span>Survey · 1:12 500 · contours 10 m</span>
+                  <button type="button" onClick={close}>Close</button>
+                </div>
+                <Topo level={level} onNote={say} big />
+              </div>
+            )}
         </div>
       ) : null}
     </main>

@@ -1,6 +1,6 @@
 import { ASKS_PER_HOUR, MAX_QUESTION, askArchive, leaks } from '@/lib/station/archive';
 import { FILES, HINTS, LOCKS, type Lock } from '@/lib/station/content';
-import { asksLastHour, enter, logAsk, player, solve, solvesOf, sql } from '@/lib/station/db';
+import { asksLastHour, enter, logAsk, player, ready, solve, solvesOf } from '@/lib/station/db';
 import { ACCESS, hash, normalise, playerOf, sessionFor } from '@/lib/station/pass';
 
 /*
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   } catch {
     return json({ error: 'bad request' }, 400);
   }
-  if (!sql) return json({ error: 'register offline' }, 503);
+  if (!ready) return json({ error: 'register offline' }, 503);
 
   if (body.op === 'login') {
     const name = String(body.name ?? '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 32);
