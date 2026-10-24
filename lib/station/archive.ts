@@ -16,7 +16,7 @@ import { FILES } from './content';
  * GEMINI_API_KEY is set on Vercel; GEMINI_MODEL picks the model.
  */
 
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
 export const ASKS_PER_HOUR = 12;
 export const MAX_QUESTION = 280;
 
@@ -64,9 +64,9 @@ export async function askArchive(question: string, level: number): Promise<strin
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: SYSTEM(level) + context(level) }] },
       contents: [{ role: 'user', parts: [{ text: question }] }],
-      generationConfig: { maxOutputTokens: 220, thinkingConfig: { thinkingBudget: 0 } },
+      generationConfig: { maxOutputTokens: 1024 },
     }),
-    signal: AbortSignal.timeout(15000),
+    signal: AbortSignal.timeout(25000),
   });
   let res = await call();
   if (res.status === 503) res = await call();   // overloaded: one retry
