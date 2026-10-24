@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Loader } from '@/components/Loader';
 import { Sound } from '@/components/Sound';
+import { SiteOnly } from '@/components/SiteOnly';
 import { BRAND } from '@/data/brand';
 
 // each page sets its own canonical address (and og:url): one set here would
@@ -31,11 +32,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Noto+Sans+Runic&display=swap"
         />
       </head>
       {/* here, not in a page: the music and the loader live across pages (the privacy policy and back) */}
-      <body>{children}<Sound /><Loader /></body>
+      <body>{children}<SiteOnly><Sound /><Loader /></SiteOnly></body>
     </html>
   );
 }

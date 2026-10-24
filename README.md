@@ -96,3 +96,11 @@ Checked in a headless browser with software rendering and the web fonts blocked.
 ## Archive
 
 Earlier designs are kept whole under `archive/`.
+
+## The hidden station (/svartskog)
+
+A scavenger hunt behind the site. At the foot of the home page a faint line of runes spells SVARTSKOG; the console says where to look. `/svartskog` is Field Station 7: a red phosphor instrument wall (the layout of a car's track-mode screen; the CRT of the SWS Nostromo terminal, in red) with a terminal, the files of Dr. Ingrid Halvorsen, who observed the cult in the forest in 1987, and two instruments: a rune board (give the 24 runes their letters, stone 7 reads itself) and a receiver dial.
+
+Four seals, each opened by something found in the files: the word on stone 7 (runes), a date (counted from the 1987 winter solstice), a frequency (a sum in the anomaly log), and the director's account (a name read down the transcript, a word in runes). The last level opens the encounters, the magical anomalies and her last entry. The chain and its answers are written at the top of `lib/station/content.ts`.
+
+Everything is checked on the server (`app/api/station/route.ts`): answers are stored as hashes, files are only sent once a visitor's pass allows, and the pass is signed with `HUNT_SECRET` (set it on Vercel; a development key is used without it). The page is not linked, not in the sitemap and not indexed. Files: `components/station/` (Station, Terminal, Games, the beam text), `app/svartskog/station.css`, `lib/station/`.

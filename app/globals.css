@@ -916,3 +916,6 @@ img, video { display: block; }
   .film__clip.is-shown { transition: none; }
   *, *::before, *::after { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* the way in to the hidden station: the station's forest, in runes, barely there */
+.foot__runes { font-family: 'Noto Sans Runic', serif; font-size: 0.75rem; letter-spacing: 0.35em; text-transform: none; color: var(--bone-dim); opacity: 0.45; user-select: text; }
