@@ -319,12 +319,12 @@ function Wall({ me, onLogout }: { me: Me; onLogout: () => void }) {
           <header className="st-card__head"><h2 id="st-term-h">Terminal</h2><span className="st-meta">{me.name} · {CLEARANCE[level]}</span></header>
           <Terminal level={level} name={me.name} bind={bind} onLevel={onLevel} onOpen={setGame} onLogout={onLogout} />
         </section>
+        <SealTrack level={level} solves={solves} />
+        <Survey level={level} />
         <div className="st-side">
-          <SealTrack level={level} solves={solves} />
-          <Survey level={level} />
+          <StonesChart />
+          <SeismicChart />
         </div>
-        <StonesChart />
-        <SeismicChart />
       </div>
 
       {game ? (

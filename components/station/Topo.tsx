@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 /*
  * The survey as a topographic map. The ground is a made-up heightfield that
@@ -87,6 +87,11 @@ function labelAt(field: number[][], level: number): [number, number] | null {
 export const TRAIL = 'M74 318 C120 312 160 300 200 286 S280 262 330 262 S420 276 456 262 S492 236 512 226 S540 214 548 210';
 
 export function Topo({ level }: { level: number }) {
+  const [probe, setProbe] = useState<{ x: number; y: number } | null>(null);
+  const onMove = (e: React.PointerEvent<SVGSVGElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setProbe({ x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H });
+  };
   const { lines, index, labels } = useMemo(() => {
     labelsTaken.length = 0;
     const field = Array.from({ length: Math.ceil(H / STEP) + 1 }, (_, j) =>
@@ -111,7 +116,7 @@ export function Topo({ level }: { level: number }) {
   const stream = `M${STREAM.map(([x, y]) => `${x} ${y}`).join(' L')}`;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="st-map" role="img" aria-label="Topographic survey: the station by the stream in the south-west, the trail climbing to the ring of seven stones on a knoll at 412 metres">
+    <svg viewBox={`0 0 ${W} ${H}`} className="st-map" onPointerMove={onMove} onPointerLeave={() => setProbe(null)} role="img" aria-label="Topographic survey: the station by the stream in the south-west, the trail climbing to the ring of seven stones on a knoll at 412 metres">
       <defs>
         <clipPath id="st-map-clip"><rect width={W} height={H} /></clipPath>
       </defs>
@@ -124,9 +129,13 @@ export function Topo({ level }: { level: number }) {
         <path d={lines} className="st-map__contour" />
         <path d={index} className="st-map__index" />
         {labels.map((l) => <text key={l.t} x={l.x} y={l.y} className="st-map__height">{l.t}</text>)}
+        {/* mist drifting down the valley */}
+        <ellipse cx={200} cy={290} rx={150} ry={26} className="st-map__mist" />
+        <ellipse cx={420} cy={250} rx={120} ry={20} className="st-map__mist st-map__mist--late" />
         <path d={stream} className="st-map__stream" />
         <path d={TRAIL} className="st-map__ghost" />
         <path d={TRAIL} className="st-map__trail" />
+        <path d={TRAIL} className="st-map__walk" />
         <circle cx={RING.x} cy={RING.y} r={RING.r + 14} className="st-map__ring" />
         {stones.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={i === 6 ? 4.5 : 3} className={`st-map__stone${i === 6 ? ' is-seven' : ''}`} />)}
         <rect x={STATION.x - 9} y={STATION.y - 9} width={18} height={18} className="st-map__cabin" />
@@ -136,6 +145,14 @@ export function Topo({ level }: { level: number }) {
         <text x={210} y={252} className="st-map__label st-map__label--dim" transform="rotate(-32 210 252)">SVARTBEKKEN</text>
         {/* you, partway up the trail, heading for the ring */}
         <path d="M0 -11 L7 7 L0 3 L-7 7 Z" className="st-map__you" transform={`translate(${level >= 2 ? 456 : 330} ${level >= 2 ? 262 : 262}) rotate(${level >= 2 ? 62 : 84})`} />
+        {probe ? (
+          <g className="st-map__probe">
+            <line x1={probe.x} x2={probe.x} y1={0} y2={H} /><line x1={0} x2={W} y1={probe.y} y2={probe.y} />
+            <text x={probe.x > W - 200 ? probe.x - 10 : probe.x + 10} y={probe.y < 40 ? probe.y + 26 : probe.y - 10} textAnchor={probe.x > W - 200 ? 'end' : 'start'}>
+              {Math.round(height(probe.x, probe.y))} m · ring {(Math.hypot(probe.x - RING.x, probe.y - RING.y) * 4 / 1000).toFixed(2)} km
+            </text>
+          </g>
+        ) : null}
       </g>
       {/* north, and the scale */}
       <g className="st-map__furniture">
