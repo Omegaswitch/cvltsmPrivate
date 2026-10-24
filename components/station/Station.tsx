@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CLEARANCE } from './api';
 import { Runes, Tune } from './Games';
 import { Terminal, type TerminalHandle } from './Terminal';
+import { Topo } from './Topo';
 
 /*
  * Field Station 7: the instrument wall of Dr. Halvorsen's station, laid out
@@ -12,9 +13,10 @@ import { Terminal, type TerminalHandle } from './Terminal';
  * and drift; the terminal is where the hunt is played; the two instruments
  * at the foot (the rune board, the receiver) open over it.
  *
- * The tube is the SWS Nostromo one, in red: scanlines through every glyph,
- * a band rolling down, a flicker, a flare now and then, the vertical hold
- * slipping, and a cold power-on.
+ * The tube is the SWS Nostromo one, in red, kept clean for reading: the
+ * glow, a flare now and then, the vertical hold slipping, and a cold power-on.
+ * The instruments move on smooth waves, every frame; their numbers change a
+ * few times a second, so they can be read.
  */
 
 const r = (a: number, b: number) => a + Math.random() * (b - a);
@@ -28,79 +30,107 @@ function useClock() {
   }, []);
   const d = new Date(t);
   const m = d.getMinutes(), s = d.getSeconds();
-  return { stamp: `Sat Dec 19 1987 · 02:${String(14 + (m % 40)).padStart(2, '0')}:${String(s).padStart(2, '0')}`, s };
+  return { stamp: `Sat Dec 19 1987 · 02:${String(14 + (m % 40)).padStart(2, '0')}:${String(s).padStart(2, '0')}` };
 }
 
-function useDrift() {
-  const [v, setV] = useState({ mag: 72, em: 31, ground: -9, ring: -31, sig: 12, needle: 0, seis: [4, 2, 6, 3, 5, 2, 7] });
+type Wave = (t: number) => number;
+
+/** a reading that wanders smoothly: a base and a few slow sines, never repeating quite the same way */
+const wave = (base: number, ...terms: [number, number, number][]): Wave => (t) =>
+  terms.reduce((v, [amp, freq, phase]) => v + amp * Math.sin(freq * t + phase), base);
+
+/**
+ * Runs `frame(t)` on every animation frame (seconds since mount) and, a few
+ * times a second, `tick(t)` for the numbers. Once, standing still, under
+ * reduced motion.
+ */
+function useFrames(frame: (t: number) => void, tick?: (t: number) => void, every = 0.25) {
+  const f = useRef(frame), k = useRef(tick);
+  f.current = frame; k.current = tick;
   useEffect(() => {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const id = setInterval(() => setV((o) => ({
-      mag: Math.round(Math.min(99, Math.max(60, o.mag + r(-3, 3)))),
-      em: Math.round(Math.min(60, Math.max(18, o.em + r(-4, 4)))),
-      ground: Math.round(o.ground + r(-0.6, 0.6) * 10) / 10 || -9,
-      ring: Math.round((-31 + r(-1.5, 1.5)) * 10) / 10,
-      sig: Math.round(Math.min(40, Math.max(4, o.sig + r(-5, 5)))),
-      needle: o.needle + r(-14, 14),
-      seis: o.seis.map((x) => Math.round(Math.min(9, Math.max(1, x + r(-2, 2))))),
-    })), 900);
-    return () => clearInterval(id);
-  }, []);
-  return v;
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const t0 = performance.now();
+    let raf = 0, last = -1;
+    const loop = (now: number) => {
+      const t = (now - t0) / 1000 + 40;
+      f.current(t);
+      if (t - last >= every) { last = t; k.current?.(t); }
+      if (!still) raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [every]);
 }
 
-function Bar({ label, value, unit, pct }: { label: string; value: string; unit?: string; pct: number }) {
+function Bar({ label, unit, fn, pct, digits = 0 }: { label: string; unit?: string; fn: Wave; pct: (v: number) => number; digits?: number }) {
+  const fill = useRef<HTMLElement>(null);
+  const [shown, setShown] = useState('');
+  useFrames(
+    (t) => { if (fill.current) fill.current.style.width = `${Math.max(2, Math.min(100, pct(fn(t))))}%`; },
+    (t) => setShown(fn(t).toFixed(digits)),
+  );
   return (
     <section className="st-panel st-bar">
-      <header><span>{label}</span><b>{value}{unit}</b></header>
-      <div className="st-bar__track"><i style={{ width: `${Math.max(2, Math.min(100, pct))}%` }} /></div>
+      <header><span>{label}</span><b>{shown}{unit}</b></header>
+      <div className="st-bar__track"><i ref={fill} /></div>
     </section>
   );
 }
 
-/** the survey: the trail from the station to the ring, glowing, and where you are */
+/** the survey: a topographic map of the ground between the station and the ring */
 function Survey({ level }: { level: number }) {
-  const stones = Array.from({ length: 7 }, (_, i) => {
-    const a = (i / 7) * Math.PI * 2 - Math.PI / 2;
-    return [520 + Math.cos(a) * 34, 250 + Math.sin(a) * 34];
-  });
   return (
     <section className="st-panel st-survey">
-      <header><span>Survey</span><span className="st-survey__elev">Elevation<br /><b>412 m</b></span></header>
-      <svg viewBox="0 0 760 380" className="st-map" aria-label="Survey map: the trail from the station to the ring of seven stones">
-        <path className="st-map__ghost" d="M40 330 C120 300 150 250 210 240 S300 260 330 210 S420 120 470 160 S560 300 520 250" />
-        <path className="st-map__trail" d="M40 330 C120 300 150 250 210 240 S300 260 330 210 S420 120 470 160 S560 300 520 250" />
-        <path className="st-map__ridge" d="M300 40 C380 70 440 30 520 60 S660 90 720 60" />
-        <circle cx="520" cy="250" r="54" className="st-map__ring" />
-        {stones.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={i === 6 ? 6 : 4} className={`st-map__stone${i === 6 ? ' is-seven' : ''}`} />)}
-        <rect x="28" y="318" width="22" height="22" className="st-map__cabin" />
-        <text x="58" y="352" className="st-map__label">STN 7</text>
-        <text x="592" y="256" className="st-map__label">RING</text>
-        <path d="M466 168 l-10 26 10 -7 10 7 z" className="st-map__you" />
-      </svg>
+      <header><span>Survey · Svartskog 1:12 500</span><span className="st-survey__elev">Contours 10 m</span></header>
+      <Topo level={level} />
       <div className="st-survey__legs">
-        <span>S1 <b>2.1 km</b></span>
-        <span>S2 <b>{level >= 2 ? '0.4 km' : '—'}</b></span>
-        <span>S3 <b>{level >= 3 ? 'ring' : '—'}</b></span>
+        <span>Station <b>172 m</b></span>
+        <span>Trail <b>2.6 km</b></span>
+        <span>Ring <b>412 m</b></span>
       </div>
     </section>
   );
 }
 
-function Compass({ needle }: { needle: number }) {
+/** magnetometer B: it will not point north. It wanders, and keeps swinging back into the ring */
+const NEEDLE = wave(58, [22, 0.21, 0], [9, 0.53, 1.3], [4, 1.7, 0.4]);
+
+function Compass() {
+  const needle = useRef<HTMLElement>(null);
+  useFrames((t) => { if (needle.current) needle.current.style.transform = `rotate(${NEEDLE(t)}deg)`; });
   return (
     <section className="st-panel st-compass">
       <header><span>Magnetometer B</span></header>
       <div className="st-compass__dial">
         <span className="n">N</span><span className="e">E</span><span className="s">S</span><span className="w">W</span>
-        <i style={{ transform: `rotate(${needle}deg)` }} />
+        <i ref={needle} />
       </div>
       <p className="st-compass__note">points into the ring</p>
     </section>
   );
 }
 
-function Ring({ temps }: { temps: number[] }) {
+/** the seven sensors in the ring, pulsing together on a 1.06 s period, each at its own strength */
+function Seismic() {
+  const bars = useRef<(HTMLElement | null)[]>([]);
+  useFrames((t) => bars.current.forEach((b, i) => {
+    if (!b) return;
+    const pulse = Math.pow(Math.max(0, Math.sin((t / 1.06) * Math.PI * 2 + i * 0.12)), 3);
+    b.style.height = `${18 + 50 * pulse * (0.6 + 0.4 * Math.sin(t * 0.3 + i)) + 10 * Math.sin(t * 0.9 + i * 2)}%`;
+  }));
+  return (
+    <section className="st-panel st-seis">
+      <header><span>Seismic</span><span>1.06 s</span></header>
+      <ol>{Array.from({ length: 7 }, (_, i) => <li key={i}><span>{i + 1}</span><i ref={(el) => { bars.current[i] = el; }} /></li>)}</ol>
+    </section>
+  );
+}
+
+const STONE_TEMPS = [-27, -29, -33, -30, -28, -32, -35].map((b, i) => wave(b, [1.2, 0.17 + i * 0.03, i], [0.4, 0.8, i * 2]));
+
+function Ring() {
+  const [temps, setTemps] = useState<number[]>([]);
+  useFrames(() => {}, (t) => setTemps(STONE_TEMPS.map((f) => Math.round(f(t)))), 0.6);
   return (
     <section className="st-panel st-ringp">
       <header><span>Stones</span><span>°C</span></header>
@@ -119,6 +149,13 @@ function Ring({ temps }: { temps: number[] }) {
   );
 }
 
+const MAG = wave(76, [9, 0.13, 0], [4, 0.41, 2], [1.5, 1.3, 1]);
+const EM = wave(33, [8, 0.19, 1], [3, 0.67, 0], [1, 2.1, 3]);
+const GROUND = wave(-9, [0.8, 0.07, 0], [0.3, 0.5, 1]);
+const RING_T = wave(-31, [1.4, 0.11, 2], [0.5, 0.7, 0]);
+const CARRIER = wave(14, [7, 0.23, 0], [4, 0.9, 1], [2, 2.7, 2]);
+const LOCKED = wave(97, [0.8, 0.5, 0]);
+
 export function Station() {
   // the instruments read the clock and drift at random: they start on screen,
   // not on the server, so the two never disagree
@@ -133,7 +170,6 @@ function Wall() {
   const [flare, setFlare] = useState(false);
   const term = useRef<TerminalHandle | null>(null);
   const clock = useClock();
-  const v = useDrift();
 
   const bind = useCallback((h: TerminalHandle) => { term.current = h; }, []);
   const solved = useCallback((what: string) => (res: { level?: number }) => {
@@ -150,14 +186,11 @@ function Wall() {
     return () => clearTimeout(t);
   }, []);
 
-  const temps = [-27, -29, -33, -30, -28, -32, -35].map((t, i) => Math.round(t + Math.sin(clock.s / 3 + i) * 1.4));
-
   return (
     <main className="st crt-glow">
       <div aria-hidden className="st-crt" />
       <div aria-hidden className="st-power" />
       <div className={`st-hold${flare ? ' st-flare' : ''}`}>
-        <div aria-hidden className="st-grain" />
         <header className="st-top">
           <span>STN 7 · <span className="st-batt" aria-label="generator 86%">▮▮▮▮▮▮▮▮▯▯</span> 86%</span>
           <span>OBS 212 / 365 · RING 7 · {CLEARANCE[level]}</span>
@@ -166,19 +199,16 @@ function Wall() {
 
         <div className="st-grid">
           <div className="st-col">
-            <Bar label="Magnetometer A" value={`${v.mag}`} unit="%" pct={v.mag} />
-            <Bar label="EM field" value={`${v.em}`} unit=" µT" pct={v.em * 1.6} />
-            <Bar label="Ground temp" value={`${v.ground}`} unit="°C" pct={40 + v.ground} />
-            <Bar label="Ring temp" value={`${v.ring}`} unit="°C" pct={40 + v.ring} />
-            <Ring temps={temps} />
+            <Bar label="Magnetometer A" unit="%" fn={MAG} pct={(v) => v} />
+            <Bar label="EM field" unit=" µT" fn={EM} pct={(v) => v * 1.6} />
+            <Bar label="Ground temp" unit="°C" fn={GROUND} pct={(v) => 40 + v} digits={1} />
+            <Bar label="Ring temp" unit="°C" fn={RING_T} pct={(v) => 40 + v} digits={1} />
+            <Ring />
           </div>
           <div className="st-col">
-            <Bar label="Carrier" value={`${level >= 3 ? 98 : v.sig}`} unit="%" pct={level >= 3 ? 98 : v.sig} />
-            <Compass needle={v.needle} />
-            <section className="st-panel st-seis">
-              <header><span>Seismic</span><span>1.06 s</span></header>
-              <ol>{v.seis.map((s, i) => <li key={i}><span>{i + 1}</span><i style={{ height: `${s * 10}%` }} /></li>)}</ol>
-            </section>
+            <Bar label="Carrier" unit="%" fn={level >= 3 ? LOCKED : CARRIER} pct={(v) => v} />
+            <Compass />
+            <Seismic />
           </div>
           <div className="st-col st-col--wide">
             <Survey level={level} />
