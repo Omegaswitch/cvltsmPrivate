@@ -4,12 +4,6 @@
    read: no scanlines, no rolling band, no flicker. Scoped under .st. */
 
 @font-face {
-  font-family: 'Reduste';
-  src: url('/fonts/Reduste.ttf') format('truetype');
-  font-display: swap;
-}
-
-@font-face {
   font-family: 'City Light';
   src: url('/fonts/city-light.woff2') format('woff2');
   font-display: swap;
@@ -23,7 +17,7 @@
   --r-low: rgb(255 36 20 / 0.16);
   --r-faint: rgb(255 36 20 / 0.08);
   --panel: linear-gradient(180deg, #140302, #090100);
-  --sans: 'Reduste', 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;   /* Reduste has no µ: it falls back to Inter Tight */
+  --sans: 'City Light', ui-monospace, 'SFMono-Regular', Menlo, monospace;   /* one face throughout: the Nostromo terminal's */
   --mono: 'City Light', ui-monospace, 'SFMono-Regular', Menlo, monospace;
   --runic: 'Noto Sans Runic', 'Segoe UI Historic', serif;
   position: relative;
@@ -32,9 +26,9 @@
   background: #000;
   color: var(--r);
   font-family: var(--sans);
-  font-size: 15px;
+  font-size: 16.5px;
   line-height: 1.35;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   overflow-x: hidden;
 }
 .st ::selection { background: var(--r); color: #000; }
@@ -115,7 +109,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 2px 4px 10px;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
@@ -180,7 +174,7 @@
   box-shadow: 0 0 8px var(--r), 0 0 18px rgb(255 36 20 / 0.5);
   will-change: transform;
 }
-.st-compass__note { margin: 0; font-size: 12px; color: var(--r-dim); text-align: center; }
+.st-compass__note { margin: 0; font-size: 14px; color: var(--r-dim); text-align: center; }
 
 .st-seis ol { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; height: 120px; margin: 0; padding: 0; list-style: none; }
 .st-seis li { position: relative; display: flex; flex-direction: column-reverse; align-items: center; gap: 4px; font-size: 11px; color: var(--r-dim); }
@@ -215,7 +209,7 @@
 .st-status dl div { display: flex; justify-content: space-between; gap: 10px; }
 .st-status dt { color: var(--r-mid); }
 .st-status dd { margin: 0; font-weight: 500; }
-.st-split > div { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; margin-bottom: 8px; font-size: 12.5px; }
+.st-split > div { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; margin-bottom: 8px; font-size: 14px; }
 .st-split > div b { font-weight: 500; }
 .st-split > div span { color: var(--r-mid); }
 .st-toggles { display: grid; grid-template-columns: 1fr 1fr; padding: 0; }
@@ -247,7 +241,7 @@
   align-items: stretch;
   margin: 10px calc(-1 * clamp(10px, 1.4vw, 20px)) 0;
   background: #000;
-  font-size: 15px;
+  font-size: 17px;
 }
 .st-foot > button, .st-foot > a { display: flex; align-items: center; justify-content: center; padding: 18px 12px; color: var(--r); text-decoration: none; }
 .st-foot > button:hover, .st-foot > a:hover { color: var(--r-hot); }
