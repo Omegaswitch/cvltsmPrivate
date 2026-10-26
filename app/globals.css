@@ -10,8 +10,11 @@
 }
 
 :root {
-  --black: #070605;
-  --char: #0f0c0a;
+  /* v2: the ground is dark red, the red of the logo's artwork (#cd1616) taken
+     down to where it reads as dried blood on stone; the marks and type stay */
+  --red: #cd1616;
+  --black: #150506;
+  --char: #2a0909;
   --bone: #d4ccbf;
   --bone-dim: rgb(212 204 191 / 0.56);
   --hair: rgb(212 204 191 / 0.16);
@@ -23,9 +26,10 @@
   --slow: cubic-bezier(0.4, 0, 0.2, 1);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* below the film: dark concrete, its edges burned like the film's frame */
+  /* below the film: the concrete, washed in red, its edges burned like the film's frame */
   --ground:
     radial-gradient(130% 90% at 50% 40%, transparent 50%, rgb(0 0 0 / 0.6) 100%),
+    linear-gradient(rgb(150 20 20 / 0.5), rgb(150 20 20 / 0.5)),
     url('/textures/ground.webp') center / cover,
     var(--char);
 }
@@ -227,7 +231,7 @@ img, video { display: block; }
   position: absolute;
   inset: 0;
   z-index: 4;
-  background: var(--film-tint, rgb(122 28 20 / 0.32));
+  background: var(--film-tint, rgb(160 22 20 / 0.44));
   mix-blend-mode: color;
 }
 
@@ -364,7 +368,7 @@ img, video { display: block; }
 
 /* A logo's place before the logo exists: its proportions, held by a hairline. */
 .logo { display: block; height: auto; }
-.hero__set .logo { width: 100%; }
+.hero__set .logo { width: 100%; filter: drop-shadow(0 2px 18px rgb(0 0 0 / 0.55)); }
 .hero__set h1 { margin: 0; }
 /* a render's place before the render exists: its proportions, held by a hairline */
 .slot {
@@ -385,7 +389,7 @@ img, video { display: block; }
 }
 /* until a picture has loaded, a dim band of light passes over its place */
 .frame img {
-  background: linear-gradient(100deg, #12100e 30%, #1c1916 50%, #12100e 70%) 0 0 / 300% 100%;
+  background: linear-gradient(100deg, #1e0a09 30%, #2c100e 50%, #1e0a09 70%) 0 0 / 300% 100%;
 }
 @media (prefers-reduced-motion: no-preference) {
   .frame img { animation: wait 1.8s linear infinite; }
@@ -522,7 +526,7 @@ img, video { display: block; }
 
 /* kits: on dark concrete, above the colour, which waits beneath */
 .kits {
-  --torn: #18140f;
+  --torn: #4a1210;
   position: relative;
   z-index: 3;
   padding: clamp(110px, 16vh, 180px) var(--gutter) clamp(140px, 22vh, 240px);
@@ -546,7 +550,7 @@ img, video { display: block; }
 /* colour: pinned to the foot of the screen beneath the kits, uncovered as
    they scroll away; its chips rise one after another as the kits leave */
 .colours {
-  --torn: #070605;
+  --torn: #150506;
   position: sticky;
   bottom: 0;
   z-index: 1;
@@ -582,7 +586,7 @@ img, video { display: block; }
 
 /* renders: back on the concrete, torn over the colors */
 .renders {
-  --torn: #18140f;
+  --torn: #4a1210;
   position: relative;
   z-index: 2;
   padding: clamp(110px, 16vh, 180px) var(--gutter) clamp(120px, 18vh, 200px);
@@ -605,7 +609,7 @@ img, video { display: block; }
 
 /* vendors: on black, torn over the renders */
 .vendors {
-  --torn: #070605;
+  --torn: #150506;
   position: relative;
   z-index: 3;
   padding: clamp(110px, 16vh, 180px) var(--gutter) clamp(110px, 16vh, 180px);
@@ -689,7 +693,7 @@ img, video { display: block; }
 /* ------------------------------------------------------------- colophon */
 
 .foot {
-  --torn: #18140f;
+  --torn: #4a1210;
   position: relative;
   z-index: 3;
   padding: clamp(72px, 12vh, 120px) var(--gutter) clamp(56px, 9vh, 88px);

@@ -11,6 +11,8 @@ npm run lint     # type check
 
 Next.js, React and TypeScript, built as a fully static page: any static host serves it, no server or secrets needed. No animation or 3D libraries: the film is plain video, the degradation is CSS, and the scroll effects run on CSS scroll timelines.
 
+Version 2 stands on dark red (see DESIGN.md, Colour) and carries the set's logo; the first version is kept as the `v1` branch of the public repository.
+
 ## Where things are
 
 ```
@@ -51,7 +53,7 @@ scripts/                 encode-film.sh, encode-audio.sh, make-textures.mjs, mak
 - **Kit renders.** All square (4000 × 4000, compressed). Put each in `public/kits/` and set its `src` in `data/kits.ts`; until then each kit shows a dashed square.
 - **Renders.** All square (4000 × 4000, compressed). Put each in `public/renders/` and set its `src` in `data/renders.ts`.
 - **Vendors.** Add names (and links) per region in `data/vendors.ts`; until then each region reads "To be announced".
-- **Logos.** The SWG logo is `public/brand/SWGX.png`. Put the set logo in `public/brand/` and set `BRAND.logo` in `data/brand.ts`; until then CVLTSM is set in Valhalica.
+- **Logos.** The SWG logo is `public/brand/SWGX.png`. The set's logo is the artwork in `assets/brand/cvltsm-logo.png` (black marks scratched on red): `python scripts/make-logo.py` takes the red away, trims the marks and writes `public/brand/cvltsm.png` (the marks in the artwork's red, used over the film) and `cvltsm-black.png`. `BRAND.logo` in `data/brand.ts` names the file; unset, CVLTSM is set in Valhalica.
 - **Clips.** The originals go in `assets/film/` (kept out of git; they are large). Each clip's source, cut and grade are a line in `scripts/encode-film.sh`; run it with `FFMPEG=/path/to/ffmpeg scripts/encode-film.sh`. It writes 480p and 360p, WebM and MP4, and a poster frame per clip to `public/film/`. Each clip's line also sets how worn it is (the height it is shrunk to before being blown back up, and how much grain is baked in) and, if the source has letterbox bars, the crop that takes them off. Name clips to encode only those: `scripts/encode-film.sh creature berserker`. The order, lengths and transitions are in `data/film.ts`.
 - **Engravings.** Put the originals (black ink on white or transparent paper, any size) in `assets/engravings/` and run `node scripts/make-engravings.mjs`. Each becomes a faint light outline on a section's background, tilted and half off the edge; the next file takes the next place, and the places (section, side, angle, depth) are listed in `components/Engravings.tsx`.
 - **Icon and share image.** `node scripts/make-brand.mjs` builds `app/favicon.ico`, `icon.svg`, `apple-icon.png` (the C of CVLTSM, from `assets/brand/*.svg`, Valhalica outlines) and the 1200×630 `opengraph-image.png` / `twitter-image.png` (a dark film frame, SWG, the name). Next picks them up by file name; `metadataBase` is https://cvltsm.cat.

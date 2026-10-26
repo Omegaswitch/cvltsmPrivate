@@ -4,8 +4,8 @@ export const BRAND = {
   /** the production address: canonical links, share images, the sitemap */
   url: 'https://cvltsm.cat',
   year: '2027',
-  /** the set's logo, e.g. '/brand/cvltsm.svg'; until set, the name stands in Valhalica */
-  logo: undefined as string | undefined,
+  /** the set's logo: the artwork's marks in its red (scripts/make-logo.py); unset, the name would stand in Valhalica */
+  logo: '/brand/cvltsm.png' as string | undefined,
   manufacturer: { name: 'SWG', logo: '/brand/SWGX.png' },
   /** the line at the very foot of the page */
   credit: 'manu x omegaswitch x stellaidoscope',

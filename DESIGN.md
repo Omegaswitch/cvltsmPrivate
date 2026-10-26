@@ -10,14 +10,18 @@ The references set the terms: black, and one red. The red of dried blood, used a
 
 - **Composition over effects.** A strong grid, wide negative space, few elements, each placed on purpose. Degradation sits over a clean structure, never instead of one.
 - **No invented copy.** No taglines, eyebrows or marketing sentences. The identity comes from the logos, the footage and the composition. Text that appears states facts. The colophon is one line, "Coming in 2027", in Valhalica, over the credit and the privacy link.
-- **No stand-in logos.** Until the artwork exists, its place is a dashed slot of the right proportions. Nothing is drawn or set in a font in its place.
+- **No stand-in logos.** Until the artwork exists, its place is a dashed slot of the right proportions. Nothing is drawn or set in a font in its place. (The set's logo exists now: the marks scratched on red, `assets/brand/cvltsm-logo.png`.)
 - **Restraint in motion.** Slow dissolves; interference rarely and briefly; nothing flashing. Motion serves the film.
 
 ## Colour
 
-- **Black** `#070605`, never pure. **Char** `#0f0c0a`, the colophon.
+Version 2 (the first stood on near-black; it is kept as the `v1` branch of the public repository). The ground is red: the red of the logo's artwork, `#cd1616`, taken down to where it reads as dried blood on stone.
+
+- **Red** `#cd1616`: the artwork's red. The logo over the film, and nothing else at full strength.
+- **Black** `#150506`, red at the bottom of it, never pure: the colours and the vendors, the loader, the page behind everything. **Char** `#2a0909` under the concrete.
+- **The concrete** (kits, renders, the colophon, the privacy policy): the texture washed in red (`rgb(150 20 20 / 0.5)` over it), its edges burned. It reads about `#4a1210`, which is what the torn edges are cut from.
 - **Bone** `#d4ccbf`: all type and hairlines. Dimmed bone (56%) for secondary type.
-- **Dried blood** `rgb(122 28 20)`: a colour pass over the film at 32%, moving the grade's hue toward blood. It is the only red in the picture.
+- **Dried blood** `rgb(160 22 20)`: the colour pass over the film, at 44%, moving the grade's hue toward blood. The film is the darkest red on the page.
 
 ## Type
 
