@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { dripShapes, oozeFilter } from '@/lib/ooze';
 
 /*
  * A colour that has bled out of its outline. The fill spills a little over
@@ -104,19 +105,8 @@ export function Ooze({ hex, index }: { hex: string; index: number }) {
         style={{ left: -PAD, top: -PAD }}
         focusable="false"
       >
-        <defs>
-          <filter id={id} filterUnits="userSpaceOnUse" x={-PAD} y={-PAD} width={vw} height={vh} colorInterpolationFilters="sRGB">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="3.4" result="soft" />
-            <feColorMatrix in="soft" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -9.5" result="goo" />
-            <feSpecularLighting in="soft" surfaceScale="9" specularConstant="0.9" specularExponent="28" lightingColor="#ffffff" result="shine">
-              <feDistantLight azimuth="235" elevation="42" />
-            </feSpecularLighting>
-            <feComposite in="shine" in2="goo" operator="in" result="sheen" />
-            <feComposite in="goo" in2="sheen" operator="arithmetic" k1="0" k2="1" k3="0.42" k4="0" result="wet" />
-            <feTurbulence type="fractalNoise" baseFrequency="0.03 0.05" numOctaves="2" seed="3" result="noise" />
-            <feDisplacementMap in="wet" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-        </defs>
+        {/* the filter is shared with the share image (lib/ooze.ts) */}
+        <defs dangerouslySetInnerHTML={{ __html: oozeFilter(id, { x: -PAD, y: -PAD, w: vw, h: vh }) }} />
         <g filter={`url(#${id})`} fill={hex}>
           <rect x={-9} y={-9} width={W + 18} height={H + 18} rx={3} />
           {blobs.map((b, n) => (
@@ -144,12 +134,12 @@ export function Ooze({ hex, index }: { hex: string; index: number }) {
                 '--dd': `${d.dd.toFixed(2)}s`,
               } as CSSProperties}
             >
-              {/* where it leaves the edge: a sag the filter turns into a fillet */}
-              <ellipse cx={0} cy={2} rx={d.w * 1.4} ry={compact ? 7 : 11} />
-              <rect className="drip__line" x={-d.w / 2} y={0} width={d.w} height={d.len} rx={d.w / 2} />
-              <g className="drip__end"><circle className="drip__tip" cx={0} cy={9 - d.w * 0.75} r={d.w * 0.75} /></g>
+              {/* where it leaves the edge: a sag the filter turns into a fillet (shapes shared: lib/ooze.ts) */}
+              <ellipse {...dripShapes(d.w, d.len, compact).sag} />
+              <rect className="drip__line" {...dripShapes(d.w, d.len, compact).line} />
+              <g className="drip__end"><circle className="drip__tip" {...dripShapes(d.w, d.len, compact).tip} /></g>
               <circle className="drip__bead" cx={0} cy={0} r={d.w * 0.95} />
-              <g className="drip__end"><circle className="drip__drop" cx={0} cy={9} r={d.w * 0.85} /></g>
+              <g className="drip__end"><circle className="drip__drop" {...dripShapes(d.w, d.len, compact).drop} /></g>
             </g>
           ))}
         </g>
