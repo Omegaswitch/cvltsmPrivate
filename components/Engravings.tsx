@@ -30,7 +30,7 @@ const PLACES: Place[] = [
 ];
 
 /** Shown whole, without the fade towards the page: their faces sit on the faded side. */
-const WHOLE = new Set(['1-05.webp']);
+const WHOLE = new Set(['1-05b.webp', '1-19b.webp', '1-31b.webp']);
 
 const files = (() => {
   try {
