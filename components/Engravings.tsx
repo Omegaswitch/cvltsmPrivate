@@ -29,6 +29,9 @@ const PLACES: Place[] = [
   { section: 'renders', side: 'l', top: 72, w: 35, rot: 12, off: 39, drift: 9, flip: true },
 ];
 
+/** Shown whole, without the fade towards the page: their faces sit on the faded side. */
+const WHOLE = new Set(['1-05.webp']);
+
 const files = (() => {
   try {
     return readdirSync(join(process.cwd(), 'public', 'engravings')).filter((f) => /\.(webp|png|jpe?g)$/i.test(f)).sort();
@@ -48,7 +51,7 @@ export function Engravings({ section }: { section: Section }) {
       {mine.map(({ file, place: p, round }) => (
         <img
           key={file}
-          className={`engraving engraving--${p.side}`}
+          className={`engraving engraving--${p.side}${WHOLE.has(file) ? ' engraving--whole' : ''}`}
           src={`/engravings/${file}`}
           alt=""
           loading="lazy"
