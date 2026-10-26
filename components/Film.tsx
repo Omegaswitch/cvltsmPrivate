@@ -112,11 +112,18 @@ export function Film() {
       sync();
     }
 
-    // out of sight: when the kits have covered it, or the tab is hidden
+    // out of sight: when the kits have covered it, or the tab is hidden.
+    // Once fully covered the whole hero is hidden too: it is pinned behind
+    // every section, and its moving layers would otherwise go on repainting
+    // under them all the way down the page.
+    const hero = el.closest<HTMLElement>('.hero');
     const onScroll = () => {
       const now = window.scrollY < window.innerHeight * 0.98;
       if (now !== visible) { visible = now; sync(); }
+      const covered = window.scrollY >= window.innerHeight;
+      if (hero && covered !== 'covered' in hero.dataset) { if (covered) hero.dataset.covered = ''; else delete hero.dataset.covered; }
     };
+    onScroll();
     const onTab = () => { tabShown = !document.hidden; sync(); };
     window.addEventListener('scroll', onScroll, { passive: true });
     document.addEventListener('visibilitychange', onTab);

@@ -198,6 +198,8 @@ img, video { display: block; }
 }
 
 .film { position: absolute; inset: 0; overflow: hidden; }
+/* covered by the page (Film.tsx marks it): not painted at all */
+.hero[data-covered] { visibility: hidden; }
 .film__poster,
 .film__clip,
 .film__damage {
@@ -222,11 +224,12 @@ img, video { display: block; }
 /* the concrete multiplied in: its marks become dirt on the film */
 .film__grime {
   position: absolute;
-  inset: 0;
+  inset: -3%;   /* a little larger than the frame, so it can jump without showing an edge */
   z-index: 4;
   background: url('/textures/grime.webp') center / cover;
   mix-blend-mode: multiply;
   opacity: 0.3;
+  will-change: transform, opacity;
   animation: grime-pulse 5.2s infinite;
 }
 
@@ -242,14 +245,16 @@ img, video { display: block; }
 
 /* The grime does not sit still: it comes in a pulse, two beats and a rest,
    like a heart or a failing lamp, and now and then the dirt jumps. */
+/* the jump is a transform, not a background position: moving the background
+   would repaint the whole full-screen texture on every change */
 @keyframes grime-pulse {
-  0%, 100% { opacity: 0.3; background-position: 50% 50%; }
+  0%, 100% { opacity: 0.3; transform: none; }
   6% { opacity: 0.85; }
   10% { opacity: 0.4; }
-  15% { opacity: 0.78; background-position: 50% 50%; }
-  15.5% { background-position: 47% 53%; }
-  24% { opacity: 0.32; background-position: 47% 53%; }
-  24.5% { background-position: 50% 50%; }
+  15% { opacity: 0.78; transform: none; }
+  15.5% { transform: translate3d(-1%, 1%, 0); }
+  24% { opacity: 0.32; transform: translate3d(-1%, 1%, 0); }
+  24.5% { transform: none; }
   61% { opacity: 0.35; }
   63% { opacity: 0.62; }
   66% { opacity: 0.33; }

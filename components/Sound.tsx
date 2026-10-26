@@ -86,8 +86,11 @@ export function Sound() {
       a.play().then(() => { started.current = true; cleanup(); apply(FADE_IN); }).catch(() => {});
     };
     events.forEach((e) => window.addEventListener(e, begin));
-    // some browsers let a site they know the visitor likes play at once
-    if (wanted.current) start.current();
+    // some browsers let a site they know the visitor likes play at once; ask
+    // first where the browser can say (trying anyway makes Firefox download
+    // the track before it refuses)
+    const policy = (navigator as Navigator & { getAutoplayPolicy?: (t: string) => string }).getAutoplayPolicy?.('mediaelement');
+    if (wanted.current && (policy === undefined || policy === 'allowed')) start.current();
     const onTab = () => { tabShown.current = !document.hidden; if (started.current) apply(); };
     document.addEventListener('visibilitychange', onTab);
     return () => {
