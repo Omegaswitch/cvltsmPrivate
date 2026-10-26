@@ -10,7 +10,6 @@
 // logo bleeding over a still from the film; see the share image below.
 import { readFileSync, writeFileSync } from 'node:fs';
 import sharp from 'sharp';
-import { dripShapes, oozeFilter } from '../lib/ooze.ts';
 
 const BONE = '#d4ccbf';
 const pathOf = (file) => readFileSync(file, 'utf8').match(/ d="([^"]+)"/)[1];
@@ -79,48 +78,21 @@ const still = await sharp('public/film/berserker.webp')
 const dragon = await inkLayer('public/engravings/1-01.webp', 560, 0.2, [0x8a, 0x16, 0x12]);
 const skull = await inkLayer('public/engravings/1-87.webp', 520, 0.24, [0x8a, 0x16, 0x12]);
 
-// ---- the blood: the logo bleeds the way the colour chips do on the page,
-// with the same filter and the same drip shapes (lib/ooze.ts), in the
-// artwork's red; drawn at twice the size and scaled down.
+// ---- the logo: the set's marks in the artwork's red, clean, with a soft
+// dark under them so they stand off the film. Drawn at twice the size and
+// scaled down.
 const S = 2;
 const LW = 860;
 const logo = await sharp('public/brand/cvltsm.png').resize({ width: LW * S }).png().toBuffer({ resolveWithObject: true });
-const LH = logo.info.height / S, LX = (W - LW) / 2, LY = 64;
-const { data: la } = await sharp(logo.data).extractChannel('alpha').raw().toBuffer({ resolveWithObject: true });
-const AW = LW * S;
-const footAt = (x) => { for (let y = LH * S - 1; y >= 0; y--) if (la[y * AW + Math.round(x * S)] > 150) return y / S; return -1; };
-const foot = Array.from({ length: LW }, (_, x) => footAt(x));
-// the lowest points of the strokes (local lows of the outline, spread apart): the blood runs from there
-const lows = [];
-for (let x = 8; x < LW - 8; x++) {
-  const y = foot[x];
-  if (y < LH * 0.5) continue;
-  if (foot.slice(x - 8, x + 9).every((v) => v <= y) && !lows.some((l) => Math.abs(l.x - x) < 40)) lows.push({ x, y });
-}
-// seeded, so the image is the same each time it is made; most drips short, a few long, as on the chips
-let seed = 11;
-const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-const attrs = (o) => Object.entries(o).map(([k, v]) => `${k}="${v}"`).join(' ');
-const drips = lows.filter(() => rand() > 0.12).map(({ x, y }) => {
-  const w = 4.5 + rand() * 7.5;
-  const len = rand() < 0.3 ? 130 + rand() * 110 : rand() < 0.25 ? 70 + rand() * 50 : 22 + rand() * 68;
-  const d = dripShapes(w, len);
-  const drop = len > 110 && rand() < 0.7 ? `<g transform="translate(0 ${(len + 28 + rand() * 40).toFixed(1)})"><circle ${attrs(d.drop)}/></g>` : '';
-  return `<g transform="translate(${((LX + x) * S).toFixed(1)} ${((LY + y - 10) * S).toFixed(1)}) scale(${S})"><ellipse ${attrs(d.sag)}/><rect ${attrs(d.line)}/><g transform="translate(0 ${len.toFixed(1)})"><circle ${attrs(d.tip)}/></g>${drop}</g>`;
-}).join('');
-
+const LH = logo.info.height / S, LX = (W - LW) / 2, LY = (H - LH) / 2 + 8;
 const BW = W * S, BH = H * S;
 const logoImg = `<image href="${uri(logo.data)}" x="${LX * S}" y="${LY * S}" width="${LW * S}" height="${LH * S}"/>`;
-const bloodSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${BW}" height="${BH}">
-<defs>
-  ${oozeFilter('ooze', { x: 0, y: 0, w: BW, h: BH }, S)}
-  <filter id="under" filterUnits="userSpaceOnUse" x="0" y="0" width="${BW}" height="${BH}"><feGaussianBlur in="SourceAlpha" stdDeviation="${6 * S}"/><feOffset dy="${5 * S}"/></filter>
-</defs>
-<!-- a soft dark under the blood, so it stands off the film -->
-<g filter="url(#under)" opacity="0.8">${logoImg}<g>${drips}</g></g>
-<g filter="url(#ooze)">${logoImg}<g fill="${RED}">${drips}</g></g>
+const markSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${BW}" height="${BH}">
+<defs><filter id="under" filterUnits="userSpaceOnUse" x="0" y="0" width="${BW}" height="${BH}"><feGaussianBlur in="SourceAlpha" stdDeviation="${8 * S}"/><feOffset dy="${5 * S}"/></filter></defs>
+<g filter="url(#under)" opacity="0.85">${logoImg}</g>
+${logoImg}
 </svg>`;
-const blood = await sharp(Buffer.from(bloodSvg)).png().toBuffer().then((b) => sharp(b).resize(W, H, { kernel: 'lanczos3' }).png().toBuffer());
+const mark = await sharp(Buffer.from(markSvg)).png().toBuffer().then((b) => sharp(b).resize(W, H, { kernel: 'lanczos3' }).png().toBuffer());
 
 const grain = await sharp('public/textures/grain.png').resize(W, H, { fit: 'cover' }).png().toBuffer();
 const swg = await sharp('public/brand/SWGX.png').resize({ height: 40 }).png().toBuffer();
@@ -138,10 +110,10 @@ const groundSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="
 <rect width="${W}" height="${H}" fill="url(#v)"/>
 <rect width="${W}" height="${H}" fill="url(#foot)"/>
 </svg>`;
-// the ground first, with its grain; the blood over it, clean
+// the ground first, with its grain; the logo over it, clean
 const ground = await sharp(Buffer.from(groundSvg)).composite([{ input: grain, blend: 'overlay' }]).png().toBuffer();
 await sharp(ground)
-  .composite([{ input: blood }, { input: swg, left: 52, top: 44 }])
+  .composite([{ input: mark }, { input: swg, left: 52, top: 44 }])
   .png({ compressionLevel: 9 }).toFile('app/opengraph-image.png');
 await sharp('app/opengraph-image.png').toFile('app/twitter-image.png');
 console.log('favicon.ico, icon.svg, apple-icon.png, opengraph-image.png, twitter-image.png');
