@@ -1,6 +1,6 @@
 import { KITS } from '@/data/kits';
 import { Engravings } from './Engravings';
-import { TornEdge } from './TornEdge';
+import { tears } from './TornEdge';
 import { Trace } from './Trace';
 
 /**
@@ -9,8 +9,7 @@ import { Trace } from './Trace';
  */
 export function KitsSection() {
   return (
-    <section id="kits" className="kits" aria-labelledby="kits-title">
-      <TornEdge />
+    <section id="kits" className="kits torn-top torn-bottom" style={tears({ top: 7, bottom: 13 })} aria-labelledby="kits-title">
       <Engravings section="kits" />
       <h2 id="kits-title" className="title">Kits</h2>
       <div className="kits__grid">
@@ -31,8 +30,6 @@ export function KitsSection() {
           </figure>
         ))}
       </div>
-      {/* the kits' own bottom edge, torn, over the colors waiting beneath */}
-      <TornEdge seed={13} side="bottom" />
     </section>
   );
 }

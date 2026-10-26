@@ -1,8 +1,14 @@
+import type { CSSProperties } from 'react';
+
 /**
- * A torn edge, as if the section had been ripped from something. On `top`
- * it rises above the section; on `bottom` it hangs below it, over whatever
- * comes next. Its colour is the section's own (--torn). The tear is drawn
- * from a fixed seed, so it is the same on every visit, server and client.
+ * Torn edges, as if a section had been ripped from something. A section
+ * with one is drawn a little taller than itself (by --tear-h, above or below)
+ * and that extra strip is cut to the tear with a mask, so the edge is the
+ * section's own ground, texture and burned edges and all: there is no second
+ * colour to match. The tear is drawn from a fixed seed, so it is the same on
+ * every visit, server and client.
+ *
+ *   <section className="kits torn-top torn-bottom" style={tears({ top: 7, bottom: 13 })}>
  */
 function tear(seed: number, points = 90) {
   let s = seed;
@@ -16,10 +22,16 @@ function tear(seed: number, points = 90) {
   return `M0 40 ${edge.join(' ')} L1000 40 Z`;
 }
 
-export function TornEdge({ seed = 7, side = 'top' }: { seed?: number; side?: 'top' | 'bottom' }) {
-  return (
-    <svg className={`torn torn--${side}`} viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true">
-      <path d={tear(seed)} />
-    </svg>
-  );
+/** the tear as a mask image: solid below the ragged line (a top edge), or above it, flipped (a bottom edge) */
+const maskOf = (seed: number, side: 'top' | 'bottom') =>
+  `url("data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 40' preserveAspectRatio='none'><path ${side === 'bottom' ? "transform='matrix(1 0 0 -1 0 40)' " : ''}d='${tear(seed)}'/></svg>`,
+  )}")`;
+
+/** the mask images for a section's torn edges, as CSS variables (with the .torn-top / .torn-bottom classes) */
+export function tears({ top, bottom }: { top?: number; bottom?: number }) {
+  const style: Record<string, string> = {};
+  if (top !== undefined) style['--tear-top'] = maskOf(top, 'top');
+  if (bottom !== undefined) style['--tear-bottom'] = maskOf(bottom, 'bottom');
+  return style as CSSProperties;
 }

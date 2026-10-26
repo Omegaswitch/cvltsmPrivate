@@ -1,12 +1,11 @@
 import { BRAND } from '@/data/brand';
 import { DaubLink } from './Daub';
-import { TornEdge } from './TornEdge';
+import { tears } from './TornEdge';
 
 /** The colophon: when it comes, and whose it is. */
 export function Footer() {
   return (
-    <footer id="colophon" className="foot">
-      <TornEdge seed={71} />
+    <footer id="colophon" className="foot torn-top" style={tears({ top: 71 })}>
       <p className="foot__soon">Coming in {BRAND.year}</p>
       <div className="foot__base">
         <span>{BRAND.credit}</span>

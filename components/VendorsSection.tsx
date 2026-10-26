@@ -1,13 +1,12 @@
 import { VENDORS } from '@/data/vendors';
 import { DaubLink } from './Daub';
 import { Engravings } from './Engravings';
-import { TornEdge } from './TornEdge';
+import { tears } from './TornEdge';
 
 /** Where the set is sold, by region. Confirmed vendors link out and are daubed on hover. */
 export function VendorsSection() {
   return (
-    <section id="vendors" className="vendors" aria-labelledby="vendors-title">
-      <TornEdge seed={53} />
+    <section id="vendors" className="vendors torn-top" style={tears({ top: 53 })} aria-labelledby="vendors-title">
       <Engravings section="vendors" />
       <h2 id="vendors-title" className="title">Vendors</h2>
       <ul className="vendors__list">

@@ -499,7 +499,7 @@ img, video { display: block; }
 .engraving--l { left: 0; --shift: calc(var(--off) * -1); -webkit-mask-image: linear-gradient(90deg, #000 25%, transparent 92%); mask-image: linear-gradient(90deg, #000 25%, transparent 92%); }
 .engraving--r { right: 0; --shift: var(--off); -webkit-mask-image: linear-gradient(270deg, #000 25%, transparent 92%); mask-image: linear-gradient(270deg, #000 25%, transparent 92%); }
 /* a section's own content sits above its engravings */
-.kits > :not(.torn):not(.engravings), .colours > :not(.engravings), .renders > :not(.torn):not(.engravings), .vendors > :not(.torn):not(.engravings) { position: relative; z-index: 1; }
+.kits > :not(.engravings), .colours > :not(.engravings), .renders > :not(.engravings), .vendors > :not(.engravings) { position: relative; z-index: 1; }
 @media (max-width: 820px) { .engraving { width: calc(var(--w) * 1.7vw); opacity: 0.15; } }
 /* v2: the ink takes the colour its ground does not have. On the red
    concrete (kits, renders) the woodcuts are black: the ink as printed,
@@ -528,21 +528,35 @@ img, video { display: block; }
 /* everything after the film; above it, so it slides up over it */
 .below { position: relative; z-index: 1; timeline-scope: --kits; }
 
-/* torn edges: each the colour of its own section (--torn) */
-.torn {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: clamp(18px, 3vw, 40px);
-  fill: var(--torn);
-  pointer-events: none;
+/* torn edges (TornEdge.tsx): the section is drawn taller by --tear-h, above
+   or below, and that strip is cut to the tear by a mask, so the edge is the
+   section's own ground. The negative margin keeps the layout where it was;
+   the strip overlaps the section before or after, as the old edges did. */
+:root { --tear-h: clamp(18px, 3vw, 40px); }
+.torn-top, .torn-bottom { -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+/* the ground is laid from the strip's outer edge, so it runs on into the tear
+   instead of repeating its burned edge there (weighted to win over each
+   section's background shorthand, which resets the origin) */
+:is(section, footer):is(.torn-top, .torn-bottom) { background-origin: border-box; }
+.torn-top { margin-top: calc(var(--tear-h) * -1); border-top: var(--tear-h) solid transparent; }
+.torn-bottom { margin-bottom: calc(var(--tear-h) * -1); border-bottom: var(--tear-h) solid transparent; }
+.torn-top:not(.torn-bottom) {
+  -webkit-mask-image: var(--tear-top), linear-gradient(#000, #000); mask-image: var(--tear-top), linear-gradient(#000, #000);
+  -webkit-mask-size: 100% var(--tear-h), 100% calc(100% - var(--tear-h) + 1px); mask-size: 100% var(--tear-h), 100% calc(100% - var(--tear-h) + 1px);
+  -webkit-mask-position: top, bottom; mask-position: top, bottom;
 }
-.torn--top { bottom: calc(100% - 1px); }
-.torn--bottom { top: calc(100% - 1px); transform: scaleY(-1); }
+/* the kits come up over the film with the colors pinned beneath them: they are
+   lifted by the tear visually (top), not in the layout, so the pinned colors
+   cannot rise into the strip and show through where the tear is cut away */
+.kits.torn-top { margin-top: 0; top: calc(var(--tear-h) * -1); margin-bottom: calc(var(--tear-h) * -2); }
+.torn-top.torn-bottom {
+  -webkit-mask-image: var(--tear-top), linear-gradient(#000, #000), var(--tear-bottom); mask-image: var(--tear-top), linear-gradient(#000, #000), var(--tear-bottom);
+  -webkit-mask-size: 100% var(--tear-h), 100% calc(100% - 2 * var(--tear-h) + 2px), 100% var(--tear-h); mask-size: 100% var(--tear-h), 100% calc(100% - 2 * var(--tear-h) + 2px), 100% var(--tear-h);
+  -webkit-mask-position: top, center, bottom; mask-position: top, center, bottom;
+}
 
 /* kits: on dark concrete, above the colour, which waits beneath */
 .kits {
-  --torn: #4a1210;
   position: relative;
   z-index: 3;
   padding: clamp(110px, 16vh, 180px) var(--gutter) clamp(140px, 22vh, 240px);
@@ -566,7 +580,6 @@ img, video { display: block; }
 /* colour: pinned to the foot of the screen beneath the kits, uncovered as
    they scroll away; its chips rise one after another as the kits leave */
 .colours {
-  --torn: #150506;
   position: sticky;
   bottom: 0;
   z-index: 1;
@@ -602,7 +615,6 @@ img, video { display: block; }
 
 /* renders: back on the concrete, torn over the colors */
 .renders {
-  --torn: #4a1210;
   position: relative;
   z-index: 2;
   padding: clamp(110px, 16vh, 180px) var(--gutter) clamp(120px, 18vh, 200px);
@@ -625,7 +637,6 @@ img, video { display: block; }
 
 /* vendors: on black, torn over the renders */
 .vendors {
-  --torn: #150506;
   position: relative;
   z-index: 3;
   padding: clamp(110px, 16vh, 180px) var(--gutter) clamp(110px, 16vh, 180px);
@@ -709,7 +720,6 @@ img, video { display: block; }
 /* ------------------------------------------------------------- colophon */
 
 .foot {
-  --torn: #4a1210;
   position: relative;
   z-index: 3;
   padding: clamp(72px, 12vh, 120px) var(--gutter) clamp(56px, 9vh, 88px);
@@ -877,7 +887,7 @@ img, video { display: block; }
    the middle, a gutter short of the novelties. */
 @media (min-width: 821px) {
   .kits { --top: clamp(84px, 11vh, 120px); padding-top: var(--top); }
-  .kits > .title:not(.torn):not(.engravings) { position: absolute; top: var(--top); left: 66.7%; }
+  .kits > .title:not(.engravings) { position: absolute; top: var(--top); left: 66.7%; }
   .kits__grid { margin-top: 0; }
   .kit--base { grid-column: 1 / span 8; justify-self: end; margin-right: clamp(32px, 6vw, 110px); width: min(100%, calc((100svh - var(--top) - 4vh - 84px) * 1.12)); }
   .kit--novelties { margin-top: max(22vh, 170px); }
@@ -886,7 +896,7 @@ img, video { display: block; }
    the edge, and the render is held to the height of the screen */
 @media (min-width: 821px) {
   .renders { --top: clamp(84px, 11vh, 120px); padding-top: var(--top); }
-  .renders > .title:not(.torn):not(.engravings) { position: absolute; top: var(--top); right: var(--gutter); }
+  .renders > .title:not(.engravings) { position: absolute; top: var(--top); right: var(--gutter); }
   .renders__grid { margin-top: 0; }
   .render--lead { width: min(100%, calc(100svh - var(--top) - 4vh - 24px)); }
   .render--side { margin-top: max(18vh, 170px); }
