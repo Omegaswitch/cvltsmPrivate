@@ -370,6 +370,9 @@ img, video { display: block; }
 .logo { display: block; height: auto; }
 .hero__set .logo { width: 100%; filter: drop-shadow(0 2px 18px rgb(0 0 0 / 0.55)); }
 .hero__set h1 { margin: 0; }
+/* the logo bleeding (Bleed.tsx): its SVG is the logo plus the room the drips run into, below it */
+.bleed { display: block; position: relative; color: #cd1616; }
+.bleed__svg { display: block; width: 100%; height: auto; overflow: visible; margin-bottom: calc(-100% * 640 / 1600); filter: drop-shadow(0 2px 18px rgb(0 0 0 / 0.55)); pointer-events: none; }
 /* a render's place before the render exists: its proportions, held by a hairline */
 .slot {
   display: grid;
@@ -645,14 +648,14 @@ img, video { display: block; }
    long as they are in view: a bead slides down, the tip swells, a drop falls.
    Before the mark (and only if the script is there to place it) they are
    held back; with no script, or with reduced motion, they are just drawn run. */
-.colours[data-armed]:not([data-dripping]) .drip { --k: 0; opacity: 0; }
+:is(.colours, .bleed)[data-armed]:not([data-dripping]) .drip { --k: 0; opacity: 0; }
 @media (prefers-reduced-motion: no-preference) {
-  .colours[data-dripping] .drip { animation: run var(--dur) cubic-bezier(0.33, 0.1, 0.3, 1) var(--delay) both; }
-  .colours[data-dripping] .drip__bead { animation: slide var(--slide) cubic-bezier(0.45, 0, 0.85, 0.5) calc(var(--delay) + var(--dur) * 0.6) infinite; }
-  .colours[data-dripping] .drip__tip { animation: swell var(--swell) ease-in-out calc(var(--delay) + var(--dur)) infinite; }
-  .colours[data-dripping] .drip__drop { animation: fall var(--drop) cubic-bezier(0.5, 0, 0.8, 0.4) calc(var(--delay) + var(--dur) + var(--dd)) infinite; }
+  :is(.colours, .bleed)[data-dripping] .drip { animation: run var(--dur) cubic-bezier(0.33, 0.1, 0.3, 1) var(--delay) both; }
+  :is(.colours, .bleed)[data-dripping] .drip__bead { animation: slide var(--slide) cubic-bezier(0.45, 0, 0.85, 0.5) calc(var(--delay) + var(--dur) * 0.6) infinite; }
+  :is(.colours, .bleed)[data-dripping] .drip__tip { animation: swell var(--swell) ease-in-out calc(var(--delay) + var(--dur)) infinite; }
+  :is(.colours, .bleed)[data-dripping] .drip__drop { animation: fall var(--drop) cubic-bezier(0.5, 0, 0.8, 0.4) calc(var(--delay) + var(--dur) + var(--dd)) infinite; }
   /* nothing runs while it cannot be seen */
-  .colours:not([data-live]) :is(.drip, .drip__bead, .drip__tip, .drip__drop) { animation-play-state: paused; }
+  :is(.colours, .bleed):not([data-live]) :is(.drip, .drip__bead, .drip__tip, .drip__drop) { animation-play-state: paused; }
 }
 /* a drip: it runs, hesitates, runs on */
 @keyframes run {
