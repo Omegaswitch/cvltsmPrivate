@@ -105,9 +105,15 @@ export function Film() {
     if (wanted) {
       load(va, 0);
       va.classList.add('is-shown');
+      // the damage pass waits for the first clip, so it never competes with it
       if (damage.current && size === 'lg') {
-        damage.current.src = `/film/damage.${format}`;
-        damage.current.load();
+        va.addEventListener('playing', () => {
+          const d = damage.current;
+          if (!d) return;
+          d.src = `/film/damage.${format}`;
+          d.load();
+          sync();
+        }, { once: true });
       }
       sync();
     }

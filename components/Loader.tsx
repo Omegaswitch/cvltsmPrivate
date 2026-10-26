@@ -11,7 +11,7 @@ import { PATHS, SRC, VIEW } from './loader-paths';
  * script it lifts by itself (globals.css).
  */
 
-const MIN = 2300;   // ms: long enough for the outline to close
+const MIN = 1400;   // ms: long enough for the outline to close
 
 export function Loader() {
   const [state, setState] = useState<'on' | 'lifting' | 'gone'>('on');
@@ -30,7 +30,7 @@ export function Loader() {
       timer = window.setTimeout(() => {
         setState('lifting');
         root.style.overflow = '';
-        timer = window.setTimeout(() => setState('gone'), 900);
+        timer = window.setTimeout(() => setState('gone'), 600);
       }, wait);
     });
     return () => { clearTimeout(timer); root.style.overflow = ''; };

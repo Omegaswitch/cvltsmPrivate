@@ -7,7 +7,7 @@ const OUT = 'public/textures';
 
 // grime: the brushed concrete as it is, greyscale. Multiplied over the
 // footage, its white leaves the picture alone and its marks darken it.
-await sharp(`${A}/concrete-brushed.jpg`).greyscale().resize({ width: 1600 }).webp({ quality: 70 })
+await sharp(`${A}/concrete-brushed.jpg`).greyscale().resize({ width: 1280 }).webp({ quality: 42, effort: 6 })   // seen at 30% under a multiply and stretched to the screen: size and compression are invisible
   .toFile(`${OUT}/grime.webp`);
 
 // ground: the plain concrete pressed into the dark, a warm near-black with

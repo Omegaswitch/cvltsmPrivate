@@ -24,8 +24,8 @@ for (const f of files) {
     .flatten({ background: '#ffffff' })     // transparent paper becomes white
     .greyscale()
     .normalise()                              // ink to black, paper to white, whatever the scan
-    .resize({ width: 1100, height: 1100, fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: 58, effort: 5 })
+    .resize({ width: 900, height: 900, fit: 'inside', withoutEnlargement: true })   // drawn at most ~1000 px wide on a sharp screen, and faint
+    .webp({ quality: 46, effort: 6 })
     .toFile(join(OUT, `${name}.webp`));
   console.log(`${name}.webp`, info.width, 'x', info.height, Math.round(info.size / 1024), 'KB');
 }

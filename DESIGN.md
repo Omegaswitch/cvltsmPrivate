@@ -26,7 +26,7 @@ Version 2 (the first stood on near-black; it is kept as the `v1` branch of the p
 ## Type
 
 - **Valhalica** (`public/fonts/`, the face the wordmark is drawn in) for everything the visitor reads as a heading or a button: the nav, section titles (up to 9rem), kit names, vendor regions, the sound control and the hover (the sound control itself has no blood, only brightens). Never for running text.
-- **Interface:** Inter Tight for the small labels and the body of the privacy policy. Small and exact, like a slate.
+- **Interface:** Valhalica too, for the small labels and the body of the privacy policy: one face, served from the site, nothing fetched from Google. The runes use the system’s runic face (Segoe UI Historic on Windows, Noto Sans Runic where installed).
 - No gothic or blackletter: dark does not mean medieval-pastiche.
 
 ## Layout

@@ -23,7 +23,7 @@ export default function Privacy() {
       <DaubLink className="policy__back" href="/" label="Return">Return</DaubLink>
       <h1 className="title">Privacy policy</h1>
       <div className="policy__body">
-        <p>Last updated 24 October 2026.</p>
+        <p>Last updated 26 October 2026.</p>
         <p>
           This site presents the {BRAND.name} keycap set. It sells nothing, has no forms and no
           newsletter, and it does not set cookies or use analytics or advertising trackers. On your
@@ -44,11 +44,6 @@ export default function Privacy() {
           <li>
             <strong>Hosting:</strong> the site is hosted by Vercel, which keeps short-lived request logs
             for security and operation. See the <a href="https://vercel.com/legal/privacy-policy">Vercel privacy policy</a>.
-          </li>
-          <li>
-            <strong>Fonts:</strong> some typefaces are loaded from Google Fonts, so your browser
-            contacts Google&rsquo;s servers, which see your IP address. See the{' '}
-            <a href="https://policies.google.com/privacy">Google privacy policy</a>.
           </li>
           <li>
             <strong>Vendors:</strong> links to vendors take you to their own sites, which have their
