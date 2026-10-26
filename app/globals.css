@@ -26,15 +26,20 @@
   --slow: cubic-bezier(0.4, 0, 0.2, 1);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* below the film: the concrete, washed in red, its edges burned like the film's frame */
+  /* below the film: the concrete, dyed red, its edges burned like the film's
+     frame. The red is blended in as colour (.dyed, below), not laid over the
+     grey: the concrete keeps its marks and its light, all of it red. */
   --ground:
     radial-gradient(130% 90% at 50% 40%, transparent 50%, rgb(0 0 0 / 0.6) 100%),
-    linear-gradient(rgb(150 20 20 / 0.5), rgb(150 20 20 / 0.5)),
+    linear-gradient(#c3140f, #c3140f),
+    linear-gradient(rgb(255 255 255 / 0.03), rgb(255 255 255 / 0.03)),
     url('/textures/ground.webp') center / cover,
     var(--char);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+/* the concrete's red layer is blended as colour (see --ground) */
+.kits, .renders, .foot, .policy { background-blend-mode: normal, color, normal, normal; }
 html { color-scheme: dark; background: var(--black); -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
