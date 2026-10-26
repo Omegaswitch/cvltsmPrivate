@@ -499,6 +499,17 @@ img, video { display: block; }
 /* a section's own content sits above its engravings */
 .kits > :not(.torn):not(.engravings), .colours > :not(.engravings), .renders > :not(.torn):not(.engravings), .vendors > :not(.torn):not(.engravings) { position: relative; z-index: 1; }
 @media (max-width: 820px) { .engraving { width: calc(var(--w) * 1.7vw); opacity: 0.15; } }
+/* v2: the ink takes the colour its ground does not have. On the red
+   concrete (kits, renders) the woodcuts are black: the ink as printed,
+   multiplied in, so the paper vanishes and the lines darken the red. On
+   the dark grounds (colors, vendors) they are the colourway's icy blue
+   (#B1BEC3, the cyan): light lines, cooled, screened in. */
+:is(.kits, .renders) .engraving { filter: grayscale(1) contrast(2.2) brightness(1.15); mix-blend-mode: multiply; opacity: 0.9; }
+:is(.colours, .vendors) .engraving { filter: invert(1) sepia(1) saturate(2.6) hue-rotate(158deg) brightness(1.05); mix-blend-mode: screen; opacity: 0.45; }
+@media (max-width: 820px) {
+  :is(.kits, .renders) .engraving { opacity: 0.8; }
+  :is(.colours, .vendors) .engraving { opacity: 0.36; }
+}
 
 /* ------------------------------------------------------------ sections */
 
