@@ -790,7 +790,7 @@ img, video { display: block; }
 .fill__svg text { font: inherit; letter-spacing: inherit; dominant-baseline: central; }
 .fill__word { fill: var(--bone); opacity: 0.85; }
 .fill__level {
-  transform: translateY(1.35em);
+  transform: translateY(1.1em);   /* just under the letters, so the first of it shows at once */
   transition: transform 1.5s cubic-bezier(0.45, 0, 0.7, 0.4);   /* draining: slow to start, then away */
 }
 .fill__blood {
@@ -799,13 +799,13 @@ img, video { display: block; }
 @keyframes seep { to { transform: translateX(-140px); } }
 .fill:is(:hover, :focus-visible) .fill__level {
   transform: translateY(-0.3em);
-  /* thick: a first gulp, a long hold, a creep, a hold, the last of it */
-  transition: transform 3.4s linear(0, 0.05 6%, 0.2 16%, 0.24 30%, 0.27 38%, 0.46 52%, 0.55 60%, 0.58 70%, 0.63 76%, 0.86 90%, 1);
+  /* thick: a first gulp at once, a hold, a creep, a hold, the last of it */
+  transition: transform 3s linear(0, 0.16 7%, 0.24 16%, 0.27 30%, 0.46 46%, 0.55 56%, 0.58 67%, 0.63 74%, 0.86 89%, 1);
 }
 .fill:is(:hover, :focus-visible) .fill__blood { animation-play-state: running; }
 .fill:is(:hover, :focus-visible) .fill__svg {
   filter: drop-shadow(0 0 4px rgb(255 40 20 / 0.7)) drop-shadow(0 0 12px rgb(190 0 0 / 0.55));
-  transition: filter 0.9s var(--ease) 2.8s;
+  transition: filter 0.9s var(--ease) 2.5s;
 }
 @media (prefers-reduced-motion: reduce) {
   .fill__level, .fill:is(:hover, :focus-visible) .fill__level { transition-duration: 0.01s; }
