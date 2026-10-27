@@ -1,5 +1,6 @@
 import { BRAND } from '@/data/brand';
 import { Home } from './Home';
+import { FillDefs, FillLink } from './FillLink';
 import { Glide } from './Glide';
 
 const LINKS = [
@@ -9,7 +10,7 @@ const LINKS = [
   { href: '#vendors', label: 'Vendors' },
 ];
 
-/** The manufacturer's mark, always on the left; the set's name joins it once the film is passed. One link home. The sections of the page, and nothing more. Each word is a vessel that fills with blood on hover (globals.css, .fill). */
+/** The manufacturer's mark, always on the left; the set's name joins it once the film is passed. One link home. The sections of the page, and nothing more. Each word is a vessel that fills with blood on hover (FillLink.tsx). */
 export function Nav() {
   return (
     <nav className="nav" aria-label="Sections">
@@ -18,9 +19,10 @@ export function Nav() {
         <span className="nav__name wordmark" aria-hidden="true">{BRAND.name}</span>
       </Home>
       {LINKS.map((l) => (
-        <a key={l.href} className="fill" href={l.href} data-label={l.label}><span>{l.label}</span></a>
+        <FillLink key={l.href} href={l.href} label={l.label} />
       ))}
       <Glide />
+      <FillDefs />
     </nav>
   );
 }

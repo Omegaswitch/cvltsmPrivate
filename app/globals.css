@@ -768,37 +768,49 @@ img, video { display: block; }
 
 /* ----------------------------------------------------------------- fill */
 
-/* The menu: each word is a vessel. Hover or focus, and blood rises inside
-   the letters from the foot, its surface rocking, until the word is full
-   and glows. A copy of the word lies over it, painted with a tall picture:
-   empty above, a wavy surface, blood below; clipped to the letters, and
-   slid up (the fill, a transition, so it drains back wherever it got to)
-   and sideways (the surface, an animation). */
+/* The menu: each word is a vessel that fills with blood (FillLink.tsx).
+   The HTML word keeps the place and is what is read aloud; the SVG draws
+   it, and the blood inside it. The rise is one transition with an easing
+   that surges and stalls, as something thick poured in does; leaving, it
+   drains back steadily from wherever it got to. The surface drifts very
+   slowly and only while the word is held. Full, the word glows. */
 .fill { position: relative; display: inline-block; }
 .fill::before { content: ''; position: absolute; inset: -5px -4px; }   /* a little more to tap than the word */
-.fill::after {
-  content: attr(data-label);
-  content: attr(data-label) / '';
+.fill > span { color: transparent; }
+.fill__svg {
   position: absolute;
   inset: 0;
-  white-space: nowrap;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
   pointer-events: none;
-  color: transparent;
-  text-shadow: none;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 300' preserveAspectRatio='none'%3E%3ClinearGradient id='g' x1='0' y1='104' x2='0' y2='230' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%23e3180d'/%3E%3Cstop offset='1' stop-color='%23860904'/%3E%3C/linearGradient%3E%3Cpath fill='url(%23g)' d='M0 110 Q10 103 20 110 T40 110 V300 H0Z'/%3E%3C/svg%3E") 0 0 / 1.4em 300% repeat-x;
-  -webkit-background-clip: text;
-  background-clip: text;
-  filter: drop-shadow(0 0 0 transparent);
-  transition: background-position-y 0.75s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s var(--ease);
+  filter: drop-shadow(0 1px 6px rgb(0 0 0 / 0.6));
+  transition: filter 0.6s var(--ease);
 }
-.fill:is(:hover, :focus-visible)::after {
-  background-position-y: 60%;
-  filter: drop-shadow(0 0 4px rgb(255 40 20 / 0.75)) drop-shadow(0 0 12px rgb(200 0 0 / 0.6));
-  transition: background-position-y 1.2s cubic-bezier(0.35, 0.1, 0.45, 1), filter 0.4s var(--ease) 0.85s;
-  animation: slosh 1.1s linear infinite;
+.fill__svg text { font: inherit; letter-spacing: inherit; dominant-baseline: central; }
+.fill__word { fill: var(--bone); opacity: 0.85; }
+.fill__level {
+  transform: translateY(1.35em);
+  transition: transform 1.5s cubic-bezier(0.45, 0, 0.7, 0.4);   /* draining: slow to start, then away */
 }
-@keyframes slosh { to { background-position-x: 1.4em; } }
-@media (prefers-reduced-motion: reduce) { .fill:is(:hover, :focus-visible)::after { animation: none; transition-duration: 0.01s; } }
+.fill__blood {
+  animation: seep 14s linear infinite paused;
+}
+@keyframes seep { to { transform: translateX(-140px); } }
+.fill:is(:hover, :focus-visible) .fill__level {
+  transform: translateY(-0.3em);
+  /* thick: a first gulp, a long hold, a creep, a hold, the last of it */
+  transition: transform 3.4s linear(0, 0.05 6%, 0.2 16%, 0.24 30%, 0.27 38%, 0.46 52%, 0.55 60%, 0.58 70%, 0.63 76%, 0.86 90%, 1);
+}
+.fill:is(:hover, :focus-visible) .fill__blood { animation-play-state: running; }
+.fill:is(:hover, :focus-visible) .fill__svg {
+  filter: drop-shadow(0 0 4px rgb(255 40 20 / 0.7)) drop-shadow(0 0 12px rgb(190 0 0 / 0.55));
+  transition: filter 0.9s var(--ease) 2.8s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fill__level, .fill:is(:hover, :focus-visible) .fill__level { transition-duration: 0.01s; }
+  .fill__blood { animation: none; }
+}
 
 /* ----------------------------------------------------------------- daub */
 
