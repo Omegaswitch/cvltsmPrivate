@@ -84,7 +84,8 @@ export function Ooze({ hex, index }: { hex: string; index: number }) {
 
   const { w: W, h: H } = size;
   const compact = H < 160;                         // a phone's low band
-  const { drips, blobs } = plan(index);
+  const { drips, blobs: all } = plan(index);
+  const blobs = compact ? [] : all;              // on a low band a blob hangs past the corner as a lump
   const fall = compact ? 40 : 360;
   const shaped = drips.map((d) => ({
     ...d,
