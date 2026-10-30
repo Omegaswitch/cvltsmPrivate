@@ -599,7 +599,7 @@ img, video { display: block; }
 }
 .strip { display: flex; gap: clamp(28px, 3vw, 56px); margin: 0; padding: 0; list-style: none; }
 .strip li { flex: 1 1 0; min-width: 0; display: grid; gap: 10px; align-content: start; }
-.strip__name, .strip__hex { position: relative; z-index: 1; text-shadow: 0 0 6px var(--black), 0 0 2px var(--black); }   /* legible where a drip runs past */
+.strip__name { position: relative; z-index: 1; text-shadow: 0 0 6px var(--black), 0 0 2px var(--black); }   /* legible where a drip runs past */
 .strip li:has(.ooze) .strip__name { margin-top: clamp(26px, 5vh, 54px); }
 /* a chip: a frame the colour bleeds out of (components/Ooze.tsx, an SVG
    with its own gooey filter, drawn the same in every browser). */
@@ -615,7 +615,6 @@ img, video { display: block; }
 .drip__tip, .drip__bead, .drip__drop { transform-box: fill-box; transform-origin: center; }
 .drip__bead, .drip__drop { opacity: 0; }
 .strip__name { font-size: 0.9375rem; }
-.strip__hex { font-size: 0.6875rem; letter-spacing: 0.08em; color: var(--bone-dim); font-variant-numeric: tabular-nums; }
 
 /* renders: back on the concrete, torn over the colors */
 .renders {
@@ -979,10 +978,9 @@ img, video { display: block; }
   .kit--numpad, .kit--novelties { width: 78%; }
   .kit--novelties { justify-self: end; }
   .strip { flex-direction: column; gap: 30px; }
-  .strip li { grid-template-columns: 1fr auto; align-items: center; }
-  .strip__chip { grid-column: 1 / -1; height: 96px; --edge: 22px; }
+  .strip__chip { height: 96px; --edge: 22px; }
   .frame { --edge: 22px; }
-  .strip li:has(.ooze) .strip__name, .strip li:has(.ooze) .strip__hex { margin-top: 30px; }
+  .strip li:has(.ooze) .strip__name { margin-top: 30px; }
   .renders__grid { grid-template-columns: minmax(0, 1fr); }
   .render--lead, .render--side, .render--third { grid-column: 1 / -1; margin-top: 0; }
   .render--side, .render--third:nth-child(4) { width: 78%; justify-self: end; margin-top: 0; }

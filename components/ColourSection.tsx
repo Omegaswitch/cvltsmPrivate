@@ -21,7 +21,6 @@ export function ColourSection() {
           <li key={c.name} style={{ '--i': i } as CSSProperties}>
             <span className="strip__chip frame"><Ooze hex={c.hex} index={i} /></span>
             <span className="strip__name">{c.name}</span>
-            <span className="strip__hex">{c.hex}</span>
           </li>
         ))}
       </ul>
