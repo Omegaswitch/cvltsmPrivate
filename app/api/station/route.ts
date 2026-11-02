@@ -1,6 +1,7 @@
 import { ASKS_PER_HOUR, MAX_QUESTION, askArchive, leaks } from '@/lib/station/archive';
 import { FILES, HINTS, LOCKS, type Lock } from '@/lib/station/content';
 import { asksLastHour, enter, logAsk, player, ready, solve, solvesOf } from '@/lib/station/db';
+import { STATION_OPEN } from '@/lib/station/open';
 import { ACCESS, hash, normalise, playerOf, sessionFor } from '@/lib/station/pass';
 
 /*
@@ -29,6 +30,7 @@ const listing = (level: number) =>
 const slow = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export async function POST(req: Request) {
+  if (!STATION_OPEN) return new Response(null, { status: 404 });
   let body: Record<string, unknown>;
   try {
     body = await req.json();

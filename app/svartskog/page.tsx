@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { STATION_OPEN } from '@/lib/station/open';
 import { Station } from '@/components/station/Station';
 import './station.css';
 
@@ -12,5 +14,6 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
+  if (!STATION_OPEN) notFound();
   return <Station />;
 }

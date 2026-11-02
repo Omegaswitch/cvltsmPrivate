@@ -1,6 +1,7 @@
 import { BRAND } from '@/data/brand';
-import { DaubLink } from './Daub';
+import { FillLink } from './FillLink';
 import { tears } from './TornEdge';
+import { STATION_OPEN } from '@/lib/station/open';
 
 /** The colophon: when it comes, and whose it is. */
 export function Footer() {
@@ -8,10 +9,10 @@ export function Footer() {
     <footer id="colophon" className="foot torn-top" style={tears({ top: 71 })}>
       <p className="foot__soon">Coming in {BRAND.year}</p>
       <div className="foot__base">
-        <span>{BRAND.credit}</span>
+        <span className="foot__credit">{BRAND.credit}</span>
         {/* the way in to the hidden station, for whoever reads runes: SVARTSKOG */}
-        <span className="foot__runes" aria-hidden="true">ᛊᚹᚨᚱᛏᛊᚲᛟᚷ</span>
-        <DaubLink href="/privacy" label="Privacy policy">Privacy policy</DaubLink>
+        {STATION_OPEN && <span className="foot__runes" aria-hidden="true">ᛊᚹᚨᚱᛏᛊᚲᛟᚷ</span>}
+        <FillLink href="/privacy" label="Privacy policy" />
       </div>
     </footer>
   );

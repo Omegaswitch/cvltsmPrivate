@@ -8,6 +8,9 @@ export const BRAND = {
   year: '2027',
   /** the set's logo: the artwork's marks in its red (scripts/make-logo.py); unset, the name would stand in Valhalica */
   logo: '/brand/cvltsm.png' as string | undefined,
+  /** the picture a shared link shows. A new picture takes a new name (bump the
+   *  number): chat apps keep the old picture for as long as the address is the same */
+  share: '/share/cvltsm-v2.png',
   manufacturer: { name: 'SWG', logo: '/brand/SWGX.png' },
   /** the line at the very foot of the page */
   credit: 'manu x omegaswitch x stellaidoscope',

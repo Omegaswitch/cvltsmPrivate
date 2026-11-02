@@ -11,8 +11,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(BRAND.url),
   title: 'CVLTSM',
   description: 'CVLTSM, a keycap set by SWG.',
-  openGraph: { title: 'CVLTSM', siteName: 'CVLTSM', description: 'A keycap set by SWG.', type: 'website' },
-  twitter: { card: 'summary_large_image', title: 'CVLTSM', description: 'A keycap set by SWG.' },
+  openGraph: { title: 'CVLTSM', siteName: 'CVLTSM', description: 'A keycap set by SWG.', type: 'website', images: [{ url: BRAND.share, width: 1200, height: 630, type: 'image/png' }] },
+  twitter: { card: 'summary_large_image', title: 'CVLTSM', description: 'A keycap set by SWG.', images: [{ url: BRAND.share, width: 1200, height: 630, type: 'image/png' }] },
 };
 
 export const viewport: Viewport = {

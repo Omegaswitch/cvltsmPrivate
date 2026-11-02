@@ -1,19 +1,19 @@
 import type { Metadata } from 'next';
+import { STATION_OPEN } from '@/lib/station/open';
 import { BRAND } from '@/data/brand';
 import { BloodDefs, DaubLink } from '@/components/Daub';
 
 const title = `Privacy policy · ${BRAND.name}`;
 const description = `What the ${BRAND.name} site does with a visitor's data.`;
-// the share images in app/ are not inherited once this page sets its own
-// openGraph and twitter, so they are named again
-const image = (url: string) => [{ url, width: 1200, height: 630, type: 'image/png' }];
+// the share image is not inherited once this page sets its own openGraph and twitter, so it is named again
+const images = [{ url: BRAND.share, width: 1200, height: 630, type: 'image/png' }];
 
 export const metadata: Metadata = {
   title,
   description,
   alternates: { canonical: '/privacy' },
-  openGraph: { title, description, siteName: BRAND.name, type: 'website', url: '/privacy', images: image('/opengraph-image.png') },
-  twitter: { card: 'summary_large_image', title, description, images: image('/twitter-image.png') },
+  openGraph: { title, description, siteName: BRAND.name, type: 'website', url: '/privacy', images },
+  twitter: { card: 'summary_large_image', title, description, images },
 };
 
 /** What this site does with a visitor's data: very little, said plainly. */
@@ -27,9 +27,8 @@ export default function Privacy() {
         <p>
           This site presents the {BRAND.name} keycap set. It sells nothing, has no forms and no
           newsletter, and it does not set cookies or use analytics or advertising trackers. On your
-          own device (local storage) it remembers whether you turned the sound off and, if you enter
-          the field station below, your sign-in to it. Nothing else is kept about you, except the
-          field station register described below.
+          own device (local storage) it remembers whether you turned the sound off
+          {STATION_OPEN ? ' and, if you enter the field station below, your sign-in to it. Nothing else is kept about you, except the field station register described below.' : '. Nothing else is kept about you.'}
         </p>
 
         <h2>What is collected</h2>
@@ -51,16 +50,20 @@ export default function Privacy() {
           </li>
         </ul>
 
-        <h2>The field station</h2>
-        <p>
-          The site has a hidden puzzle page. To enter it you choose a name; that name, how far you
-          get and when, and any questions you put to its archive are stored in a database hosted by
-          Neon (in Frankfurt) so the organisers can see who solved it. Use a nickname, not your
-          real name. Questions to the archive are answered by Google&rsquo;s Gemini service, which
-          receives the question text. See the <a href="https://neon.com/privacy-policy">Neon</a> and{' '}
-          <a href="https://policies.google.com/privacy">Google</a> privacy policies. To have your
-          entry removed, contact {BRAND.contact} with the name you used.
-        </p>
+        {STATION_OPEN && (
+          <>
+            <h2>The field station</h2>
+            <p>
+              The site has a hidden puzzle page. To enter it you choose a name; that name, how far you
+              get and when, and any questions you put to its archive are stored in a database hosted by
+              Neon (in Frankfurt) so the organisers can see who solved it. Use a nickname, not your
+              real name. Questions to the archive are answered by Google&rsquo;s Gemini service, which
+              receives the question text. See the <a href="https://neon.com/privacy-policy">Neon</a> and{' '}
+              <a href="https://policies.google.com/privacy">Google</a> privacy policies. To have your
+              entry removed, contact {BRAND.contact} with the name you used.
+            </p>
+          </>
+        )}
 
         <h2>Your rights</h2>
         <p>
@@ -74,7 +77,7 @@ export default function Privacy() {
           For questions about this policy, contact {BRAND.contact}.
         </p>
         {/* the field station's access code, for whoever reads runes this far down: SKOGSRA */}
-        <p className="policy__runes" aria-hidden="true">ᛊᚲᛟᚷᛊᚱᚨ</p>
+        {STATION_OPEN && <p className="policy__runes" aria-hidden="true">ᛊᚲᛟᚷᛊᚱᚨ</p>}
       </div>
       <BloodDefs />
       <div className="grain" aria-hidden="true" />

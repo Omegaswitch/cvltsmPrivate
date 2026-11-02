@@ -12,7 +12,7 @@ import { BRAND } from '@/data/brand';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
-  openGraph: { title: 'CVLTSM', siteName: 'CVLTSM', description: 'A keycap set by SWG.', type: 'website', url: '/' },
+  openGraph: { title: 'CVLTSM', siteName: 'CVLTSM', description: 'A keycap set by SWG.', type: 'website', url: '/', images: [{ url: BRAND.share, width: 1200, height: 630, type: 'image/png' }] },
 };
 
 /* What the page is, for search engines: the visible page has almost no words

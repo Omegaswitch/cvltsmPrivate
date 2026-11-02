@@ -736,18 +736,21 @@ img, video { display: block; }
   line-height: 1;
   color: var(--bone);
 }
-/* the very foot: the credit and the privacy link, tiny */
+/* the very foot: the credit and the privacy link, small but read */
 .foot__base {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 16px;
   margin-top: clamp(56px, 9vh, 96px);
-  font-size: 0.625rem;
+  font-size: 0.8125rem;
   letter-spacing: 0.08em;
   text-transform: lowercase;
   color: var(--bone-dim);
 }
-.foot__base a { color: var(--bone-dim); }
+.foot__credit { color: var(--bone); opacity: 0.85; }
+.foot__base .fill { font-size: 1rem; letter-spacing: 0.04em; }
+.foot .fill__blood { fill: url(#fill-dried); }
 
 /* the privacy policy: plain reading on the concrete */
 .policy {

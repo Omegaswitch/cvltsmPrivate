@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 /*
  * A menu word that is a vessel: on hover or focus, blood rises inside the
  * letters. Thick, not watery: it comes up in slow surges with pauses between
@@ -41,15 +43,22 @@ export function FillDefs() {
           <stop offset="0.12" stopColor="#b10f07" />
           <stop offset="1" stopColor="#5c0502" />
         </linearGradient>
+        {/* on a red ground (the colophon) the blood is old and dark, or it would not show */}
+        <linearGradient id="fill-dried" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#4a0603" />
+          <stop offset="1" stopColor="#140100" />
+        </linearGradient>
       </defs>
     </svg>
   );
 }
 
 export function FillLink({ href, label }: { href: string; label: string }) {
-  const id = `fill-${label.toLowerCase()}`;
+  const id = `fill-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+  // a link to another page of the site is followed without reloading, so the music goes on
+  const Tag = href.startsWith('/') ? Link : 'a';
   return (
-    <a className="fill" href={href}>
+    <Tag className="fill" href={href}>
       <span>{label}</span>
       <svg className="fill__svg" aria-hidden="true" focusable="false">
         <clipPath id={id}>
@@ -64,6 +73,6 @@ export function FillLink({ href, label }: { href: string; label: string }) {
           </g>
         </g>
       </svg>
-    </a>
+    </Tag>
   );
 }

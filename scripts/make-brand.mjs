@@ -4,35 +4,33 @@
 //
 // From the CVLTSM outlines in assets/brand/ (cut from Valhalica, so nothing
 // depends on a font being installed), the SWG logo and two of the engravings:
-//   app/favicon.ico, app/icon.svg, app/apple-icon.png    (browser tabs, phones)
-//   app/opengraph-image.png, app/twitter-image.png       (links shared anywhere)
+//   app/favicon.ico, app/icon.png, app/apple-icon.png    (browser tabs, phones)
+//   public/share/cvltsm-v2.png (links shared anywhere; BRAND.share: a new picture takes a new name)
 // Next serves them by their names, with no code. The embed (v2) is the set's
 // logo bleeding over a still from the film; see the share image below.
 import { readFileSync, writeFileSync } from 'node:fs';
 import sharp from 'sharp';
 
-const BONE = '#d4ccbf';
-const pathOf = (file) => readFileSync(file, 'utf8').match(/ d="([^"]+)"/)[1];
-const boxOf = (file) => readFileSync(file, 'utf8').match(/viewBox="([^"]+)"/)[1].split(/\s+/).map(Number);
-
-const C = { d: pathOf('assets/brand/cvltsm-c.svg'), box: boxOf('assets/brand/cvltsm-c.svg') };
-const WORD = { d: pathOf('assets/brand/cvltsm-wordmark.svg'), box: boxOf('assets/brand/cvltsm-wordmark.svg') };
-
-// ---- the icon: the C, bone on black, centred with room round it
-function iconSvg(size, pad, bg, round = 0) {
-  const [x, y, w, h] = C.box;
-  const s = (size - 2 * pad) / Math.max(w, h);
-  const tx = (size - w * s) / 2 - x * s, ty = (size - h * s) / 2 - y * s;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-<rect width="${size}" height="${size}" rx="${round}" fill="${bg}"/>
-<path transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(5)})" fill="${BONE}" d="${C.d}"/></svg>`;
+// ---- the icon: the C of the v2 logo (its two crossed strokes, cut from the
+// lettering by hand into assets/brand/cvltsm-c-cross.png), red on black,
+// centred with room round it
+const CROSS = 'assets/brand/cvltsm-c-cross.png';
+async function icon(size, pad, bg, round = 0) {
+  const inner = size - 2 * pad;
+  // the strokes are thickened a little (blurred, then cut back low), so they hold at tab size
+  const mask = await sharp(CROSS).resize(inner, inner, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .extractChannel(0).blur(Math.max(0.3, inner * 0.018)).linear(3.2, -40).toBuffer();
+  const mark = await sharp({ create: { width: inner, height: inner, channels: 3, background: '#cd1616' } })
+    .joinChannel(mask).png().toBuffer();
+  const plate = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}"><rect width="${size}" height="${size}" rx="${round}" fill="${bg}"/></svg>`);
+  return sharp(plate).composite([{ input: mark, left: Math.round(pad), top: Math.round(pad) }]).png().toBuffer();
 }
-writeFileSync('app/icon.svg', iconSvg(64, 11, '#070605', 12) + '\n');
-await sharp(Buffer.from(iconSvg(180, 36, '#14110d'))).png().toFile('app/apple-icon.png');
+writeFileSync('app/icon.png', await icon(192, 16, '#070605', 36));
+writeFileSync('app/apple-icon.png', await icon(180, 22, '#070605'));
 
 // favicon.ico: a few PNGs in an ICO container (browsers read these directly)
 const sizes = [16, 32, 48];
-const pngs = await Promise.all(sizes.map((n) => sharp(Buffer.from(iconSvg(n * 4, n * 0.6, '#070605', n * 0.8))).resize(n, n).png().toBuffer()));
+const pngs = await Promise.all(sizes.map(async (n) => sharp(await icon(n * 4, n * 0.25, '#070605', n * 0.8)).resize(n, n).png().toBuffer()));
 const head = Buffer.alloc(6 + 16 * sizes.length);
 head.writeUInt16LE(0, 0); head.writeUInt16LE(1, 2); head.writeUInt16LE(sizes.length, 4);
 let offset = head.length;
@@ -114,6 +112,5 @@ const groundSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="
 const ground = await sharp(Buffer.from(groundSvg)).composite([{ input: grain, blend: 'overlay' }]).png().toBuffer();
 await sharp(ground)
   .composite([{ input: mark }, { input: swg, left: 52, top: 44 }])
-  .png({ compressionLevel: 9 }).toFile('app/opengraph-image.png');
-await sharp('app/opengraph-image.png').toFile('app/twitter-image.png');
-console.log('favicon.ico, icon.svg, apple-icon.png, opengraph-image.png, twitter-image.png');
+  .png({ compressionLevel: 9 }).toFile('public/share/cvltsm-v2.png');
+console.log('favicon.ico, icon.png, apple-icon.png, share/cvltsm-v2.png');
