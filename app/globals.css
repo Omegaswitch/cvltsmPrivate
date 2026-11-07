@@ -175,7 +175,7 @@ img, video { display: block; }
 }
 .nav__home:hover, .nav__home:focus-visible { opacity: 0.8; }
 .nav__home img { height: calc(var(--mark-h) / 0.88); width: auto; }
-.nav .nav__name { font-size: calc(var(--mark-h) / 0.71); line-height: 1; text-shadow: none; white-space: nowrap; opacity: 1; transform: translateY(0.047em); }   /* Valhalica's capitals sit a hair high in their line box: this puts their middle on the logo's */
+.nav .nav__name { height: calc(var(--mark-h) * 1.9); width: auto; font-size: calc(var(--mark-h) / 0.71); object-fit: contain; object-position: left center; opacity: 1; }   /* the v2 logo, its strokes as tall as the mark beside it */
 /* the name is there from the start where scroll can't draw it in */
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
@@ -980,10 +980,12 @@ img, video { display: block; }
   .kit--base, .kit--numpad, .kit--novelties { grid-column: 1 / -1; margin-top: 0; }
   .kit--numpad, .kit--novelties { width: 78%; }
   .kit--novelties { justify-self: end; }
-  .strip { flex-direction: column; gap: 30px; }
-  .strip__chip { height: 96px; --edge: 22px; }
+  /* two by two, so the colors and their title fit one phone screen */
+  .colours { padding: 92px var(--gutter) 5vh; gap: 32px; }
+  .strip { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 18px; }
+  .strip__chip { height: 104px; --edge: 18px; }
   .frame { --edge: 22px; }
-  .strip li:has(.ooze) .strip__name { margin-top: 30px; }
+  .strip li:has(.ooze) .strip__name { margin-top: 22px; }
   .renders__grid { grid-template-columns: minmax(0, 1fr); }
   .render--lead, .render--side, .render--third { grid-column: 1 / -1; margin-top: 0; }
   .render--side, .render--third:nth-child(4) { width: 78%; justify-self: end; margin-top: 0; }

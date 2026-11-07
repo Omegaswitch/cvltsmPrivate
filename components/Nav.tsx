@@ -16,7 +16,7 @@ export function Nav() {
     <nav className="nav" aria-label="Sections">
       <Home label={`${BRAND.name}, back to the top`}>
         <img className="logo" src={BRAND.manufacturer.logo} alt={BRAND.manufacturer.name} />
-        <span className="nav__name wordmark" aria-hidden="true">{BRAND.name}</span>
+        {BRAND.logo && <img className="nav__name" src={BRAND.logo} alt="" aria-hidden="true" />}
       </Home>
       {LINKS.map((l) => (
         <FillLink key={l.href} href={l.href} label={l.label} />
