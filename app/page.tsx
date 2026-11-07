@@ -6,7 +6,6 @@ import { ColourSection } from '@/components/ColourSection';
 import { RendersSection } from '@/components/RendersSection';
 import { VendorsSection } from '@/components/VendorsSection';
 import { Footer } from '@/components/Footer';
-import { BloodDefs } from '@/components/Daub';
 import { Lightbox } from '@/components/Lightbox';
 import { BRAND } from '@/data/brand';
 
@@ -42,7 +41,6 @@ export default function Page() {
         </div>
       </main>
       <Footer />
-      <BloodDefs />
       <Lightbox />
       <div className="grain" aria-hidden="true" />
     </>

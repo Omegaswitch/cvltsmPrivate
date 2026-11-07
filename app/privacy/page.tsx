@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { STATION_OPEN } from '@/lib/station/open';
 import { BRAND } from '@/data/brand';
-import { BloodDefs, DaubLink } from '@/components/Daub';
+import { FillDefs, FillLink } from '@/components/FillLink';
 
 const title = `Privacy policy · ${BRAND.name}`;
 const description = `What the ${BRAND.name} site does with a visitor's data.`;
@@ -20,10 +20,10 @@ export const metadata: Metadata = {
 export default function Privacy() {
   return (
     <main className="policy">
-      <DaubLink className="policy__back" href="/" label="Return">Return</DaubLink>
+      <FillLink className="policy__back" href="/" label="Return" />
       <h1 className="title">Privacy policy</h1>
       <div className="policy__body">
-        <p>Last updated 26 October 2026.</p>
+        <p>Last updated 7 November 2026.</p>
         <p>
           This site presents the {BRAND.name} keycap set. It sells nothing, has no forms and no
           newsletter, and it does not set cookies or use analytics or advertising trackers. On your
@@ -79,7 +79,7 @@ export default function Privacy() {
         {/* the field station's access code, for whoever reads runes this far down: SKOGSRA */}
         {STATION_OPEN && <p className="policy__runes" aria-hidden="true">ᛊᚲᛟᚷᛊᚱᚨ</p>}
       </div>
-      <BloodDefs />
+      <FillDefs />
       <div className="grain" aria-hidden="true" />
     </main>
   );

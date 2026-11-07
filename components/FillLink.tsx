@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { AnchorHTMLAttributes } from 'react';
 
 /*
  * A menu word that is a vessel: on hover or focus, blood rises inside the
@@ -53,12 +54,12 @@ export function FillDefs() {
   );
 }
 
-export function FillLink({ href, label }: { href: string; label: string }) {
+export function FillLink({ href, label, className = '', ...rest }: { href: string; label: string } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>) {
   const id = `fill-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
   // a link to another page of the site is followed without reloading, so the music goes on
   const Tag = href.startsWith('/') ? Link : 'a';
   return (
-    <Tag className="fill" href={href}>
+    <Tag className={`fill ${className}`.trim()} href={href} {...rest}>
       <span>{label}</span>
       <svg className="fill__svg" aria-hidden="true" focusable="false">
         <clipPath id={id}>

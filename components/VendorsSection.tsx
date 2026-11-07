@@ -1,9 +1,9 @@
 import { VENDORS } from '@/data/vendors';
-import { DaubLink } from './Daub';
+import { FillLink } from './FillLink';
 import { Engravings } from './Engravings';
 import { tears } from './TornEdge';
 
-/** Where the set is sold, by region. Confirmed vendors link out and are daubed on hover. */
+/** Where the set is sold, by region. Confirmed vendors link out and fill with blood on hover, like the menu. */
 export function VendorsSection() {
   return (
     <section id="vendors" className="vendors torn-top" style={tears({ top: 53 })} aria-labelledby="vendors-title">
@@ -16,7 +16,7 @@ export function VendorsSection() {
             <span className="vendors__names">
               {r.vendors.length
                 ? r.vendors.map((v) => v.href
-                  ? <DaubLink key={v.name} href={v.href} label={v.name} target="_blank" rel="noopener noreferrer">{v.name}</DaubLink>
+                  ? <FillLink key={v.name} href={v.href} label={v.name} target="_blank" rel="noopener noreferrer" />
                   : <span key={v.name}>{v.name}</span>)
                 : <span className="vendors__tba">To be announced</span>}
             </span>
